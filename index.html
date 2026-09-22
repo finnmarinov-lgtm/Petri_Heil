@@ -113,6 +113,9 @@ kbd{font-family:var(--f-disp);font-size:11px;padding:1px 5px;border:2px solid va
 .board .n{text-align:right;font-variant-numeric:tabular-nums}
 .board td.n{font-family:var(--f-disp);font-size:14px}
 .board tr.me td{background:rgba(242,193,78,.12);color:var(--gold)}
+.konto{display:flex;flex-direction:column;gap:8px;padding:12px;background:var(--ink-2);border:2px solid var(--line)}
+.konto .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.code{font-family:var(--f-disp);font-size:15px;letter-spacing:.06em;color:var(--gold);background:var(--ink);border:2px solid var(--line);padding:8px 10px;user-select:all}
 @media (prefers-reduced-motion:reduce){.btn:active{transform:none}}
 </style>
 </head>
@@ -205,6 +208,15 @@ kbd{font-family:var(--f-disp);font-size:11px;padding:1px 5px;border:2px solid va
       <label for="bNick">Dein Name in der Rangliste</label>
       <div class="row"><input id="bNick" maxlength="16" autocomplete="nickname" placeholder="z. B. Finn"><button class="btn" type="submit">Speichern</button></div>
     </form>
+    <div class="konto" id="bKonto" hidden>
+      <p class="muted small">Dein Spielercode. Damit holst du deinen Spielstand auf ein anderes Gerät. Schreib ihn dir auf.</p>
+      <div class="row"><span class="code" id="bCode">PETRI-0000-0000</span><button class="btn" id="bCopy" type="button">Kopieren</button></div>
+      <form class="nick" id="bCodeForm">
+        <label for="bCodeIn">Spielstand von einem anderen Gerät holen</label>
+        <div class="row"><input id="bCodeIn" maxlength="16" placeholder="PETRI-A1B2-C3D4" autocomplete="off" spellcheck="false"><button class="btn" type="submit">Holen</button></div>
+      </form>
+      <p class="muted small" id="bCodeMsg"></p>
+    </div>
     <div class="actions"><button class="btn" data-back type="button">Zurück</button></div>
   </div>
 </div>
@@ -266,7 +278,7 @@ const SHOP = [
   { k: 'thermo', name: 'Thermoskanne', icon: 'thermo', lv: ['leer', 'Tee', 'Kakao', 'Kaffee'], cost: [100, 250, 500] },
 ];
 const DEF = () => ({ v: 1, coins: 0, best: 0, bestFish: 0, bestTop: '', rounds: 0,
-  up: { rute: 0, rolle: 0, koeder: 0, feeder: 0, blei: 0, thermo: 0 }, album: {}, nick: '', lbSent: 0, lbNick: '', savedAt: 0 });
+  up: { rute: 0, rolle: 0, koeder: 0, feeder: 0, blei: 0, thermo: 0 }, album: {}, nick: '', code: '', lbSent: 0, lbNick: '', savedAt: 0 });
 
 // ---------- Pixel-Sprites (Kopf zeigt nach rechts) ----------
 const SHAPES = {
@@ -453,7 +465,7 @@ function normalize(r) {
   const d = DEF();
   if (!r || typeof r !== 'object') return d;
   for (const k of ['coins', 'best', 'bestFish', 'rounds', 'lbSent', 'savedAt']) if (Number.isFinite(r[k])) d[k] = r[k];
-  for (const k of ['bestTop', 'nick', 'lbNick']) if (typeof r[k] === 'string') d[k] = r[k].slice(0, 40);
+  for (const k of ['bestTop', 'nick', 'code', 'lbNick']) if (typeof r[k] === 'string') d[k] = r[k].slice(0, 40);
   if (r.up) for (const it of SHOP) { const v = r.up[it.k]; if (Number.isInteger(v)) d.up[it.k] = clamp(v, 0, it.lv.length - 1); }
   if (r.album) for (const sp of SPECIES) { const a = r.album[sp.id]; if (a && Number.isFinite(a.n)) d.album[sp.id] = { n: a.n, max: Number(a.max) || 0 }; }
   return d;
@@ -840,16 +852,18 @@ function updateHud() {
 }
 const current = () => MODALS.find(m => !$(m).hidden);
 const hideAll = () => {
+  clearInterval(boardTimer);
   for (const m of MODALS) $(m).hidden = true;
   // Fokus vom versteckten Knopf nehmen, sonst löst die Leertaste ihn erneut aus
   if (document.activeElement && document.activeElement !== document.body) document.activeElement.blur();
 };
 function show(id) {
+  clearInterval(boardTimer);
   for (const m of MODALS) $(m).hidden = m !== id;
   if (id === 'mTitle') renderTitle();
   if (id === 'mShop') renderShop();
   if (id === 'mAlbum') renderAlbum();
-  if (id === 'mBoard') renderBoard();
+  if (id === 'mBoard') { renderBoard(); if (sbOn) { sbBoard(); clearInterval(boardTimer); boardTimer = setInterval(sbBoard, 20000); } }
   if (kbd) { const b = $(id).querySelector('.btn'); if (b) b.focus({ preventScroll: true }); }
 }
 function discovered() { return SPECIES.filter(s => save.album[s.id]).length; }
@@ -873,14 +887,14 @@ function renderResult(rec) {
     list.append(li);
   }
   $('rCoins').textContent = `+${de(G.score)} Münzen · jetzt ${de(save.coins)} im Beutel`;
-  $('rNickForm').hidden = !(lbCol && !save.nick && lbState !== 'readonly');
+  $('rNickForm').hidden = !((lbCol || sbOn) && !save.nick && lbState !== 'readonly');
   $('rBoard').textContent = boardHint();
 }
 function boardHint() {
   if (lbState === 'off') return 'Rekord gespeichert. Die gemeinsame Rangliste gibt es in der Claude-Version des Spiels.';
   if (lbState === 'readonly') return 'Du kannst die Rangliste ansehen, aber nichts eintragen.';
   if (!save.nick) return 'Gib einen Namen ein, dann landet dein Rekord in der Rangliste.';
-  const i = lbRows.findIndex(r => r.id === pkey);
+  const i = lbRows.findIndex(r => r.me || r.id === pkey);
   return i >= 0 ? `Du stehst auf Platz ${i + 1} der Rangliste.` : 'Dein Rekord wird in die Rangliste eingetragen.';
 }
 function shopText(it, l) {
@@ -932,6 +946,93 @@ function renderAlbum() {
   }
 }
 
+// ---------- Onlinekonto der App-Version (Supabase) ----------
+const SB = {
+  url: 'https://yzzipjtounvktdhhvrnt.supabase.co',
+  key: 'sb_publishable_OCNFFT4wa4CMaHyhcLAY4A_u2flZF1s', // anon public key (darf oeffentlich sein)
+};
+let sbOn = false, sbBusy = false, sbDirty = false, sbTimer = 0, boardTimer = 0;
+const CODE_RE = /^PETRI-[A-Z0-9]{4}-[A-Z0-9]{4}$/;
+function newCode() {
+  const A = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let s = '';
+  for (let i = 0; i < 8; i++) s += A[Math.floor(Math.random() * A.length)];
+  return 'PETRI-' + s.slice(0, 4) + '-' + s.slice(4);
+}
+function playerCode() {
+  if (CODE_RE.test(save.code)) return save.code;
+  let c = '';
+  try { c = localStorage.getItem('petriheil.code') || ''; } catch (e) {}
+  if (!CODE_RE.test(c)) c = newCode();
+  save.code = c;
+  try { localStorage.setItem('petriheil.code', c); } catch (e) {}
+  return c;
+}
+async function rpc(fn, body) {
+  const res = await fetch(SB.url + '/rest/v1/rpc/' + fn, {
+    method: 'POST',
+    headers: { apikey: SB.key, Authorization: 'Bearer ' + SB.key, 'Content-Type': 'application/json' },
+    body: JSON.stringify(body || {}),
+  });
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  const txt = await res.text();
+  return txt ? JSON.parse(txt) : null;
+}
+async function sbPush() {
+  if (!sbOn) return;
+  if (sbBusy) { sbDirty = true; return; }
+  sbBusy = true; sbDirty = false;
+  try {
+    await rpc('stand_speichern', { p_code: playerCode(), p_name: save.nick, p_stand: save,
+      p_best: save.best, p_fische: save.bestFish, p_fang: save.bestTop });
+  } catch (e) { sbDirty = true; }
+  sbBusy = false;
+  if (sbDirty && navigator.onLine) { clearTimeout(sbTimer); sbTimer = setTimeout(sbPush, 5000); }
+}
+async function sbBoard() {
+  if (!sbOn) return;
+  try {
+    const rows = await rpc('rangliste', {});
+    lbRows = (rows || []).map(r => ({ name: r.name, score: r.best, fish: r.fische, top: r.bester_fang,
+      me: !!save.nick && r.name === save.nick }));
+    lbState = 'ok';
+  } catch (e) { lbState = 'error'; }
+  refreshBoard();
+}
+async function sbPull(code) {
+  const stand = await rpc('stand_laden', { p_code: code });
+  return stand && typeof stand === 'object' && Object.keys(stand).length ? normalize(stand) : null;
+}
+async function initSupabase() {
+  sbOn = true; lbState = 'loading'; pkey = playerCode();
+  refreshBoard();
+  try {
+    const remote = await sbPull(pkey);
+    if (remote && remote.savedAt > save.savedAt && G.mode !== 'play' && G.mode !== 'paused') {
+      save = remote; save.code = pkey; writeLocal(); updateHud();
+      const cur = current(); if (cur) show(cur);
+    } else {
+      await sbPush();
+    }
+  } catch (e) { lbState = 'error'; }
+  sbBoard();
+  addEventListener('online', () => { if (sbDirty) sbPush(); sbBoard(); });
+}
+async function codeHolen(eingabe) {
+  const c = String(eingabe || '').trim().toUpperCase().replace(/\s/g, '');
+  if (!CODE_RE.test(c)) return 'Der Code sieht nicht richtig aus. Er hat die Form PETRI-A1B2-C3D4.';
+  if (c === playerCode()) return 'Das ist schon dein eigener Code.';
+  let remote;
+  try { remote = await sbPull(c); }
+  catch (e) { return 'Das hat nicht geklappt. Bist du online?'; }
+  if (!remote) return 'Zu diesem Code gibt es keinen Spielstand.';
+  if (save.savedAt > 0 && !confirm('Der Spielstand auf diesem Gerät wird durch den geladenen ersetzt. Weiter?')) return 'Abgebrochen.';
+  save = remote; save.code = c;
+  try { localStorage.setItem('petriheil.code', c); } catch (e) {}
+  writeLocal(); updateHud(); renderTitle(); refreshBoard(); sbBoard();
+  return 'Spielstand geladen: ' + de(save.coins) + ' Münzen, Rekord ' + de(save.best) + '.';
+}
+
 // ---------- Speichern: Gerät + claude.ai (geräteübergreifend) ----------
 const use = n => (window.claude && typeof window.claude.use === 'function') ? window.claude.use(n).catch(() => null) : Promise.resolve(null);
 let progDoc = null, lbCol = null, lbRows = [], lbState = 'loading', pkey = null, writing = false, again = false;
@@ -942,7 +1043,12 @@ function localPid() {
     return p;
   } catch (e) { return 'p-' + Math.random().toString(36).slice(2, 10); }
 }
-function persist() { save.savedAt = Date.now(); writeLocal(); flush(); }
+function persist() {
+  save.savedAt = Date.now();
+  writeLocal();
+  flush();
+  if (sbOn) { clearTimeout(sbTimer); sbTimer = setTimeout(sbPush, 1500); }
+}
 async function flush() {
   if (!progDoc) return;
   if (writing) { again = true; return; }
@@ -953,6 +1059,7 @@ async function flush() {
   if (again) { again = false; flush(); }
 }
 async function submitScore() {
+  if (sbOn) { await sbPush(); sbBoard(); return; }
   if (!lbCol || !save.nick || lbState === 'readonly' || save.best <= 0) return;
   if (save.lbSent >= save.best && save.lbNick === save.nick) return;
   try {
@@ -965,7 +1072,7 @@ async function submitScore() {
 }
 function refreshBoard() {
   if (!$('mBoard').hidden) renderBoard();
-  if (!$('mResult').hidden) { $('rBoard').textContent = boardHint(); $('rNickForm').hidden = !(lbCol && !save.nick && lbState !== 'readonly'); }
+  if (!$('mResult').hidden) { $('rBoard').textContent = boardHint(); $('rNickForm').hidden = !((lbCol || sbOn) && !save.nick && lbState !== 'readonly'); }
 }
 function renderBoard() {
   $('bBest').textContent = de(save.best);
@@ -975,16 +1082,18 @@ function renderBoard() {
     loading: 'Lade Rangliste …',
     error: 'Die Rangliste ist gerade nicht erreichbar. Dein Rekord bleibt gespeichert.',
     readonly: 'Du kannst die Rangliste ansehen, aber nichts eintragen.',
-    ok: lbRows.length ? 'Beste Runde pro Person. Aktualisiert sich live.' : 'Noch keine Einträge. Spiel eine Runde und trag dich ein.',
+    ok: lbRows.length ? 'Beste Runde pro Person.' : 'Noch keine Einträge. Spiel eine Runde und trag dich ein.',
   }[lbState] || '';
   rows.textContent = '';
   lbRows.forEach((r, i) => {
-    const tr = el('tr', r.id === pkey ? 'me' : '');
-    tr.append(el('td', 'n', String(i + 1)), el('td', '', String(r.name || '—').slice(0, 16) + (r.id === pkey ? ' (du)' : '')),
+    const tr = el('tr', (r.me || r.id === pkey) ? 'me' : '');
+    tr.append(el('td', 'n', String(i + 1)), el('td', '', String(r.name || '—').slice(0, 16) + ((r.me || r.id === pkey) ? ' (du)' : '')),
       el('td', 'n', de(Number(r.score) || 0)), el('td', 'n', String(Number(r.fish) || 0)), el('td', '', String(r.top || '')));
     rows.append(tr);
   });
-  $('bNickForm').hidden = !lbCol || lbState === 'readonly';
+  $('bNickForm').hidden = !(lbCol || sbOn) || lbState === 'readonly';
+  $('bKonto').hidden = !sbOn;
+  if (sbOn) $('bCode').textContent = playerCode();
   if (document.activeElement !== $('bNick')) $('bNick').value = save.nick;
 }
 function setNick(v) {
@@ -994,6 +1103,10 @@ function setNick(v) {
   return true;
 }
 async function initCloud() {
+  if (!window.claude || typeof window.claude.use !== 'function') {
+    if (SB.key.length > 20) return initSupabase();
+    lbState = 'off'; pkey = localPid(); refreshBoard(); return;
+  }
   const [db, user] = await Promise.all([use('db'), use('user')]);
   let uid = null;
   if (user) { try { uid = await user.id(); } catch (e) {} }
@@ -1079,6 +1192,17 @@ $('btnSound').onclick = () => {
 };
 $('rNickForm').addEventListener('submit', e => { e.preventDefault(); if (setNick($('rNick').value)) { $('rNickForm').hidden = true; $('rBoard').textContent = 'Eingetragen!'; } });
 $('bNickForm').addEventListener('submit', e => { e.preventDefault(); if (setNick($('bNick').value)) $('bStatus').textContent = 'Name gespeichert.'; });
+$('bCodeForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  $('bCodeMsg').textContent = 'Einen Moment …';
+  $('bCodeMsg').textContent = await codeHolen($('bCodeIn').value);
+  $('bCodeIn').value = '';
+});
+$('bCopy').onclick = async () => {
+  const code = playerCode();
+  try { await navigator.clipboard.writeText(code); $('bCodeMsg').textContent = 'Code kopiert.'; }
+  catch (e) { $('bCodeMsg').textContent = 'Kopieren ging nicht. Schreib ihn ab: ' + code; }
+};
 
 // ---------- Größe: Pixel möglichst ganzzahlig skalieren ----------
 function fit() {

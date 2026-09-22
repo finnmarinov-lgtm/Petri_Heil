@@ -63,7 +63,7 @@ kbd{font-family:var(--f-disp);font-size:11px;padding:1px 5px;border:2px solid va
 .lead{margin:0;font-size:22px;max-width:40ch}
 .muted{color:var(--muted);margin:0}
 .small{font-size:18px}
-.facts{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:0}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(88px,1fr));gap:6px;margin:0}
 .facts div{background:var(--ink-2);border:2px solid var(--line);padding:6px 8px;min-width:0}
 .facts dt{font-family:var(--f-disp);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
 .facts dd{margin:0;font-family:var(--f-disp);font-size:18px;font-variant-numeric:tabular-nums}
@@ -162,7 +162,8 @@ kbd{font-family:var(--f-disp);font-size:11px;padding:1px 5px;border:2px solid va
     <dl class="facts">
       <div><dt>Rekord</dt><dd id="tBest">0</dd></div>
       <div><dt>Münzen</dt><dd id="tCoins">0</dd></div>
-      <div><dt>Fangbuch</dt><dd id="tAlbum">0/13</dd></div>
+      <div><dt>Fangbuch</dt><dd id="tAlbum">0/14</dd></div>
+      <div><dt>Pokale</dt><dd id="tPokale">0</dd></div>
     </dl>
     <div class="actions">
       <button class="btn primary" id="bStart" type="button">Tagessee</button>
@@ -273,6 +274,17 @@ kbd{font-family:var(--f-disp);font-size:11px;padding:1px 5px;border:2px solid va
   </div>
 </div>
 
+<div class="modal" id="mBelohnung" hidden>
+  <div class="box small" role="dialog" aria-labelledby="pzTitle">
+    <p class="eyebrow" id="pzTag">Tagessee</p>
+    <h2 id="pzTitle" class="big">Platz 1</h2>
+    <p class="lead" id="pzText"></p>
+    <p class="badge" id="pzMuenzen"></p>
+    <p class="muted small" id="pzPokale"></p>
+    <div class="actions"><button class="btn primary" id="pzOk" type="button">Petri Dank!</button></div>
+  </div>
+</div>
+
 <div class="modal" id="mPause" hidden>
   <div class="box small" role="dialog" aria-labelledby="pTitle">
     <h2 id="pTitle" class="big">Pause</h2>
@@ -356,7 +368,7 @@ const SHOP = [
 const DEF = () => ({ v: 2, coins: 0, best: 0, bestFish: 0, bestTop: '', rounds: 0,
   up: { rolle: 0, feeder: 0, blei: 0, thermo: 0 },
   ruten: ['stippe'], vorrat: { maden: 3 }, tackle: { rute: 'stippe', koeder: 'maden' },
-  tag: { datum: '', punkte: 0, fische: 0, fang: '' },
+  tag: { datum: '', punkte: 0, fische: 0, fang: '' }, pokale: { siege: 0, podeste: 0 },
   album: {}, nick: '', code: '', lbSent: 0, lbNick: '', savedAt: 0 });
 
 // ---------- Pixel-Sprites (Kopf zeigt nach rechts) ----------
@@ -549,6 +561,7 @@ function normalize(r) {
   if (Array.isArray(r.ruten)) for (const id of r.ruten) if (R_BY[id] && !d.ruten.includes(id)) d.ruten.push(id);
   if (r.vorrat) for (const k of KOEDER) if (Number.isFinite(r.vorrat[k.id])) d.vorrat[k.id] = Math.max(0, Math.round(r.vorrat[k.id]));
   if (r.tackle) { if (R_BY[r.tackle.rute]) d.tackle.rute = r.tackle.rute; if (K_BY[r.tackle.koeder]) d.tackle.koeder = r.tackle.koeder; }
+  if (r.pokale) d.pokale = { siege: Math.max(0, Number(r.pokale.siege) || 0), podeste: Math.max(0, Number(r.pokale.podeste) || 0) };
   if (r.tag && typeof r.tag.datum === 'string') d.tag = { datum: r.tag.datum.slice(0, 10), punkte: Number(r.tag.punkte) || 0,
     fische: Number(r.tag.fische) || 0, fang: String(r.tag.fang || '').slice(0, 40) };
   if (!r.ruten && r.up) {
@@ -1011,7 +1024,7 @@ function frame(now) {
 }
 
 // ---------- Oberfläche ----------
-const MODALS = ['mTitle', 'mResult', 'mTackle', 'mShop', 'mAlbum', 'mBoard', 'mPause'];
+const MODALS = ['mTitle', 'mResult', 'mTackle', 'mShop', 'mAlbum', 'mBoard', 'mBelohnung', 'mPause'];
 let backTo = 'mTitle', kbd = false;
 const el = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
 const img = (src, w) => { const i = new Image(); i.src = src; i.alt = ''; if (w) i.style.width = w + 'px'; return i; };
@@ -1054,6 +1067,7 @@ function renderTitle() {
     ? `Tagessee vom ${d.getDate()}.${d.getMonth() + 1}. erledigt: ${de(save.tag.punkte)} Punkte mit ${save.tag.fische} Fischen. Freies Angeln geht immer.`
     : `Tagessee vom ${d.getDate()}.${d.getMonth() + 1}.: heute noch nicht gespielt. Alle angeln denselben See, das zählt für die Tagesrangliste.`;
   $('bStart').textContent = tagGespielt() ? 'Tagessee nochmal' : 'Tagessee';
+  $('tPokale').textContent = save.pokale.siege + (save.pokale.podeste > save.pokale.siege ? ' + ' + (save.pokale.podeste - save.pokale.siege) : '');
   $('hint').innerHTML = '';
   $('hint').append(document.createTextNode(rute().name + ' mit ' + koeder().name + ' · '),
     (() => { const b = el('b', '', 'Tippen'); return b; })(),
@@ -1294,6 +1308,31 @@ async function sbBoard() {
   } catch (e) { lbState = 'error'; }
   refreshBoard();
 }
+async function holeBelohnung() {
+  if (!sbOn) return;
+  let rows;
+  try { rows = await rpc('belohnung_abholen', { p_code: playerCode() }); }
+  catch (e) { return; }   // Datenbank kennt die Belohnung noch nicht
+  const r = rows && rows[0];
+  if (!r || !r.muenzen) return;
+  save.coins += r.muenzen;
+  save.pokale = { siege: Number(r.siege) || save.pokale.siege, podeste: Number(r.podeste) || save.pokale.podeste };
+  persist(); updateHud();
+  const [jahr, monat, tag] = String(r.datum || '').split('-');
+  $('pzTag').textContent = tag ? `Tagessee vom ${Number(tag)}.${Number(monat)}.` : 'Tagessee';
+  $('pzTitle').textContent = r.platz <= 3 ? 'Platz ' + r.platz : 'Dabei gewesen';
+  $('pzText').textContent = r.platz === 1
+    ? `Du hast den Tagessee gewonnen, vor ${r.teilnehmer - 1} anderen.`
+    : r.platz <= 3
+      ? `Aufs Podest geschafft: Platz ${r.platz} von ${r.teilnehmer}.`
+      : `Platz ${r.platz} von ${r.teilnehmer}. Antrittsgeld gibt es trotzdem.`;
+  $('pzMuenzen').textContent = '+' + de(r.muenzen) + ' Münzen';
+  $('pzPokale').textContent = save.pokale.siege || save.pokale.podeste
+    ? `Insgesamt ${save.pokale.siege}× gewonnen, ${save.pokale.podeste}× aufs Podest.`
+    : '';
+  if (G.mode === 'menu' || G.mode === 'over') show('mBelohnung');
+}
+
 async function sbPull(code) {
   const stand = await rpc('stand_laden', { p_code: code });
   return stand && typeof stand === 'object' && Object.keys(stand).length ? normalize(stand) : null;
@@ -1311,6 +1350,7 @@ async function initSupabase() {
     }
   } catch (e) { lbState = 'error'; }
   sbBoard();
+  holeBelohnung();
   addEventListener('online', () => { if (sbDirty) sbPush(); sbBoard(); });
 }
 async function codeHolen(eingabe) {
@@ -1391,7 +1431,7 @@ function renderBoard() {
   if (tagAn && lbState === 'ok') {
     st.textContent = lbTag === null
       ? 'Die Tagesrangliste braucht noch den neuen SQL-Block in Supabase.'
-      : (liste.length ? 'Alle angeln heute denselben See. Zählt nur die erste Tagesrunde.'
+      : (liste.length ? 'Alle angeln heute denselben See. Morgen gibt es Münzen: Platz 1 bekommt 200, Platz 2 120, Platz 3 80, alle anderen 25.'
         : 'Heute hat noch niemand den Tagessee gefischt.');
   }
   rows.textContent = '';
@@ -1497,6 +1537,7 @@ $('bFrei').onclick = () => zurTasche(false);
 $('bAgain').onclick = () => zurTasche(!tagGespielt());
 $('bShopPlay').onclick = () => zurTasche(modusTag);
 $('kLos').onclick = () => startRound(modusTag);
+$('pzOk').onclick = () => show('mTitle');
 $('bTabTag').onclick = () => setBoardTab('tag');
 $('bTabAll').onclick = () => setBoardTab('all');
 $('bResume').onclick = resume;

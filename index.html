@@ -125,10 +125,6 @@ kbd{font-family:var(--f-disp);font-size:11px;padding:1px 5px;border:2px solid va
 .opt small{color:var(--muted);font-size:17px}
 .opt.weg{opacity:.45}
 .beisst{padding:10px;background:var(--ink-2);border:2px solid var(--line)}
-.beisstnicht{margin:10px 0 4px}
-.fehlliste{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px;color:var(--muted);font-size:18px}
-.fehlliste li{display:flex;flex-wrap:wrap;gap:6px}
-.grund{font-family:var(--f-disp);font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink);background:var(--muted);padding:2px 5px;align-self:center}
 .beisst h3{margin:0 0 4px;font-family:var(--f-disp);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
 .fischliste{display:flex;flex-wrap:wrap;gap:4px 10px;margin:0;padding:0;list-style:none}
 .fischliste li{display:flex;align-items:center;gap:5px;font-size:19px}
@@ -223,8 +219,6 @@ kbd{font-family:var(--f-disp);font-size:11px;padding:1px 5px;border:2px solid va
       <h3>Damit beißen heute</h3>
       <ul class="fischliste" id="kFische"></ul>
       <p class="muted small" id="kWarnung"></p>
-      <h3 class="beisstnicht">Beißt hier nicht</h3>
-      <ul class="fehlliste" id="kFehlt"></ul>
     </div>
     <div class="actions">
       <button class="btn primary" id="kLos" type="button">Losangeln!</button>
@@ -1267,26 +1261,7 @@ function renderTackle() {
     liste.append(li);
   }
   if (!treffer.length) liste.append(el('li', 'muted', 'Mit dieser Kombination beißt hier nichts.'));
-  // Alle übrigen Arten mit Grund auflisten
-  const r = rute(), k = koeder();
-  const zuWeit = [], falscherKoeder = [], falscheRute = [];
-  for (const sp of SPECIES) {
-    if (sp.band === 'junk' || fangbar(sp)) continue;
-    if (!magKoeder(sp, k.id)) falscherKoeder.push(sp.name);
-    else if (!koederPasstZurRute(k, r)) falscheRute.push(sp.name);
-    else zuWeit.push(sp.name);
-  }
-  const fehlt = $('kFehlt');
-  fehlt.textContent = '';
-  const zeile = (titel, namen) => {
-    if (!namen.length) return;
-    const li = el('li');
-    li.append(el('span', 'grund', titel), el('span', '', namen.join(', ')));
-    fehlt.append(li);
-  };
-  zeile('zu weit draußen', zuWeit);
-  zeile('anderer Köder nötig', falscherKoeder);
-  zeile('andere Rute nötig', falscheRute);
+  const r = rute();
   const zuSchwer = treffer.filter(sp => sp.kraft > r.kraft).map(sp => sp.name);
   $('kWarnung').textContent = zuSchwer.length
     ? `Zu schwer für die ${r.name}: ${zuSchwer.join(', ')}. Beim Kurbeln steigt die Spannung, zwischendurch nachgeben!`

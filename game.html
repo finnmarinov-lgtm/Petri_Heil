@@ -243,7 +243,7 @@ kbd{font-family:var(--f-disp);font-size:11px;padding:1px 5px;border:2px solid va
     </form>
     <div class="konto" id="bKonto" hidden>
       <p class="muted small">Dein Spielercode. Damit holst du deinen Spielstand auf ein anderes Gerät. Schreib ihn dir auf.</p>
-      <div class="row"><span class="code" id="bCode">PETRI-0000-0000</span><button class="btn" id="bCopy" type="button">Kopieren</button></div>
+      <div class="row"><span class="code" id="bCode">PETRI-0000-0000</span><button class="btn" id="bCopy" type="button">Kopieren</button><button class="btn" id="bShare" type="button">Link teilen</button></div>
       <form class="nick" id="bCodeForm">
         <label for="bCodeIn">Spielstand von einem anderen Gerät holen</label>
         <div class="row"><input id="bCodeIn" maxlength="16" placeholder="PETRI-A1B2-C3D4" autocomplete="off" spellcheck="false"><button class="btn" type="submit">Holen</button></div>
@@ -1396,6 +1396,15 @@ async function initSupabase() {
       await sbPush();
     }
   } catch (e) { lbState = 'error'; }
+  const ausLink = new URLSearchParams(location.search).get('code');
+  if (ausLink) {
+    try { history.replaceState(null, '', location.origin + location.pathname); } catch (e) {}
+    if (CODE_RE.test(ausLink.toUpperCase()) && ausLink.toUpperCase() !== pkey) {
+      const meldung = await codeHolen(ausLink);
+      toast(meldung);
+      pkey = playerCode();
+    }
+  }
   sbBoard();
   holeBelohnung();
   addEventListener('online', () => { if (sbDirty) sbPush(); sbBoard(); });
@@ -1605,10 +1614,48 @@ $('bCodeForm').addEventListener('submit', async e => {
   $('bCodeMsg').textContent = await codeHolen($('bCodeIn').value);
   $('bCodeIn').value = '';
 });
+async function inZwischenablage(text) {
+  try { await navigator.clipboard.writeText(text); return true; } catch (e) {}
+  // Ersatzweg für Browser, die das neue Kopieren verweigern
+  try {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly', '');
+    ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0';
+    document.body.appendChild(ta);
+    ta.select(); ta.setSelectionRange(0, text.length);
+    const ok = document.execCommand('copy');
+    document.body.removeChild(ta);
+    if (ok) return true;
+  } catch (e) {}
+  return false;
+}
+function markiereCode() {
+  // Letzter Ausweg: den Code markieren, dann kann man ihn selbst kopieren
+  try {
+    const r = document.createRange();
+    r.selectNodeContents($('bCode'));
+    const sel = getSelection();
+    sel.removeAllRanges(); sel.addRange(r);
+    return true;
+  } catch (e) { return false; }
+}
+const teilLink = () => location.origin + location.pathname + '?code=' + playerCode();
 $('bCopy').onclick = async () => {
   const code = playerCode();
-  try { await navigator.clipboard.writeText(code); $('bCodeMsg').textContent = 'Code kopiert.'; }
-  catch (e) { $('bCodeMsg').textContent = 'Kopieren ging nicht. Schreib ihn ab: ' + code; }
+  if (await inZwischenablage(code)) { $('bCodeMsg').textContent = 'Code kopiert.'; return; }
+  $('bCodeMsg').textContent = markiereCode()
+    ? 'Dein Browser kopiert nicht von allein. Der Code ist jetzt markiert: mit Strg+C kopieren oder lange darauf tippen.'
+    : 'Kopieren ging nicht. Schreib ihn ab: ' + code;
+};
+$('bShare').onclick = async () => {
+  const url = teilLink();
+  if (navigator.share) {
+    try { await navigator.share({ title: 'Petri Heil', text: 'Mein Spielstand', url }); $('bCodeMsg').textContent = 'Link geteilt. Auf dem anderen Gerät öffnen, fertig.'; return; }
+    catch (e) { if (e && e.name === 'AbortError') return; }
+  }
+  if (await inZwischenablage(url)) { $('bCodeMsg').textContent = 'Link kopiert. Öffne ihn auf dem anderen Gerät, dann ist der Spielstand dort.'; return; }
+  $('bCodeMsg').textContent = 'Link: ' + url;
 };
 
 // ---------- Größe: Pixel möglichst ganzzahlig skalieren ----------

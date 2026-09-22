@@ -113,6 +113,9 @@ kbd{font-family:var(--f-disp);font-size:11px;padding:1px 5px;border:2px solid va
 .board .n{text-align:right;font-variant-numeric:tabular-nums}
 .board td.n{font-family:var(--f-disp);font-size:14px}
 .board tr.me td{background:rgba(242,193,78,.12);color:var(--gold)}
+.tabs{display:flex;gap:6px}
+.tab{font-family:var(--f-disp);font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:8px 10px;background:var(--ink-2);border:2px solid var(--line);color:var(--muted);cursor:pointer}
+.tab[aria-selected="true"]{color:var(--ink);background:var(--gold);border-color:var(--gold)}
 .wahl{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px}
 .opt{display:flex;flex-direction:column;gap:2px;padding:8px 10px;text-align:left;background:var(--ink-2);border:2px solid var(--line);color:var(--cream);font-family:var(--f-body);font-size:19px;line-height:1.15;cursor:pointer}
 .opt:hover{border-color:var(--muted)}
@@ -155,14 +158,15 @@ kbd{font-family:var(--f-disp);font-size:11px;padding:1px 5px;border:2px solid va
     <p class="eyebrow">Arcade-Angeln · <span id="tTime">60</span> Sekunden</p>
     <h2 id="tTitle" class="big">Petri Heil!</h2>
     <p class="lead">Wirf aus, halte den Fisch im grünen Bereich und fang in einer Runde so viel wie möglich.</p>
+    <p class="muted small" id="tTagInfo"></p>
     <dl class="facts">
       <div><dt>Rekord</dt><dd id="tBest">0</dd></div>
       <div><dt>Münzen</dt><dd id="tCoins">0</dd></div>
       <div><dt>Fangbuch</dt><dd id="tAlbum">0/13</dd></div>
     </dl>
     <div class="actions">
-      <button class="btn primary" id="bStart" type="button">Angeln!</button>
-      <button class="btn" data-open="mTackle" type="button">Angeltasche</button>
+      <button class="btn primary" id="bStart" type="button">Tagessee</button>
+      <button class="btn" id="bFrei" type="button">Freies Angeln</button>
       <button class="btn" data-open="mShop" type="button">Angelladen</button>
       <button class="btn" data-open="mAlbum" type="button">Fangbuch</button>
       <button class="btn" data-open="mBoard" type="button">Rangliste</button>
@@ -180,6 +184,7 @@ kbd{font-family:var(--f-disp);font-size:11px;padding:1px 5px;border:2px solid va
     <p class="eyebrow">Zeit um</p>
     <h2 id="rTitle" class="big"><span id="rScore">0</span> Punkte</h2>
     <p class="badge" id="rRecord" hidden>Neuer Rekord!</p>
+    <p class="muted small" id="rTagInfo"></p>
     <ul class="catches" id="rList"></ul>
     <p class="muted" id="rCoins"></p>
     <form class="nick" id="rNickForm" hidden>
@@ -199,6 +204,7 @@ kbd{font-family:var(--f-disp);font-size:11px;padding:1px 5px;border:2px solid va
 <div class="modal" id="mTackle" hidden>
   <div class="box wide" role="dialog" aria-labelledby="kTitle">
     <div class="box-head"><h2 id="kTitle">Angeltasche packen</h2><p class="purse">Münzen: <b id="kCoins">0</b></p></div>
+    <p class="eyebrow" id="kModus"></p>
     <div>
       <p class="eyebrow">Rute</p>
       <div class="wahl" id="kRuten"></div>
@@ -243,7 +249,11 @@ kbd{font-family:var(--f-disp);font-size:11px;padding:1px 5px;border:2px solid va
 
 <div class="modal" id="mBoard" hidden>
   <div class="box wide" role="dialog" aria-labelledby="bTitle">
-    <div class="box-head"><h2 id="bTitle">Rangliste</h2><p class="purse">Dein Rekord: <b id="bBest">0</b></p></div>
+    <div class="box-head"><h2 id="bTitle">Rangliste</h2><p class="purse"><span id="bBestLabel">Dein Rekord</span>: <b id="bBest">0</b></p></div>
+    <div class="tabs" role="tablist">
+      <button class="tab" id="bTabTag" type="button" role="tab" aria-selected="true">Heute</button>
+      <button class="tab" id="bTabAll" type="button" role="tab" aria-selected="false">Ewige Liste</button>
+    </div>
     <p class="muted small" id="bStatus">Lade Rangliste …</p>
     <div class="tablewrap"><table class="board"><thead><tr><th class="n">#</th><th>Name</th><th class="n">Punkte</th><th class="n">Fische</th><th>Bester Fang</th></tr></thead><tbody id="bRows"></tbody></table></div>
     <form class="nick" id="bNickForm">
@@ -346,6 +356,7 @@ const SHOP = [
 const DEF = () => ({ v: 2, coins: 0, best: 0, bestFish: 0, bestTop: '', rounds: 0,
   up: { rolle: 0, feeder: 0, blei: 0, thermo: 0 },
   ruten: ['stippe'], vorrat: { maden: 3 }, tackle: { rute: 'stippe', koeder: 'maden' },
+  tag: { datum: '', punkte: 0, fische: 0, fang: '' },
   album: {}, nick: '', code: '', lbSent: 0, lbNick: '', savedAt: 0 });
 
 // ---------- Pixel-Sprites (Kopf zeigt nach rechts) ----------
@@ -538,6 +549,8 @@ function normalize(r) {
   if (Array.isArray(r.ruten)) for (const id of r.ruten) if (R_BY[id] && !d.ruten.includes(id)) d.ruten.push(id);
   if (r.vorrat) for (const k of KOEDER) if (Number.isFinite(r.vorrat[k.id])) d.vorrat[k.id] = Math.max(0, Math.round(r.vorrat[k.id]));
   if (r.tackle) { if (R_BY[r.tackle.rute]) d.tackle.rute = r.tackle.rute; if (K_BY[r.tackle.koeder]) d.tackle.koeder = r.tackle.koeder; }
+  if (r.tag && typeof r.tag.datum === 'string') d.tag = { datum: r.tag.datum.slice(0, 10), punkte: Number(r.tag.punkte) || 0,
+    fische: Number(r.tag.fische) || 0, fang: String(r.tag.fang || '').slice(0, 40) };
   if (!r.ruten && r.up) {
     // alter Spielstand: Stufen werden in Gegenstände umgerechnet
     const alteRute = [['stippe'], ['stippe', 'match', 'feeder'], ['stippe', 'match', 'feeder', 'karpfen'],
@@ -582,21 +595,44 @@ const aimX = () => 64 + (.5 - .5 * Math.cos(G.aimT * 2.2)) * (clamp(rute().weite
 function pickSpecies() {
   let tot = 0;
   for (const s of SPECIES) tot += s.w;
-  let r = Math.random() * tot;
+  let r = seeRnd() * tot;
   for (const s of SPECIES) { r -= s.w; if (s.w > 0 && r <= 0) return s; }
   return SPECIES[0];
 }
 const minXFor = f => xMinFor(f.y + f.sp.sh / 2) + f.sp.sw / 2;
 function spawnFish(inside) {
   const sp = pickSpecies(), [a, b] = BANDS[sp.band];
-  const f = { sp, y: Math.round(rnd(a, b)), dir: -1, x: W + sp.sw, speed: rnd(8, 15), state: 'swim', wob: Math.random() * 6, bub: rnd(1, 5), cool: rnd(0, 1), len: 0 };
+  const f = { sp, y: Math.round(seeZahl(a, b)), dir: -1, x: W + sp.sw, speed: seeZahl(8, 15), state: 'swim', wob: Math.random() * 6, bub: rnd(1, 5), cool: rnd(0, 1), len: 0 };
   const minX = minXFor(f);
   if (minX > W - 12) return;
-  f.turnX = rnd(minX, Math.min(W - 24, minX + 70));
-  if (inside) { f.x = rnd(minX, W - 10); if (Math.random() < .5) f.dir = 1; }
+  f.turnX = seeZahl(minX, Math.min(W - 24, minX + 70));
+  if (inside) { f.x = seeZahl(minX, W - 10); if (seeRnd() < .5) f.dir = 1; }
   G.fish.push(f);
 }
-const rollLen = sp => Math.round(sp.len[0] + (sp.len[1] - sp.len[0]) * Math.pow(Math.random(), 1.6));
+// Der Tagessee: aus dem Datum wird eine feste Zahlenfolge, für alle Spieler gleich
+function mkRng(seed) {
+  let a = seed >>> 0;
+  return () => {
+    a = (a + 0x6D2B79F5) >>> 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function heute() {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+function datumSeed(txt) {
+  let h = 2166136261;
+  for (let i = 0; i < txt.length; i++) { h ^= txt.charCodeAt(i); h = Math.imul(h, 16777619); }
+  return h >>> 0;
+}
+let seeRnd = Math.random;                       // Zufall für den Fischbestand
+const seeZahl = (a, b) => a + seeRnd() * (b - a);
+const tagGespielt = () => save.tag.datum === heute();
+
+const rollLen = sp => Math.round(sp.len[0] + (sp.len[1] - sp.len[0]) * Math.pow(seeRnd(), 1.6));
 const fmtLen = (sp, len) => sp.band === 'junk' ? 'Gr. ' + len : len + ' cm';
 const pointsFor = (sp, len) => sp.band === 'junk' ? 1 : Math.max(1, Math.round(sp.pts * len / ((sp.len[0] + sp.len[1]) / 2)));
 function rodTip() {
@@ -616,12 +652,15 @@ function toast(s) {
 }
 
 // ---------- Runde ----------
-function startRound() {
+function startRound(tagesrunde) {
   hideAll();
+  G.tagModus = !!tagesrunde;
+  seeRnd = tagesrunde ? mkRng(datumSeed(heute() + '|see')) : Math.random;
   Object.assign(G, { mode: 'play', phase: 'aim', time: roundLen(), score: 0, catches: [], hook: null, fight: null, land: null,
     aimT: 0, lastCall: false, pressed: false, needRelease: false, teased: {}, lastSec: 99 });
+  G.fish = [];   // frischer See, sonst schwimmen noch die Fische aus dem Menue herum
   G.junk = [];
-  for (let i = 0; i < 2; i++) { const x = rnd(110, 238); G.junk.push({ x, y: botAt(x) - 4 }); }
+  for (let i = 0; i < 2; i++) { const x = seeZahl(110, 238); G.junk.push({ x, y: botAt(x) - 4 }); }
   while (G.fish.length < MAXFISH[lvl('feeder')] - 1) spawnFish(true);
   const k = koeder();
   if (k.id !== 'brot') {
@@ -793,6 +832,14 @@ function endRound() {
   for (const f of G.fish) if (f.state === 'hooked') { f.state = 'swim'; f.dir = 1; f.turnX = -99; }
   save.rounds++;
   if (!hatVorrat(save.tackle.koeder)) save.tackle.koeder = 'brot';
+  seeRnd = Math.random;
+  G.tagGewertet = false;
+  if (G.tagModus && !tagGespielt()) {
+    const top = G.catches.slice().sort((a, b) => b.pts - a.pts)[0];
+    save.tag = { datum: heute(), punkte: G.score, fische: G.catches.length,
+      fang: top ? SP[top.id].name + ', ' + fmtLen(SP[top.id], top.len) : '' };
+    G.tagGewertet = true;
+  }
   const rec = G.score > save.best;
   if (rec) {
     save.best = G.score; save.bestFish = G.catches.length;
@@ -1002,6 +1049,11 @@ function renderTitle() {
   $('tBest').textContent = de(save.best);
   $('tCoins').textContent = de(save.coins);
   $('tAlbum').textContent = discovered() + '/' + SPECIES.length;
+  const d = new Date();
+  $('tTagInfo').textContent = tagGespielt()
+    ? `Tagessee vom ${d.getDate()}.${d.getMonth() + 1}. erledigt: ${de(save.tag.punkte)} Punkte mit ${save.tag.fische} Fischen. Freies Angeln geht immer.`
+    : `Tagessee vom ${d.getDate()}.${d.getMonth() + 1}.: heute noch nicht gespielt. Alle angeln denselben See, das zählt für die Tagesrangliste.`;
+  $('bStart').textContent = tagGespielt() ? 'Tagessee nochmal' : 'Tagessee';
   $('hint').innerHTML = '';
   $('hint').append(document.createTextNode(rute().name + ' mit ' + koeder().name + ' · '),
     (() => { const b = el('b', '', 'Tippen'); return b; })(),
@@ -1010,6 +1062,9 @@ function renderTitle() {
 function renderResult(rec) {
   $('rScore').textContent = de(G.score);
   $('rRecord').hidden = !rec || G.score === 0;
+  $('rTagInfo').textContent = G.tagModus
+    ? (G.tagGewertet ? 'Tagessee gewertet. Mal sehen, was die anderen heute fangen.' : 'Tagessee heute schon gespielt, diese Runde zählt nur für Münzen und das Fangbuch.')
+    : 'Freies Angeln: Münzen und Fangbuch zählen, die Tagesrangliste nicht.';
   const list = $('rList'); list.textContent = '';
   const groups = {};
   for (const c of G.catches) { const g = groups[c.id] || (groups[c.id] = { n: 0, pts: 0, max: 0 }); g.n++; g.pts += c.pts; g.max = Math.max(g.max, c.len); }
@@ -1044,6 +1099,9 @@ function shopText(it, l) {
 }
 function renderTackle() {
   $('kCoins').textContent = de(save.coins);
+  $('kModus').textContent = modusTag
+    ? (tagGespielt() ? 'Tagessee · heute schon gewertet, weitere Runden zählen nur für Münzen' : 'Tagessee · zählt für die Tagesrangliste')
+    : 'Freies Angeln · zählt für Münzen, Fangbuch und den ewigen Rekord';
   const rb = $('kRuten'); rb.textContent = '';
   for (const r of RUTEN) {
     if (!save.ruten.includes(r.id)) continue;
@@ -1175,7 +1233,8 @@ const SB = {
   url: 'https://yzzipjtounvktdhhvrnt.supabase.co',
   key: 'sb_publishable_OCNFFT4wa4CMaHyhcLAY4A_u2flZF1s', // anon public key (darf oeffentlich sein)
 };
-let sbOn = false, sbBusy = false, sbDirty = false, sbTimer = 0, boardTimer = 0;
+let sbOn = false, sbBusy = false, sbDirty = false, sbTimer = 0, boardTimer = 0, sbAltDb = false;
+let lbTag = [], boardTab = 'tag';
 const CODE_RE = /^PETRI-[A-Z0-9]{4}-[A-Z0-9]{4}$/;
 function newCode() {
   const A = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -1206,15 +1265,27 @@ async function sbPush() {
   if (!sbOn) return;
   if (sbBusy) { sbDirty = true; return; }
   sbBusy = true; sbDirty = false;
+  const basis = { p_code: playerCode(), p_name: save.nick, p_stand: save,
+    p_best: save.best, p_fische: save.bestFish, p_fang: save.bestTop };
+  const mitTag = Object.assign({}, basis, { p_tag_datum: save.tag.datum || null,
+    p_tag_punkte: save.tag.punkte, p_tag_fische: save.tag.fische, p_tag_fang: save.tag.fang });
   try {
-    await rpc('stand_speichern', { p_code: playerCode(), p_name: save.nick, p_stand: save,
-      p_best: save.best, p_fische: save.bestFish, p_fang: save.bestTop });
-  } catch (e) { sbDirty = true; }
+    await rpc('stand_speichern', sbAltDb ? basis : mitTag);
+  } catch (e) {
+    // Datenbank kennt die Tagesspalten noch nicht: ohne sie speichern
+    if (!sbAltDb) { sbAltDb = true; try { await rpc('stand_speichern', basis); } catch (e2) { sbDirty = true; } }
+    else sbDirty = true;
+  }
   sbBusy = false;
   if (sbDirty && navigator.onLine) { clearTimeout(sbTimer); sbTimer = setTimeout(sbPush, 5000); }
 }
 async function sbBoard() {
   if (!sbOn) return;
+  try {
+    const tagRows = await rpc('rangliste_tag', { p_datum: heute() });
+    lbTag = (tagRows || []).map(r => ({ name: r.name, score: r.punkte, fish: r.fische, top: r.fang,
+      me: !!save.nick && r.name === save.nick }));
+  } catch (e) { lbTag = null; }
   try {
     const rows = await rpc('rangliste', {});
     lbRows = (rows || []).map(r => ({ name: r.name, score: r.best, fish: r.fische, top: r.bester_fang,
@@ -1298,8 +1369,16 @@ function refreshBoard() {
   if (!$('mBoard').hidden) renderBoard();
   if (!$('mResult').hidden) { $('rBoard').textContent = boardHint(); $('rNickForm').hidden = !((lbCol || sbOn) && !save.nick && lbState !== 'readonly'); }
 }
+function setBoardTab(t) {
+  boardTab = t;
+  renderBoard();
+}
 function renderBoard() {
   $('bBest').textContent = de(save.best);
+  const tagAn = sbOn && boardTab === 'tag';
+  $('bTabTag').setAttribute('aria-selected', String(boardTab === 'tag'));
+  $('bTabAll').setAttribute('aria-selected', String(boardTab !== 'tag'));
+  document.querySelector('.tabs').hidden = !sbOn;
   const st = $('bStatus'), rows = $('bRows');
   st.textContent = {
     off: 'Die gemeinsame Rangliste gibt es nur in der Claude-Version des Spiels. Hier zählt dein eigener Rekord.',
@@ -1308,13 +1387,22 @@ function renderBoard() {
     readonly: 'Du kannst die Rangliste ansehen, aber nichts eintragen.',
     ok: lbRows.length ? 'Beste Runde pro Person.' : 'Noch keine Einträge. Spiel eine Runde und trag dich ein.',
   }[lbState] || '';
+  const liste = tagAn ? (lbTag || []) : lbRows;
+  if (tagAn && lbState === 'ok') {
+    st.textContent = lbTag === null
+      ? 'Die Tagesrangliste braucht noch den neuen SQL-Block in Supabase.'
+      : (liste.length ? 'Alle angeln heute denselben See. Zählt nur die erste Tagesrunde.'
+        : 'Heute hat noch niemand den Tagessee gefischt.');
+  }
   rows.textContent = '';
-  lbRows.forEach((r, i) => {
+  liste.forEach((r, i) => {
     const tr = el('tr', (r.me || r.id === pkey) ? 'me' : '');
     tr.append(el('td', 'n', String(i + 1)), el('td', '', String(r.name || '—').slice(0, 16) + ((r.me || r.id === pkey) ? ' (du)' : '')),
       el('td', 'n', de(Number(r.score) || 0)), el('td', 'n', String(Number(r.fish) || 0)), el('td', '', String(r.top || '')));
     rows.append(tr);
   });
+  $('bBest').textContent = de(tagAn ? save.tag.punkte : save.best);
+  $('bBestLabel').textContent = tagAn ? 'Heute' : 'Dein Rekord';
   $('bNickForm').hidden = !(lbCol || sbOn) || lbState === 'readonly';
   $('bKonto').hidden = !sbOn;
   if (sbOn) $('bCode').textContent = playerCode();
@@ -1402,10 +1490,15 @@ document.addEventListener('click', e => {
   }
   if (e.target.closest('[data-back]')) show(backTo);
 });
-$('bStart').onclick = () => show('mTackle');
-$('bAgain').onclick = () => show('mTackle');
-$('bShopPlay').onclick = () => show('mTackle');
-$('kLos').onclick = startRound;
+let modusTag = true;
+const zurTasche = tag => { modusTag = tag; backTo = current() || 'mTitle'; show('mTackle'); };
+$('bStart').onclick = () => zurTasche(true);
+$('bFrei').onclick = () => zurTasche(false);
+$('bAgain').onclick = () => zurTasche(!tagGespielt());
+$('bShopPlay').onclick = () => zurTasche(modusTag);
+$('kLos').onclick = () => startRound(modusTag);
+$('bTabTag').onclick = () => setBoardTab('tag');
+$('bTabAll').onclick = () => setBoardTab('all');
 $('bResume').onclick = resume;
 $('bQuit').onclick = endRound;
 $('btnPause').onclick = () => { if (G.mode === 'play') pause(); else if (G.mode === 'paused') resume(); else show('mTitle'); };

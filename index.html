@@ -113,6 +113,18 @@ kbd{font-family:var(--f-disp);font-size:11px;padding:1px 5px;border:2px solid va
 .board .n{text-align:right;font-variant-numeric:tabular-nums}
 .board td.n{font-family:var(--f-disp);font-size:14px}
 .board tr.me td{background:rgba(242,193,78,.12);color:var(--gold)}
+.wahl{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px}
+.opt{display:flex;flex-direction:column;gap:2px;padding:8px 10px;text-align:left;background:var(--ink-2);border:2px solid var(--line);color:var(--cream);font-family:var(--f-body);font-size:19px;line-height:1.15;cursor:pointer}
+.opt:hover{border-color:var(--muted)}
+.opt[aria-pressed="true"]{border-color:var(--gold);background:#24344f}
+.opt b{font-family:var(--f-disp);font-size:11px;letter-spacing:.04em;text-transform:uppercase}
+.opt small{color:var(--muted);font-size:17px}
+.opt.weg{opacity:.45}
+.beisst{padding:10px;background:var(--ink-2);border:2px solid var(--line)}
+.beisst h3{margin:0 0 4px;font-family:var(--f-disp);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.fischliste{display:flex;flex-wrap:wrap;gap:4px 10px;margin:0;padding:0;list-style:none}
+.fischliste li{display:flex;align-items:center;gap:5px;font-size:19px}
+.fischliste img{image-rendering:pixelated}
 .konto{display:flex;flex-direction:column;gap:8px;padding:12px;background:var(--ink-2);border:2px solid var(--line)}
 .konto .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .code{font-family:var(--f-disp);font-size:15px;letter-spacing:.06em;color:var(--gold);background:var(--ink);border:2px solid var(--line);padding:8px 10px;user-select:all}
@@ -150,6 +162,7 @@ kbd{font-family:var(--f-disp);font-size:11px;padding:1px 5px;border:2px solid va
     </dl>
     <div class="actions">
       <button class="btn primary" id="bStart" type="button">Angeln!</button>
+      <button class="btn" data-open="mTackle" type="button">Angeltasche</button>
       <button class="btn" data-open="mShop" type="button">Angelladen</button>
       <button class="btn" data-open="mAlbum" type="button">Fangbuch</button>
       <button class="btn" data-open="mBoard" type="button">Rangliste</button>
@@ -183,9 +196,38 @@ kbd{font-family:var(--f-disp);font-size:11px;padding:1px 5px;border:2px solid va
   </div>
 </div>
 
+<div class="modal" id="mTackle" hidden>
+  <div class="box wide" role="dialog" aria-labelledby="kTitle">
+    <div class="box-head"><h2 id="kTitle">Angeltasche packen</h2><p class="purse">Münzen: <b id="kCoins">0</b></p></div>
+    <div>
+      <p class="eyebrow">Rute</p>
+      <div class="wahl" id="kRuten"></div>
+    </div>
+    <div>
+      <p class="eyebrow">Köder</p>
+      <div class="wahl" id="kKoeder"></div>
+    </div>
+    <div class="beisst">
+      <h3>Damit beißen heute</h3>
+      <ul class="fischliste" id="kFische"></ul>
+      <p class="muted small" id="kWarnung"></p>
+    </div>
+    <div class="actions">
+      <button class="btn primary" id="kLos" type="button">Losangeln!</button>
+      <button class="btn" data-open="mShop" type="button">Angelladen</button>
+      <button class="btn" data-back type="button">Zurück</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal" id="mShop" hidden>
   <div class="box wide" role="dialog" aria-labelledby="sTitle">
     <div class="box-head"><h2 id="sTitle">Angelladen</h2><p class="purse">Münzen: <b id="sCoins">0</b></p></div>
+    <p class="eyebrow">Ruten</p>
+    <div class="shop" id="shopRuten"></div>
+    <p class="eyebrow">Köder nachkaufen</p>
+    <div class="shop" id="shopKoeder"></div>
+    <p class="eyebrow">Ausrüstung</p>
     <div class="shop" id="shopList"></div>
     <div class="actions"><button class="btn primary" id="bShopPlay" type="button">Angeln!</button><button class="btn" data-back type="button">Zurück</button></div>
   </div>
@@ -242,43 +284,69 @@ const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
 // Tiefenzonen (Pixel-y des Fischmittelpunkts)
 const BANDS = { flach: [64, 88], mittel: [86, 118], tief: [116, 148], grund: [146, 174] };
 const BAND_TXT = { flach: 'ufernah, flach', mittel: 'Mittelwasser', tief: 'tiefes Wasser', grund: 'am Grund, weit draußen', junk: 'liegt am Grund' };
-const BAITS = ['Brotflocke', 'Bienenmaden', 'Pellets', 'Gummifisch', 'Boilies'];
-const BAIT_COL = ['#f3e9d2', '#f0dca0', '#6b4a2a', '#e4573d', '#e8c440'];
+const RUTEN = [
+  { id: 'stippe',  name: 'Stippe',        preis: 0,   zone: .30, kraft: 2, weite: 130, typ: 'natur',
+    info: 'Kurz und leicht. Kommt nur ufernah, hält keine großen Fische.' },
+  { id: 'match',   name: 'Matchrute',     preis: 90,  zone: .34, kraft: 3, weite: 200, typ: 'natur',
+    info: 'Feines Gerät mit weitem Wurf, ideal für Weißfisch.' },
+  { id: 'feeder',  name: 'Feederrute',    preis: 180, zone: .32, kraft: 4, weite: 246, typ: 'natur', futter: true,
+    info: 'Weit hinaus an den Grund, arbeitet mit dem Futterkorb.' },
+  { id: 'karpfen', name: 'Karpfenrute',   preis: 420, zone: .38, kraft: 5, weite: 246, typ: 'natur', futter: true,
+    info: 'Hält jeden Großfisch. Kleine beißen an der dicken Schnur seltener.' },
+  { id: 'spinn',   name: 'Spinnrute',     preis: 260, zone: .30, kraft: 3, weite: 230, typ: 'kunst',
+    info: 'Für Kunstköder. Räuber packen nur zu, während du einholst.' },
+  { id: 'fliege',  name: 'Fliegenrute',   preis: 340, zone: .42, kraft: 3, weite: 150, typ: 'kunst',
+    info: 'Trockenfliege dicht unter der Oberfläche. Sehr leichter Drill.' },
+];
+const KOEDER = [
+  { id: 'brot',    name: 'Brotflocke',    preis: 0,   runden: 0, typ: 'natur', c: '#f3e9d2' },
+  { id: 'mais',    name: 'Mais',          preis: 30,  runden: 5, typ: 'natur', c: '#f2c14e' },
+  { id: 'maden',   name: 'Bienenmaden',   preis: 40,  runden: 5, typ: 'natur', c: '#f0dca0' },
+  { id: 'wurm',    name: 'Tauwurm',       preis: 50,  runden: 5, typ: 'natur', c: '#c06a5a' },
+  { id: 'pellets', name: 'Pellets',       preis: 70,  runden: 4, typ: 'natur', c: '#6b4a2a' },
+  { id: 'boilies', name: 'Boilies',       preis: 120, runden: 4, typ: 'natur', c: '#e8c440' },
+  { id: 'fliege',  name: 'Trockenfliege', preis: 90,  runden: 6, typ: 'kunst', c: '#d8d0b0' },
+  { id: 'blinker', name: 'Blinker',       preis: 130, runden: 8, typ: 'kunst', c: '#c8ccd2' },
+  { id: 'gummi',   name: 'Gummifisch',    preis: 150, runden: 8, typ: 'kunst', c: '#e4573d' },
+];
+const R_BY = Object.fromEntries(RUTEN.map(r => [r.id, r]));
+const K_BY = Object.fromEntries(KOEDER.map(k => [k.id, k]));
+const KRAFT_TXT = ['', 'sehr leicht', 'leicht', 'mittel', 'stark', 'sehr stark'];
 
 // Farben: [Körper, Bauch, Flossen, Muster]
 const SPECIES = [
-  { id: 'rotauge',  name: 'Rotauge',        band: 'flach',  len: [12, 30],   pts: 5,   wild: .15, w: 10,  bait: 0, shape: 's', c: ['#b9c6cc', '#eef2f3', '#d9534f', '#8fa3ad'] },
-  { id: 'rotfeder', name: 'Rotfeder',       band: 'flach',  len: [14, 32],   pts: 6,   wild: .2,  w: 7,   bait: 0, shape: 's', c: ['#c9a55a', '#f0dfae', '#e0452f', '#a8843e'] },
-  { id: 'brasse',   name: 'Brasse',         band: 'mittel', len: [30, 65],   pts: 12,  wild: .25, w: 7,   bait: 0, shape: 'm', c: ['#9c8a62', '#d8cba6', '#6b5d45', '#857350'] },
-  { id: 'barsch',   name: 'Barsch',         band: 'flach',  len: [15, 40],   pts: 10,  wild: .4,  w: 6,   bait: 1, shape: 's', c: ['#7f9a4c', '#d8d7a0', '#e8742c', '#3e4d24'] },
-  { id: 'schleie',  name: 'Schleie',        band: 'mittel', len: [25, 55],   pts: 18,  wild: .35, w: 4,   bait: 1, shape: 'm', c: ['#5d6b2c', '#a8a860', '#3f4a1c', '#4b5722'] },
-  { id: 'aal',      name: 'Aal',            band: 'grund',  len: [45, 95],   pts: 25,  wild: .75, w: 3,   bait: 1, shape: 'l', c: ['#3d3a2a', '#8a8466', '#2c2a1e', '#34311f'] },
-  { id: 'karpfen',  name: 'Karpfen',        band: 'tief',   len: [40, 90],   pts: 35,  wild: .5,  w: 4,   bait: 2, shape: 'b', c: ['#a8863a', '#e2c979', '#7a5f26', '#8c6f2c'] },
-  { id: 'hecht',    name: 'Hecht',          band: 'mittel', len: [50, 110],  pts: 45,  wild: .8,  w: 2,   bait: 3, shape: 'l', c: ['#6c8a3a', '#e4e2b0', '#a0602a', '#c8d68a'] },
-  { id: 'zander',   name: 'Zander',         band: 'tief',   len: [40, 85],   pts: 40,  wild: .6,  w: 2,   bait: 3, shape: 'm', c: ['#8c9a8c', '#e2e6de', '#5a665a', '#5f6d60'] },
-  { id: 'spiegel',  name: 'Spiegelkarpfen', band: 'tief',   len: [50, 100],  pts: 60,  wild: .6,  w: 1.4, bait: 4, shape: 'b', c: ['#c99a3a', '#f0d890', '#8a5f20', '#f4d27a'] },
-  { id: 'wels',     name: 'Wels',           band: 'grund',  len: [80, 220],  pts: 90,  wild: .85, w: 1,   bait: 4, shape: 'x', c: ['#4a4a58', '#9a98a0', '#33333d', '#3c3c48'] },
-  { id: 'stoer',    name: 'Stör',           band: 'grund',  len: [100, 190], pts: 150, wild: .9,  w: .35, bait: 4, shape: 'x', c: ['#7f8896', '#d4d8de', '#5c6470', '#c3c9d2'], legend: true },
-  { id: 'stiefel',  name: 'Gummistiefel',   band: 'junk',   len: [38, 47],   pts: 1,   wild: .05, w: 0,   bait: 0, shape: 'boot', c: ['#2f5a3a', '#1f3a26', '#1f3a26', '#4f8a5e'] },
+  { id: 'rotauge',  name: 'Rotauge',            band: 'flach',  len: [12, 30],   pts: 5,   wild: .15, w: 10,  kraft: 1, koe: ['brot', 'maden', 'mais'],            shape: 's', c: ['#b9c6cc', '#eef2f3', '#d9534f', '#8fa3ad'] },
+  { id: 'rotfeder', name: 'Rotfeder',           band: 'flach',  len: [14, 32],   pts: 6,   wild: .2,  w: 7,   kraft: 1, koe: ['brot', 'maden', 'mais'],            shape: 's', c: ['#c9a55a', '#f0dfae', '#e0452f', '#a8843e'] },
+  { id: 'brasse',   name: 'Brasse',             band: 'mittel', len: [30, 65],   pts: 12,  wild: .25, w: 7,   kraft: 2, koe: ['maden', 'mais', 'wurm', 'pellets'], shape: 'm', c: ['#9c8a62', '#d8cba6', '#6b5d45', '#857350'] },
+  { id: 'barsch',   name: 'Barsch',             band: 'flach',  len: [15, 40],   pts: 10,  wild: .4,  w: 6,   kraft: 2, koe: ['maden', 'wurm', 'gummi', 'blinker'], shape: 's', c: ['#7f9a4c', '#d8d7a0', '#e8742c', '#3e4d24'] },
+  { id: 'schleie',  name: 'Schleie',            band: 'mittel', len: [25, 55],   pts: 18,  wild: .35, w: 4,   kraft: 2, koe: ['maden', 'wurm', 'mais'],           shape: 'm', c: ['#5d6b2c', '#a8a860', '#3f4a1c', '#4b5722'] },
+  { id: 'forelle',  name: 'Regenbogenforelle',  band: 'flach',  len: [25, 55],   pts: 22,  wild: .55, w: 4,   kraft: 2, koe: ['fliege', 'maden', 'blinker'],      shape: 'm', c: ['#8a9aa8', '#f0e6d8', '#e0707e', '#d76a7a'] },
+  { id: 'aal',      name: 'Aal',                band: 'grund',  len: [45, 95],   pts: 25,  wild: .75, w: 3,   kraft: 3, koe: ['wurm', 'maden'],                   shape: 'l', c: ['#3d3a2a', '#8a8466', '#2c2a1e', '#34311f'] },
+  { id: 'karpfen',  name: 'Karpfen',            band: 'tief',   len: [40, 90],   pts: 35,  wild: .5,  w: 4,   kraft: 4, koe: ['mais', 'pellets', 'boilies'],      shape: 'b', c: ['#a8863a', '#e2c979', '#7a5f26', '#8c6f2c'] },
+  { id: 'hecht',    name: 'Hecht',              band: 'mittel', len: [50, 110],  pts: 45,  wild: .8,  w: 2,   kraft: 4, koe: ['gummi', 'blinker'],                shape: 'l', c: ['#6c8a3a', '#e4e2b0', '#a0602a', '#c8d68a'] },
+  { id: 'zander',   name: 'Zander',             band: 'tief',   len: [40, 85],   pts: 40,  wild: .6,  w: 2,   kraft: 3, koe: ['gummi', 'wurm'],                   shape: 'm', c: ['#8c9a8c', '#e2e6de', '#5a665a', '#5f6d60'] },
+  { id: 'spiegel',  name: 'Spiegelkarpfen',     band: 'tief',   len: [50, 100],  pts: 60,  wild: .6,  w: 1.4, kraft: 5, koe: ['boilies', 'pellets'],             shape: 'b', c: ['#c99a3a', '#f0d890', '#8a5f20', '#f4d27a'] },
+  { id: 'wels',     name: 'Wels',               band: 'grund',  len: [80, 220],  pts: 90,  wild: .85, w: 1,   kraft: 5, koe: ['wurm', 'boilies', 'gummi'],        shape: 'x', c: ['#4a4a58', '#9a98a0', '#33333d', '#3c3c48'] },
+  { id: 'stoer',    name: 'Stör',               band: 'grund',  len: [100, 190], pts: 150, wild: .9,  w: .35, kraft: 5, koe: ['pellets', 'boilies'],             shape: 'x', c: ['#7f8896', '#d4d8de', '#5c6470', '#c3c9d2'], legend: true },
+  { id: 'stiefel',  name: 'Gummistiefel',       band: 'junk',   len: [38, 47],   pts: 1,   wild: .05, w: 0,   kraft: 1, koe: [],                                  shape: 'boot', c: ['#2f5a3a', '#1f3a26', '#1f3a26', '#4f8a5e'] },
 ];
 const SP = Object.fromEntries(SPECIES.map(s => [s.id, s]));
 
 // Ausrüstung: Werte je Stufe
-const ROD_ZONE = [.26, .32, .38, .45];
 const REEL = [1, 1.3, 1.6, 2];
 const SINK = [20, 30, 42];
 const MAXFISH = [5, 7, 9, 11];
 const BITE = [1, 1.3, 1.6, 2];
 const SHOP = [
-  { k: 'rute',   name: 'Rute',         icon: 'rod',    lv: ['Stippe', 'Feederrute', 'Karpfenrute', 'Profi-Rute'], cost: [60, 180, 450] },
   { k: 'rolle',  name: 'Rolle',        icon: 'reel',   lv: ['Kinderrolle', 'Freilaufrolle', 'Weitwurfrolle', 'Big-Pit-Rolle'], cost: [50, 150, 400] },
-  { k: 'koeder', name: 'Köderbox',     icon: 'bait',   lv: ['Brotflocke', '+ Bienenmaden', '+ Pellets', '+ Gummifisch', '+ Boilies'], cost: [80, 200, 380, 600] },
   { k: 'feeder', name: 'Futterkorb',   icon: 'feeder', lv: ['ohne', 'Futterkorb', 'Method-Feeder', 'Method + Lockfutter'], cost: [70, 200, 420] },
   { k: 'blei',   name: 'Blei',         icon: 'lead',   lv: ['5 g', '20 g', '40 g'], cost: [40, 120] },
   { k: 'thermo', name: 'Thermoskanne', icon: 'thermo', lv: ['leer', 'Tee', 'Kakao', 'Kaffee'], cost: [100, 250, 500] },
 ];
-const DEF = () => ({ v: 1, coins: 0, best: 0, bestFish: 0, bestTop: '', rounds: 0,
-  up: { rute: 0, rolle: 0, koeder: 0, feeder: 0, blei: 0, thermo: 0 }, album: {}, nick: '', code: '', lbSent: 0, lbNick: '', savedAt: 0 });
+const DEF = () => ({ v: 2, coins: 0, best: 0, bestFish: 0, bestTop: '', rounds: 0,
+  up: { rolle: 0, feeder: 0, blei: 0, thermo: 0 },
+  ruten: ['stippe'], vorrat: { maden: 3 }, tackle: { rute: 'stippe', koeder: 'maden' },
+  album: {}, nick: '', code: '', lbSent: 0, lbNick: '', savedAt: 0 });
 
 // ---------- Pixel-Sprites (Kopf zeigt nach rechts) ----------
 const SHAPES = {
@@ -467,6 +535,21 @@ function normalize(r) {
   for (const k of ['coins', 'best', 'bestFish', 'rounds', 'lbSent', 'savedAt']) if (Number.isFinite(r[k])) d[k] = r[k];
   for (const k of ['bestTop', 'nick', 'code', 'lbNick']) if (typeof r[k] === 'string') d[k] = r[k].slice(0, 40);
   if (r.up) for (const it of SHOP) { const v = r.up[it.k]; if (Number.isInteger(v)) d.up[it.k] = clamp(v, 0, it.lv.length - 1); }
+  if (Array.isArray(r.ruten)) for (const id of r.ruten) if (R_BY[id] && !d.ruten.includes(id)) d.ruten.push(id);
+  if (r.vorrat) for (const k of KOEDER) if (Number.isFinite(r.vorrat[k.id])) d.vorrat[k.id] = Math.max(0, Math.round(r.vorrat[k.id]));
+  if (r.tackle) { if (R_BY[r.tackle.rute]) d.tackle.rute = r.tackle.rute; if (K_BY[r.tackle.koeder]) d.tackle.koeder = r.tackle.koeder; }
+  if (!r.ruten && r.up) {
+    // alter Spielstand: Stufen werden in Gegenstände umgerechnet
+    const alteRute = [['stippe'], ['stippe', 'match', 'feeder'], ['stippe', 'match', 'feeder', 'karpfen'],
+      ['stippe', 'match', 'feeder', 'karpfen', 'spinn']][clamp(r.up.rute || 0, 0, 3)];
+    for (const id of alteRute) if (!d.ruten.includes(id)) d.ruten.push(id);
+    const alteKoeder = [{}, { maden: 5 }, { maden: 5, pellets: 4 }, { maden: 5, pellets: 4, gummi: 8 },
+      { maden: 5, pellets: 4, gummi: 8, boilies: 4 }][clamp(r.up.koeder || 0, 0, 4)];
+    for (const k in alteKoeder) d.vorrat[k] = (d.vorrat[k] || 0) + alteKoeder[k];
+    d.tackle.rute = d.ruten[d.ruten.length - 1];
+  }
+  if (!d.ruten.includes(d.tackle.rute)) d.tackle.rute = d.ruten[0];
+  if (d.tackle.koeder !== 'brot' && !d.vorrat[d.tackle.koeder]) d.tackle.koeder = 'brot';
   if (r.album) for (const sp of SPECIES) { const a = r.album[sp.id]; if (a && Number.isFinite(a.n)) d.album[sp.id] = { n: a.n, max: Number(a.max) || 0 }; }
   return d;
 }
@@ -474,6 +557,19 @@ function readLocal() { try { return JSON.parse(localStorage.getItem(LS_KEY) || '
 function writeLocal() { try { localStorage.setItem(LS_KEY, JSON.stringify(save)); } catch (e) {} }
 let save = normalize(readLocal());
 const lvl = k => save.up[k] || 0;
+const rute = () => R_BY[save.tackle.rute] || R_BY.stippe;
+const koeder = () => K_BY[save.tackle.koeder] || K_BY.brot;
+const hatVorrat = id => id === 'brot' || (save.vorrat[id] || 0) > 0;
+// Beißt diese Art auf den gewählten Köder? Und passt die Rute dazu?
+const magKoeder = (sp, kid) => sp.koe.includes(kid || save.tackle.koeder);
+const koederPasstZurRute = (k, r) => k.typ !== 'kunst' || r.typ === 'kunst';
+function fangbar(sp, r, k) {
+  r = r || rute(); k = k || koeder();
+  if (sp.band === 'junk') return false;
+  if (!magKoeder(sp, k.id) || !koederPasstZurRute(k, r)) return false;
+  const [a, b] = BANDS[sp.band];
+  return xMinFor(a + sp.sh / 2) + sp.sw / 2 < r.weite;
+}
 
 // ---------- Spielzustand ----------
 const G = { mode: 'menu', phase: 'idle', t: 0, time: 60, score: 0, catches: [], fish: [], junk: [], parts: [], texts: [],
@@ -481,7 +577,7 @@ const G = { mode: 'menu', phase: 'idle', t: 0, time: 60, score: 0, catches: [], 
 const clouds = [{ x: 20, y: 12, w: 22 }, { x: 110, y: 22, w: 16 }, { x: 170, y: 8, w: 28 }];
 const REEDS = [{ x: 45, h: 26, c: 1 }, { x: 47, h: 32, c: 1 }, { x: 50, h: 22, c: 0 }, { x: 53, h: 29, c: 1 }, { x: 56, h: 18, c: 0 }, { x: 59, h: 13, c: 0 }];
 const roundLen = () => 60 + 5 * lvl('thermo');
-const aimX = () => 64 + (.5 - .5 * Math.cos(G.aimT * 2.2)) * 178;
+const aimX = () => 64 + (.5 - .5 * Math.cos(G.aimT * 2.2)) * (clamp(rute().weite, 100, 246) - 64);
 
 function pickSpecies() {
   let tot = 0;
@@ -527,6 +623,12 @@ function startRound() {
   G.junk = [];
   for (let i = 0; i < 2; i++) { const x = rnd(110, 238); G.junk.push({ x, y: botAt(x) - 4 }); }
   while (G.fish.length < MAXFISH[lvl('feeder')] - 1) spawnFish(true);
+  const k = koeder();
+  if (k.id !== 'brot') {
+    save.vorrat[k.id] = Math.max(0, (save.vorrat[k.id] || 0) - 1);
+    if (!save.vorrat[k.id]) { delete save.vorrat[k.id]; toast(k.name + ' aufgebraucht. Nächste Runde mit Brotflocke.'); }
+    persist();
+  }
   audio(); updateHud();
 }
 function cast() {
@@ -572,18 +674,19 @@ function hookFish(f) {
   if (!G.fish.includes(f)) G.fish.push(f);
   const h = G.hook;
   G.phase = 'fight';
-  G.fight = { f, pos: .5, tgt: .5, tt: .4, zone: .35, zv: 0, prog: .35, in: false, x0: h.x, y0: h.y };
+  G.fight = { f, pos: .5, tgt: .5, tt: .4, zone: .35, zv: 0, prog: .35, in: false, x0: h.x, y0: h.y,
+    zone_h: rute().zone, ueber: Math.max(0, f.sp.kraft - rute().kraft), spannung: 0 };
   if (f.sp.band === 'junk') SFX.junk(); else SFX.bite();
   addText('!', h.x, h.y - 8, '#f2c14e');
 }
 function tease(sp) {
   if (G.teased[sp.id]) return;
   G.teased[sp.id] = 1;
-  toast(`${sp.name}: kein Interesse. Beißt auf ${BAITS[sp.bait]} (Angelladen)`);
+  toast(`${sp.name}: kein Interesse. Beißt auf ${sp.koe.map(k => K_BY[k].name).join(' oder ')}.`);
 }
 function updFish(dt) {
   const h = G.hook, fishing = G.mode === 'play' && G.phase === 'sink' && h;
-  const bl = lvl('koeder'), fl = lvl('feeder');
+  const fl = lvl('feeder'), r = rute(), k = koeder(), ziehen = G.pressed && !G.needRelease;
   for (const f of G.fish) {
     if (f.state === 'hooked') continue;
     f.wob += dt * 6;
@@ -608,8 +711,14 @@ function updFish(dt) {
       f.cool = rnd(.5, 1.1);
       const dx = h.x - mx, dy = h.y - f.y, R = 26 + fl * 6;
       if (Math.abs(dx) < R && Math.abs(dy) < 16) {
-        if (f.sp.bait <= bl) { if (Math.random() < .5 * BITE[fl]) f.state = 'approach'; }
-        else tease(f.sp);
+        if (!magKoeder(f.sp, k.id)) { tease(f.sp); }
+        else if (k.typ === 'kunst' && !ziehen) { /* Kunstköder muss sich bewegen */ }
+        else {
+          let ch = .5 * BITE[fl];
+          if (r.kraft - f.sp.kraft >= 3) ch *= .45;   // grobe Schnur, kleiner Fisch
+          if (k.typ === 'kunst') ch *= 1.2;
+          if (Math.random() < ch) f.state = 'approach';
+        }
       }
     }
   }
@@ -622,13 +731,18 @@ function updFight(dt) {
   const spd = .25 + w * 1.4;
   F.pos += clamp(F.tgt - F.pos, -spd * dt, spd * dt);
   if (w > .6 && Math.random() < dt * w * 1.2) F.pos = clamp(F.pos + rnd(-.12, .12), .03, .97);
-  const zh = ROD_ZONE[lvl('rute')];
+  const zh = rute().zone;
   F.zv = clamp(F.zv + (G.pressed ? 2.8 : -2.4) * dt, -1.4, 1.4);
   F.zone += F.zv * dt;
   if (F.zone < 0) { F.zone = 0; F.zv *= -.3; }
   if (F.zone > 1 - zh) { F.zone = 1 - zh; F.zv *= -.3; }
   F.in = F.pos >= F.zone && F.pos <= F.zone + zh;
   F.prog += (F.in ? .24 * REEL[lvl('rolle')] / (1 + w * .7) : -(.12 + w * .1)) * dt;
+  if (F.ueber > 0) {
+    // Die Rute ist zu leicht: beim Kurbeln steigt die Spannung, beim Nachgeben fällt sie
+    F.spannung = clamp(F.spannung + (G.pressed ? .13 * F.ueber : -.22) * dt, 0, 1);
+    if (F.spannung >= 1) { schnurBruch(); return; }
+  }
   // Fisch zappelt am Haken und kommt mit dem Drill näher
   const h = G.hook, p = clamp(F.prog, 0, 1);
   h.x = lerp(F.x0, Math.max(60, F.x0 - 40), p * .6) + Math.sin(G.t * 9) * 2 * (1 - p * .5);
@@ -658,6 +772,13 @@ function updLand(dt) {
   L.t += dt / .6;
   if (L.t >= 1) { addText('+' + L.pts, 30, 30, '#f2c14e'); G.land = null; backToAim(); }
 }
+function schnurBruch() {
+  const f = G.fight.f;
+  SFX.lost();
+  toast('Schnurbruch! ' + f.sp.name + ' war zu stark für die ' + rute().name + '.');
+  f.state = 'swim'; f.dir = 1; f.speed = 34; f.cool = 8; f.turnX = -99;
+  backToAim();
+}
 function loseFish() {
   const f = G.fight.f;
   SFX.lost();
@@ -671,6 +792,7 @@ function endRound() {
   G.fish = G.fish.filter(f => f.sp.band !== 'junk');
   for (const f of G.fish) if (f.state === 'hooked') { f.state = 'swim'; f.dir = 1; f.turnX = -99; }
   save.rounds++;
+  if (!hatVorrat(save.tackle.koeder)) save.tackle.koeder = 'brot';
   const rec = G.score > save.best;
   if (rec) {
     save.best = G.score; save.bestFish = G.catches.length;
@@ -766,7 +888,7 @@ function drawRodAndLine() {
   if (!h) {
     if (G.land) return;
     pline(tip.x, tip.y + 1, tip.x, tip.y + 9, 'rgba(243,233,210,.6)');
-    rect(tip.x, tip.y + 10, 2, 2, BAIT_COL[lvl('koeder')]);
+    rect(tip.x, tip.y + 10, 2, 2, koeder().c);
     return;
   }
   const tense = G.phase === 'fight';
@@ -778,11 +900,11 @@ function drawRodAndLine() {
   }
   if (tense) return;
   if (lvl('feeder') > 0) rect(h.x - 1, h.y - 5, 3, 3, '#5a6b5a');
-  rect(h.x, h.y, 2, 2, BAIT_COL[lvl('koeder')]);
+  rect(h.x, h.y, 2, 2, koeder().c);
   rect(h.x - 1, h.y + 1, 1, 1, '#c8ccd2');
 }
 function drawFight() {
-  const F = G.fight, zh = ROD_ZONE[lvl('rute')];
+  const F = G.fight, zh = F.zone_h;
   const bx = 224, by = 64, bw = 28, bh = 122, tx = bx + 4, ty = by + 4, tw = 12, th = bh - 8;
   rect(bx - 1, by - 1, bw + 2, bh + 2, '#f3e9d2');
   rect(bx, by, bw, bh, '#121a2b');
@@ -792,6 +914,13 @@ function drawFight() {
   const px = bx + 19, ph = Math.round(th * clamp(F.prog, 0, 1));
   rect(px, ty, 5, th, '#2a3552');
   rect(px, ty + th - ph, 5, ph, F.prog > .75 ? '#ffd86b' : '#f2c14e');
+  if (F.ueber > 0) {
+    // Schnurspannung als roter Balken über dem Drillfeld
+    const sh = Math.round((bh - 8) * F.spannung);
+    rect(bx - 6, by, 4, bh, '#2a3552');
+    rect(bx - 6, by + 4 + (bh - 8) - sh, 4, sh, F.spannung > .7 ? '#ff7a5f' : '#e4573d');
+    if (F.spannung > .7 && Math.floor(G.t * 6) % 2) pixText('SCHNUR!', 128, 4, '#ff7a5f');
+  }
 }
 function draw() {
   cx.drawImage(bgc, 0, 0);
@@ -835,7 +964,7 @@ function frame(now) {
 }
 
 // ---------- Oberfläche ----------
-const MODALS = ['mTitle', 'mResult', 'mShop', 'mAlbum', 'mBoard', 'mPause'];
+const MODALS = ['mTitle', 'mResult', 'mTackle', 'mShop', 'mAlbum', 'mBoard', 'mPause'];
 let backTo = 'mTitle', kbd = false;
 const el = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
 const img = (src, w) => { const i = new Image(); i.src = src; i.alt = ''; if (w) i.style.width = w + 'px'; return i; };
@@ -861,6 +990,7 @@ function show(id) {
   clearInterval(boardTimer);
   for (const m of MODALS) $(m).hidden = m !== id;
   if (id === 'mTitle') renderTitle();
+  if (id === 'mTackle') renderTackle();
   if (id === 'mShop') renderShop();
   if (id === 'mAlbum') renderAlbum();
   if (id === 'mBoard') { renderBoard(); if (sbOn) { sbBoard(); clearInterval(boardTimer); boardTimer = setInterval(sbBoard, 20000); } }
@@ -872,6 +1002,10 @@ function renderTitle() {
   $('tBest').textContent = de(save.best);
   $('tCoins').textContent = de(save.coins);
   $('tAlbum').textContent = discovered() + '/' + SPECIES.length;
+  $('hint').innerHTML = '';
+  $('hint').append(document.createTextNode(rute().name + ' mit ' + koeder().name + ' · '),
+    (() => { const b = el('b', '', 'Tippen'); return b; })(),
+    document.createTextNode(' wirft aus, gedrückt halten holt ein'));
 }
 function renderResult(rec) {
   $('rScore').textContent = de(G.score);
@@ -901,17 +1035,64 @@ function shopText(it, l) {
   if (l >= it.lv.length - 1) return 'Voll ausgebaut.';
   const n = l + 1;
   switch (it.k) {
-    case 'rute': return `Grüner Bereich ${Math.round(ROD_ZONE[l] * 100)} % → ${Math.round(ROD_ZONE[n] * 100)} %`;
     case 'rolle': return `Drill ${de(REEL[l])}× → ${de(REEL[n])}× so schnell`;
-    case 'koeder': return `Neu: ${BAITS[n]}. Dann beißen ${SPECIES.filter(s => s.bait === n).map(s => s.name).join(', ')}.`;
     case 'feeder': return `Bis zu ${MAXFISH[n]} statt ${MAXFISH[l]} Fische im See, schnellere Bisse`;
     case 'blei': return 'Der Köder sinkt schneller zum Grund.';
     case 'thermo': return `Runde dauert ${60 + 5 * n} statt ${60 + 5 * l} Sekunden`;
   }
   return '';
 }
+function renderTackle() {
+  $('kCoins').textContent = de(save.coins);
+  const rb = $('kRuten'); rb.textContent = '';
+  for (const r of RUTEN) {
+    if (!save.ruten.includes(r.id)) continue;
+    const b = el('button', 'opt'); b.type = 'button';
+    b.setAttribute('aria-pressed', String(save.tackle.rute === r.id));
+    b.append(el('b', '', r.name), el('small', '', r.info),
+      el('small', '', `Wurf ${Math.round((r.weite - 64) / 182 * 100)} % · Tragkraft ${KRAFT_TXT[r.kraft]} · ${r.typ === 'kunst' ? 'nur Kunstköder' : 'Naturköder'}`));
+    b.onclick = () => {
+      save.tackle.rute = r.id;
+      if (!koederPasstZurRute(koeder(), r)) save.tackle.koeder = r.typ === 'kunst' ? 'gummi' : 'brot';
+      if (!hatVorrat(save.tackle.koeder)) save.tackle.koeder = 'brot';
+      persist(); renderTackle();
+    };
+    rb.append(b);
+  }
+  const kb = $('kKoeder'); kb.textContent = '';
+  for (const k of KOEDER) {
+    const rest = k.id === 'brot' ? -1 : (save.vorrat[k.id] || 0);
+    if (rest === 0) continue;
+    const passt = koederPasstZurRute(k, rute());
+    const b = el('button', 'opt' + (passt ? '' : ' weg')); b.type = 'button';
+    b.setAttribute('aria-pressed', String(save.tackle.koeder === k.id));
+    b.append(el('b', '', k.name),
+      el('small', '', rest < 0 ? 'unbegrenzt, fängt aber wenig' : rest + (rest === 1 ? ' Runde übrig' : ' Runden übrig')),
+      el('small', '', passt ? (k.typ === 'kunst' ? 'Bisse nur beim Einholen' : 'liegt ruhig im Wasser') : 'braucht eine Kunstköderrute'));
+    b.disabled = !passt;
+    b.onclick = () => { save.tackle.koeder = k.id; persist(); renderTackle(); };
+    kb.append(b);
+  }
+  const liste = $('kFische'); liste.textContent = '';
+  const treffer = SPECIES.filter(sp => fangbar(sp));
+  for (const sp of treffer) {
+    const li = el('li');
+    li.append(img(sp.icon, 24), el('span', '', sp.name));
+    if (sp.kraft > rute().kraft) li.append(el('span', 'pts', 'Schnurbruch!'));
+    liste.append(li);
+  }
+  if (!treffer.length) liste.append(el('li', 'muted', 'Mit dieser Kombination beißt hier nichts.'));
+  const zuSchwer = treffer.filter(sp => sp.kraft > rute().kraft).map(sp => sp.name);
+  const zuKurz = SPECIES.filter(sp => sp.band !== 'junk' && magKoeder(sp) && koederPasstZurRute(koeder(), rute()) && !fangbar(sp)).map(sp => sp.name);
+  const hinweise = [];
+  if (zuSchwer.length) hinweise.push(`Zu schwer für die ${rute().name}: ${zuSchwer.join(', ')}. Die Schnur kann reißen, wenn du zu hart kurbelst.`);
+  if (zuKurz.length) hinweise.push(`Zu weit draußen für diese Rute: ${zuKurz.join(', ')}.`);
+  $('kWarnung').textContent = hinweise.join(' ');
+}
+
 function renderShop() {
   $('sCoins').textContent = de(save.coins);
+  renderKaufListen();
   const box = $('shopList'); box.textContent = '';
   for (const it of SHOP) {
     const l = lvl(it.k), max = it.lv.length - 1, row = el('div', 'item'), txt = el('div');
@@ -925,6 +1106,49 @@ function renderShop() {
     row.append(img(ICON_IMG[it.icon], 40), txt, btn);
     box.append(row);
   }
+}
+function renderKaufListen() {
+  const rb = $('shopRuten'); rb.textContent = '';
+  for (const r of RUTEN) {
+    const row = el('div', 'item'), txt = el('div');
+    txt.append(el('h3', '', r.name), el('p', '', r.info),
+      el('p', '', `Tragkraft ${KRAFT_TXT[r.kraft]} · Drillbereich ${Math.round(r.zone * 100)} % · ${r.typ === 'kunst' ? 'Kunstköder' : 'Naturköder'}`));
+    const btn = el('button', 'btn'); btn.type = 'button';
+    if (save.ruten.includes(r.id)) { btn.textContent = 'Im Besitz'; btn.disabled = true; }
+    else { btn.textContent = 'Kaufen · ' + r.preis; btn.disabled = save.coins < r.preis; btn.onclick = () => kaufeRute(r); }
+    row.append(img(ICON_IMG.rod, 40), txt, btn);
+    rb.append(row);
+  }
+  const kb = $('shopKoeder'); kb.textContent = '';
+  for (const k of KOEDER) {
+    if (k.id === 'brot') continue;
+    const row = el('div', 'item'), txt = el('div');
+    const wer = SPECIES.filter(sp => sp.koe.includes(k.id)).map(sp => sp.name).join(', ');
+    txt.append(el('h3', '', k.name), el('p', '', 'Reicht für ' + k.runden + ' Runden · ' + (k.typ === 'kunst' ? 'nur mit Spinn- oder Fliegenrute' : 'für jede normale Rute')),
+      el('p', '', 'Dafür: ' + wer));
+    const rest = save.vorrat[k.id] || 0;
+    if (rest) txt.append(el('p', 'now', 'Noch ' + rest + (rest === 1 ? ' Runde' : ' Runden') + ' im Beutel'));
+    const btn = el('button', 'btn'); btn.type = 'button';
+    btn.textContent = 'Kaufen · ' + k.preis;
+    btn.disabled = save.coins < k.preis;
+    btn.onclick = () => kaufeKoeder(k);
+    row.append(img(ICON_IMG.bait, 40), txt, btn);
+    kb.append(row);
+  }
+}
+function kaufeRute(r) {
+  if (save.coins < r.preis || save.ruten.includes(r.id)) return;
+  save.coins -= r.preis; save.ruten.push(r.id); save.tackle.rute = r.id;
+  if (!koederPasstZurRute(koeder(), r)) save.tackle.koeder = r.typ === 'kunst' ? (hatVorrat('gummi') ? 'gummi' : 'brot') : 'brot';
+  SFX.buy(); persist(); renderShop(); updateHud();
+  toast(r.name + ' gekauft und eingepackt.');
+}
+function kaufeKoeder(k) {
+  if (save.coins < k.preis) return;
+  save.coins -= k.preis;
+  save.vorrat[k.id] = (save.vorrat[k.id] || 0) + k.runden;
+  if (koederPasstZurRute(k, rute())) save.tackle.koeder = k.id;
+  SFX.buy(); persist(); renderShop(); updateHud();
 }
 function buy(it) {
   const l = lvl(it.k), c = it.cost[l];
@@ -940,7 +1164,7 @@ function renderAlbum() {
     pic.append(img(a ? sp.img : sp.sil));
     card.append(pic, el('h3', '', a ? sp.name : '???'));
     if (a) card.append(el('p', '', `${a.n}× gefangen · Rekord ${fmtLen(sp, a.max)}`));
-    card.append(el('p', '', `${BAND_TXT[sp.band]} · ${sp.band === 'junk' ? 'beißt nicht' : 'beißt auf ' + BAITS[sp.bait]}`));
+    card.append(el('p', '', `${BAND_TXT[sp.band]}${sp.band === 'junk' ? '' : ' · ' + sp.koe.map(k => K_BY[k].name).join(', ')}`));
     if (sp.legend) card.append(el('span', 'tag', 'legendär'));
     grid.append(card);
   }
@@ -1173,14 +1397,15 @@ document.addEventListener('click', e => {
   const o = e.target.closest('[data-open]');
   if (o) {
     const cur = current(), to = o.dataset.open;
-    if ((to === 'mShop' || to === 'mAlbum' || to === 'mBoard') && (cur === 'mTitle' || cur === 'mResult')) backTo = cur;
+    if ((to === 'mTackle' || to === 'mShop' || to === 'mAlbum' || to === 'mBoard') && (cur === 'mTitle' || cur === 'mResult')) backTo = cur;
     show(to);
   }
   if (e.target.closest('[data-back]')) show(backTo);
 });
-$('bStart').onclick = startRound;
-$('bAgain').onclick = startRound;
-$('bShopPlay').onclick = startRound;
+$('bStart').onclick = () => show('mTackle');
+$('bAgain').onclick = () => show('mTackle');
+$('bShopPlay').onclick = () => show('mTackle');
+$('kLos').onclick = startRound;
 $('bResume').onclick = resume;
 $('bQuit').onclick = endRound;
 $('btnPause').onclick = () => { if (G.mode === 'play') pause(); else if (G.mode === 'paused') resume(); else show('mTitle'); };

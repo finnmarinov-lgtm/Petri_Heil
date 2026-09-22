@@ -35,4 +35,11 @@ ${body}
 </html>
 `;
 fs.writeFileSync(__dirname + '/index.html', out);
+
+// Cache-Namen im Service Worker an den Inhalt koppeln, damit Updates sicher ankommen
+const hash = require('crypto').createHash('sha1').update(out).digest('hex').slice(0, 8);
+const swPath = __dirname + '/sw.js';
+const sw = fs.readFileSync(swPath, 'utf8').replace(/const CACHE = '[^']*';/, "const CACHE = 'petri-heil-" + hash + "';");
+fs.writeFileSync(swPath, sw);
+console.log('Service-Worker-Cache: petri-heil-' + hash);
 console.log('index.html geschrieben (' + Math.round(out.length / 1024) + ' KB)');

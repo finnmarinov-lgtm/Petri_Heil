@@ -1,7 +1,7 @@
 // Service Worker: macht das Spiel offline spielbar.
-// Nach jeder Änderung am Spiel die Versionsnummer hochzählen (v2 -> v3),
-// damit alle Geräte die neue Fassung bekommen.
-const CACHE = 'petri-heil-v2';
+// Der Cache-Name wird von build.js automatisch aus dem Inhalt erzeugt,
+// damit installierte Geräte jede neue Fassung bekommen.
+const CACHE = 'petri-heil-466d8e4b';
 const ASSETS = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {

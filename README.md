@@ -26,7 +26,7 @@ Das Icon nur neu erzeugen, wenn es geändert wurde:
 node make-icons.js
 ```
 
-**Wichtig bei jeder Änderung:** in `sw.js` die Zahl in `const CACHE = 'petri-heil-vN'` um eins hochzählen. Sonst behalten bereits installierte Geräte die alte Fassung.
+`build.js` setzt dabei automatisch einen neuen Cache-Namen in `sw.js`, damit installierte Geräte die neue Fassung bekommen.
 
 ## Auf dem eigenen PC testen
 

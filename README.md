@@ -26,37 +26,33 @@ Das Icon nur neu erzeugen, wenn es geändert wurde:
 node make-icons.js
 ```
 
+**Wichtig bei jeder Änderung:** in `sw.js` die Zahl in `const CACHE = 'petri-heil-vN'` um eins hochzählen. Sonst behalten bereits installierte Geräte die alte Fassung.
+
 ## Auf dem eigenen PC testen
 
 ```
 node serve.js
 ```
 
-Danach http://localhost:4173 im Browser öffnen. Für die Installation als App muss die Seite über `http://localhost` oder eine `https`-Adresse laufen, als lokale Datei geht es nicht.
+Danach `http://localhost:4173` im Browser öffnen. Für die Installation als App muss die Seite über `http://localhost` oder eine `https`-Adresse laufen, als lokale Datei geht es nicht.
 
 ## Veröffentlichen (GitHub Pages)
 
-1. Auf github.com ein Repository anlegen, zum Beispiel `petri-heil`, öffentlich.
-2. Den Inhalt dieses Ordners hochladen.
-3. Unter *Settings → Pages* als Quelle den Branch `main` und den Ordner `/ (root)` wählen.
-4. Nach ein bis zwei Minuten läuft das Spiel unter `https://<benutzername>.github.io/petri-heil/`.
+Repository: `Petri_Heil` von `finnmarinov-lgtm`, Adresse https://finnmarinov-lgtm.github.io/Petri_Heil/
+
+Nach Änderungen die geänderten Dateien dort über *Add file → Upload files* hochladen.
 
 ## Onlinekonto (nur App-Version)
 
-Spielstand und Rangliste liegen bei Supabase (Projekt ). Jedes Gerät bekommt beim
-ersten Start einen Spielercode wie ; mit diesem Code holt man den Spielstand
-auf ein anderes Gerät. Der Schlüssel in  ist der *publishable key* und darf öffentlich
-sein: Die Tabelle ist gesperrt, Zugriff gibt es nur über die drei Funktionen
-,  und .
+Spielstand und Rangliste liegen bei Supabase (Projekt `Petri_heil`). Jedes Gerät bekommt beim ersten Start einen Spielercode wie `PETRI-A1B2-C3D4`. Mit diesem Code holt man den Spielstand auf ein anderes Gerät.
+
+Der Schlüssel in `game.html` ist der *publishable key* und darf öffentlich sein: Die Tabelle `spieler` ist für Fremdzugriff gesperrt, möglich sind nur die drei Funktionen `stand_laden`, `stand_speichern` und `rangliste`. Wer einen fremden Spielercode nicht kennt, kommt an diesen Spielstand nicht heran.
 
 Ohne Netz läuft alles lokal weiter und wird beim nächsten Speichern hochgeladen.
 
-**Wichtig bei Änderungen:** in  die Zeile  hochzählen, sonst behalten
-installierte Geräte die alte Fassung.
-
 ## Zwei Versionen
 
-- **Claude-Version** (https://claude.ai/artifact/4vhhCU325fb1sQ8sFM71y3): mit gemeinsamer Rangliste, Spielstand hängt am Claude-Konto und ist auf allen Geräten gleich.
-- **App-Version** (GitHub Pages): installierbar, offline spielbar, ohne Konto. Spielstand liegt nur im jeweiligen Browser, keine gemeinsame Rangliste.
+- **Claude-Version** (https://claude.ai/artifact/4vhhCU325fb1sQ8sFM71y3): Rangliste und Spielstand laufen über claude.ai, dafür braucht man ein Claude-Konto.
+- **App-Version** (GitHub Pages): installierbar, offline spielbar, ohne Claude-Konto. Spielstand und Rangliste laufen über Supabase und den Spielercode.
 
-Beide entstehen aus derselben `game.html`.
+Beide entstehen aus derselben `game.html`. Die Ranglisten sind getrennt, weil die Claude-Seite keine fremden Server anfragen darf.

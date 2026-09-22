@@ -41,6 +41,19 @@ Danach http://localhost:4173 im Browser öffnen. Für die Installation als App m
 3. Unter *Settings → Pages* als Quelle den Branch `main` und den Ordner `/ (root)` wählen.
 4. Nach ein bis zwei Minuten läuft das Spiel unter `https://<benutzername>.github.io/petri-heil/`.
 
+## Onlinekonto (nur App-Version)
+
+Spielstand und Rangliste liegen bei Supabase (Projekt ). Jedes Gerät bekommt beim
+ersten Start einen Spielercode wie ; mit diesem Code holt man den Spielstand
+auf ein anderes Gerät. Der Schlüssel in  ist der *publishable key* und darf öffentlich
+sein: Die Tabelle ist gesperrt, Zugriff gibt es nur über die drei Funktionen
+,  und .
+
+Ohne Netz läuft alles lokal weiter und wird beim nächsten Speichern hochgeladen.
+
+**Wichtig bei Änderungen:** in  die Zeile  hochzählen, sonst behalten
+installierte Geräte die alte Fassung.
+
 ## Zwei Versionen
 
 - **Claude-Version** (https://claude.ai/artifact/4vhhCU325fb1sQ8sFM71y3): mit gemeinsamer Rangliste, Spielstand hängt am Claude-Konto und ist auf allen Geräten gleich.

@@ -120,10 +120,15 @@ kbd{font-family:var(--f-disp);font-size:11px;padding:1px 5px;border:2px solid va
 .opt{display:flex;flex-direction:column;gap:2px;padding:8px 10px;text-align:left;background:var(--ink-2);border:2px solid var(--line);color:var(--cream);font-family:var(--f-body);font-size:19px;line-height:1.15;cursor:pointer}
 .opt:hover{border-color:var(--muted)}
 .opt[aria-pressed="true"]{border-color:var(--gold);background:#24344f}
-.opt b{font-family:var(--f-disp);font-size:11px;letter-spacing:.04em;text-transform:uppercase}
+.opt b{display:flex;align-items:center;gap:6px;font-family:var(--f-disp);font-size:11px;letter-spacing:.04em;text-transform:uppercase}
+.opt b img{image-rendering:pixelated;flex:none}
 .opt small{color:var(--muted);font-size:17px}
 .opt.weg{opacity:.45}
 .beisst{padding:10px;background:var(--ink-2);border:2px solid var(--line)}
+.beisstnicht{margin:10px 0 4px}
+.fehlliste{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px;color:var(--muted);font-size:18px}
+.fehlliste li{display:flex;flex-wrap:wrap;gap:6px}
+.grund{font-family:var(--f-disp);font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink);background:var(--muted);padding:2px 5px;align-self:center}
 .beisst h3{margin:0 0 4px;font-family:var(--f-disp);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
 .fischliste{display:flex;flex-wrap:wrap;gap:4px 10px;margin:0;padding:0;list-style:none}
 .fischliste li{display:flex;align-items:center;gap:5px;font-size:19px}
@@ -218,6 +223,8 @@ kbd{font-family:var(--f-disp);font-size:11px;padding:1px 5px;border:2px solid va
       <h3>Damit beißen heute</h3>
       <ul class="fischliste" id="kFische"></ul>
       <p class="muted small" id="kWarnung"></p>
+      <h3 class="beisstnicht">Beißt hier nicht</h3>
+      <ul class="fehlliste" id="kFehlt"></ul>
     </div>
     <div class="actions">
       <button class="btn primary" id="kLos" type="button">Losangeln!</button>
@@ -390,6 +397,38 @@ const ICONS = {
   thermo: ['..kkkk..', '..rrrr..', '.rrrrrr.', '.rwwwwr.', '.rrrrrr.', '.rrrrrr.', '.rrrrrr.', '..rrrr..'],
 };
 const ICON_COL = { k: '#2a1a14', w: '#c8ccd2', g: '#6fa35a', y: '#f2c14e', r: '#e4573d' };
+
+// Köder, 10x10
+const K_ICONS = {
+  brot:    { rows: ['..........', '...ccc....', '..ccccc...', '.ccccddc..', '.ccdddcc..', '.cdddccc..', '..cdccc...', '...ccc....', '..........', '..........'],
+             col: { c: '#e2d2a4', d: '#f8f0d4' } },
+  mais:    { rows: ['..........', '...yy.....', '..yyyy....', '..yyoy.yy.', '...yy.yyyy', '.yy...yyoy', 'yyyy...yy.', 'yyoy......', '.yy.......', '..........'],
+             col: { y: '#f2c14e', o: '#d9a23a' } },
+  maden:   { rows: ['..........', '...mmm....', '..msmsm...', '..mmmmm...', '...mmm....', '.....mmm..', '....msmsm.', '....mmmmm.', '.....mmm..', '..........'],
+             col: { m: '#f0dca0', s: '#d8c084' } },
+  wurm:    { rows: ['..........', '...wwww...', '..ww..ww..', '..wd..dw..', '...www....', '....www...', '..wd..dw..', '..ww..ww..', '...wwww...', '..........'],
+             col: { w: '#c06a5a', d: '#9c4f43' } },
+  pellets: { rows: ['..........', '..pppp....', '..pqqp....', '..pppp....', '.......pp.', '..pp...pq.', '..pq...pp.', '..pp...pp.', '..........', '..........'],
+             col: { p: '#7a5632', q: '#5a3e22' } },
+  boilies: { rows: ['..........', '..bbbb....', '.bbbbbb...', '.bbhbbb...', '..bbbb....', '.....rrrr.', '....rrrrrr', '....rrhrrr', '.....rrrr.', '..........'],
+             col: { b: '#e8c440', h: '#f6e08a', r: '#d9534f' } },
+  fliege:  { rows: ['..ff...ff.', '.ffff.ffff', '..ff...ff.', '...hhhh...', '..hhhhhh..', '...hhhh...', '....kk....', '...k..k...', '....kk....', '..........'],
+             col: { f: '#eae4d2', h: '#8a5a3c', k: '#c8ccd2' } },
+  blinker: { rows: ['....k.....', '...ss.....', '..ssss....', '..shss....', '.ssssss...', '..ssss.r..', '..ssss.rr.', '...ss..rr.', '....k..r..', '..........'],
+             col: { s: '#c8ccd2', h: '#f3f5f8', k: '#8a99a8', r: '#d9534f' } },
+  gummi:   { rows: ['..........', '..r..ggg..', '.rrrgggggg', 'rrrrgggghe', '.rrrgggggg', '..r..ggg..', '..........', '..........', '..........', '..........'],
+             col: { g: '#6fa35a', r: '#e4573d', h: '#e8f0e0', e: '#101418' } },
+};
+// Ruten, 12x12
+const R_ICONS = {
+  stippe:  ['..........kk', '.........kk.', '........kk..', '.......kk...', '......kk....', '.....kk.....', '....kk......', '...kk.......', '..hh........', '.hh.........', 'hh..........', '............'],
+  match:   ['..........kk', '.........kk.', '........kk..', '.......kk...', '......kk....', '.....kk.....', '....kk......', '...kk.......', '..hh.rr.....', '.hh.rwwr....', 'hh...rr.....', '............'],
+  feeder:  ['..........kk', '.........kk.', '........kk..', '.......kk...', '......kk....', '.....kk..gg.', '....kk..gygg', '...kk...ggyg', '..hh.rr.gggg', '.hh.rwwr.gg.', 'hh...rr.....', '............'],
+  karpfen: ['.........kkk', '........kkk.', '.......kkk..', '......kkk...', '.....kkk....', '....kkk.....', '...kkk......', '..hh.rrrr...', '.hh.rwwwwr..', 'hh..rwwwwr..', '.....rrrr...', '............'],
+  spinn:   ['..........kk', '.........kk.', '........kk..', '.......kk...', '......kk....', '.....kk.....', '....kk...s..', '...kk...sss.', '..hh.rr.sss.', '.hh.rwwr.s..', 'hh...rr.....', '............'],
+  fliege:  ['.........kk.', '........kk..', '.......kk...', '......kk....', '.....kk.....', '....kk......', '...kk.......', '..hh........', '.hh..llll...', 'hh..l....l..', '.....llll...', '............'],
+};
+const R_ICON_COL = { k: '#c8b89a', h: '#6b4226', r: '#8a99a8', w: '#5c6b7a', g: '#6fa35a', y: '#f2c14e', s: '#c8ccd2', l: '#f3e9d2' };
 const ANGLER = ['....hhh...', '...hhhhh..', '.hhhhhhhhh', '....sss...', '....ssk...', '....sss...', '...rrrr...', '..rrcrrss.',
   '..rrrcr...', '..rcrrr...', '..ppppp...', '..pp.pp...', '..pp.pp...', '..bb.bb...', '.bbb.bbb..'];
 const ANGLER_COL = { h: '#d9a441', s: '#e8b48a', k: '#2a1a14', r: '#b8433a', c: '#7a2a26', p: '#34507a', b: '#3a2a20' };
@@ -420,6 +459,8 @@ for (const sp of SPECIES) {
 }
 const ICON_IMG = {};
 for (const k in ICONS) ICON_IMG[k] = scaled(paint(ICONS[k], ICON_COL, false), 5);
+for (const k of KOEDER) { const d = K_ICONS[k.id]; k.bild = d ? scaled(paint(d.rows, d.col, false), 4) : ICON_IMG.bait; }
+for (const r of RUTEN) { const d = R_ICONS[r.id]; r.bild = d ? scaled(paint(d, R_ICON_COL, false), 4) : ICON_IMG.rod; }
 function scaled(src, s) {
   const c = document.createElement('canvas');
   c.width = src.width * s; c.height = src.height * s;
@@ -649,7 +690,9 @@ function datumSeed(txt) {
 }
 let seeRnd = Math.random;                       // Zufall für den Fischbestand
 const seeZahl = (a, b) => a + seeRnd() * (b - a);
+const TAGESRUNDEN = 1;   // ein Gewässer, später drei
 const tagGespielt = () => save.tag.datum === heute();
+const tagRestlich = () => (tagGespielt() ? 0 : TAGESRUNDEN);
 
 const derDie = sp => (sp.g === 'e' ? 'Die' : sp.g === 's' ? 'Das' : 'Der');
 const rollLen = sp => Math.round(sp.len[0] + (sp.len[1] - sp.len[0]) * Math.pow(seeRnd(), 1.6));
@@ -1129,8 +1172,8 @@ function renderTitle() {
   $('tAlbum').textContent = discovered() + '/' + SPECIES.length;
   const d = new Date();
   $('tTagInfo').textContent = tagGespielt()
-    ? `Tagessee vom ${d.getDate()}.${d.getMonth() + 1}. erledigt: ${de(save.tag.punkte)} Punkte mit ${save.tag.fische} Fischen. Freies Angeln geht immer.`
-    : `Tagessee vom ${d.getDate()}.${d.getMonth() + 1}.: heute noch nicht gespielt. Alle angeln denselben See, das zählt für die Tagesrangliste.`;
+    ? `Tagessee vom ${d.getDate()}.${d.getMonth() + 1}.: ${TAGESRUNDEN} von ${TAGESRUNDEN} gewerteten Runden gefischt, ${de(save.tag.punkte)} Punkte mit ${save.tag.fische} Fischen. Freies Angeln geht weiterhin unbegrenzt.`
+    : `Tagessee vom ${d.getDate()}.${d.getMonth() + 1}.: noch ${tagRestlich()} von ${TAGESRUNDEN} gewerteten Runden übrig. Alle angeln denselben See.`;
   $('bStart').textContent = tagGespielt() ? 'Tagessee nochmal' : 'Tagessee';
   $('tPokale').textContent = save.pokale.siege + (save.pokale.podeste > save.pokale.siege ? ' + ' + (save.pokale.podeste - save.pokale.siege) : '');
   $('hint').innerHTML = '';
@@ -1181,14 +1224,16 @@ const anschlagTxt = r => (r.typ === 'kunst' ? 'hakt beim Einholen selbst' : r.an
 function renderTackle() {
   $('kCoins').textContent = de(save.coins);
   $('kModus').textContent = modusTag
-    ? (tagGespielt() ? 'Tagessee · heute schon gewertet, weitere Runden zählen nur für Münzen' : 'Tagessee · zählt für die Tagesrangliste')
-    : 'Freies Angeln · zählt für Münzen, Fangbuch und den ewigen Rekord';
+    ? (tagGespielt() ? `Tagessee · heute schon gewertet (${de(save.tag.punkte)} Punkte), weitere Runden zählen nur für Münzen und Fangbuch`
+      : `Tagessee · noch ${tagRestlich()} von ${TAGESRUNDEN} gewerteten Runden heute`)
+    : 'Freies Angeln · unbegrenzt, zählt für Münzen, Fangbuch und den ewigen Rekord';
   const rb = $('kRuten'); rb.textContent = '';
   for (const r of RUTEN) {
     if (!save.ruten.includes(r.id)) continue;
     const b = el('button', 'opt'); b.type = 'button';
     b.setAttribute('aria-pressed', String(save.tackle.rute === r.id));
-    b.append(el('b', '', r.name), el('small', '', r.info),
+    const kopf = el('b'); kopf.append(img(r.bild, 24), document.createTextNode(r.name));
+    b.append(kopf, el('small', '', r.info),
       el('small', '', `Wurf ${Math.round((r.weite - 64) / 182 * 100)} % · Tragkraft ${KRAFT_TXT[r.kraft]} · ${genauTxt(r)} · ${anschlagTxt(r)}`));
     b.onclick = () => {
       save.tackle.rute = r.id;
@@ -1205,7 +1250,8 @@ function renderTackle() {
     const passt = koederPasstZurRute(k, rute());
     const b = el('button', 'opt' + (passt ? '' : ' weg')); b.type = 'button';
     b.setAttribute('aria-pressed', String(save.tackle.koeder === k.id));
-    b.append(el('b', '', k.name),
+    const kopf = el('b'); kopf.append(img(k.bild, 22), document.createTextNode(k.name));
+    b.append(kopf,
       el('small', '', rest < 0 ? 'unbegrenzt, fängt aber wenig' : rest + (rest === 1 ? ' Runde übrig' : ' Runden übrig')),
       el('small', '', passt ? (k.typ === 'kunst' ? 'Bisse nur beim Einholen' : 'liegt ruhig im Wasser') : 'braucht eine Kunstköderrute'));
     b.disabled = !passt;
@@ -1221,12 +1267,30 @@ function renderTackle() {
     liste.append(li);
   }
   if (!treffer.length) liste.append(el('li', 'muted', 'Mit dieser Kombination beißt hier nichts.'));
-  const zuSchwer = treffer.filter(sp => sp.kraft > rute().kraft).map(sp => sp.name);
-  const zuKurz = SPECIES.filter(sp => sp.band !== 'junk' && magKoeder(sp) && koederPasstZurRute(koeder(), rute()) && !fangbar(sp)).map(sp => sp.name);
-  const hinweise = [];
-  if (zuSchwer.length) hinweise.push(`Zu schwer für die ${rute().name}: ${zuSchwer.join(', ')}. Die Schnur kann reißen, wenn du zu hart kurbelst.`);
-  if (zuKurz.length) hinweise.push(`Zu weit draußen für diese Rute: ${zuKurz.join(', ')}.`);
-  $('kWarnung').textContent = hinweise.join(' ');
+  // Alle übrigen Arten mit Grund auflisten
+  const r = rute(), k = koeder();
+  const zuWeit = [], falscherKoeder = [], falscheRute = [];
+  for (const sp of SPECIES) {
+    if (sp.band === 'junk' || fangbar(sp)) continue;
+    if (!magKoeder(sp, k.id)) falscherKoeder.push(sp.name);
+    else if (!koederPasstZurRute(k, r)) falscheRute.push(sp.name);
+    else zuWeit.push(sp.name);
+  }
+  const fehlt = $('kFehlt');
+  fehlt.textContent = '';
+  const zeile = (titel, namen) => {
+    if (!namen.length) return;
+    const li = el('li');
+    li.append(el('span', 'grund', titel), el('span', '', namen.join(', ')));
+    fehlt.append(li);
+  };
+  zeile('zu weit draußen', zuWeit);
+  zeile('anderer Köder nötig', falscherKoeder);
+  zeile('andere Rute nötig', falscheRute);
+  const zuSchwer = treffer.filter(sp => sp.kraft > r.kraft).map(sp => sp.name);
+  $('kWarnung').textContent = zuSchwer.length
+    ? `Zu schwer für die ${r.name}: ${zuSchwer.join(', ')}. Beim Kurbeln steigt die Spannung, zwischendurch nachgeben!`
+    : '';
 }
 
 function renderShop() {
@@ -1255,7 +1319,7 @@ function renderKaufListen() {
     const btn = el('button', 'btn'); btn.type = 'button';
     if (save.ruten.includes(r.id)) { btn.textContent = 'Im Besitz'; btn.disabled = true; }
     else { btn.textContent = 'Kaufen · ' + r.preis; btn.disabled = save.coins < r.preis; btn.onclick = () => kaufeRute(r); }
-    row.append(img(ICON_IMG.rod, 40), txt, btn);
+    row.append(img(r.bild, 40), txt, btn);
     rb.append(row);
   }
   const kb = $('shopKoeder'); kb.textContent = '';
@@ -1271,7 +1335,7 @@ function renderKaufListen() {
     btn.textContent = 'Kaufen · ' + k.preis;
     btn.disabled = save.coins < k.preis;
     btn.onclick = () => kaufeKoeder(k);
-    row.append(img(ICON_IMG.bait, 40), txt, btn);
+    row.append(img(k.bild, 40), txt, btn);
     kb.append(row);
   }
 }

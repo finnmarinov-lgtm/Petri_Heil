@@ -512,10 +512,15 @@ const GEWAESSER = [
     id: 'fluss', name: 'Fluss', stroemung: -10,
     info: 'Die Strömung treibt den Köder ab, du musst öfter neu auswerfen. In der tiefen Rinne stehen die Großen.',
     grund: x => {
-      if (x < 46) return 56 + x * .07;                      // Kiesbank: Land, kein Wasser
-      if (x > 242) return Math.max(56, 96 - (x - 242) * 3.4); // drüben steigt das Ufer aus dem Wasser
+      // Rinne in der Mitte, zu beiden Ufern hin weich auslaufend
       const t = clamp((x - 46) / 196, 0, 1), u = Math.sin(Math.PI * Math.pow(t, 2));
-      return Math.min(186, 66 + 120 * u + 2 * Math.sin(x * .11) + 1.2 * Math.sin(x * .27));
+      const rinne = Math.min(186, 66 + 120 * u + 2 * Math.sin(x * .11) + 1.2 * Math.sin(x * .27));
+      const bankLinks = 56 + x * .06;            // Kiesbank, liegt über der Wasserlinie
+      const bankRechts = 56.5;                   // Wiesenufer drüben
+      const sanft = v => v * v * (3 - 2 * v);
+      const sL = sanft(clamp((x - 44) / 18, 0, 1));
+      const sR = sanft(clamp((254 - x) / 20, 0, 1));
+      return lerp(bankRechts, lerp(bankLinks, rinne, sL), sR);
     },
     schilf: [{ x: 46, h: 18, c: 0 }, { x: 49, h: 24, c: 1 }, { x: 52, h: 14, c: 0 }, { x: 236, h: 20, c: 1 }, { x: 240, h: 26, c: 1 }, { x: 245, h: 16, c: 0 }],
   },
@@ -603,6 +608,14 @@ function buildBg() {
   const fluss = gew.id === 'fluss';
   for (let x = 0; x <= W; x++) {
     const top = Math.round(bot[x]);
+    if (top > SURF + 2) {
+      // Schwebstoffe über dem Grund, damit die Kante nicht schneidet
+      g.fillStyle = fluss ? 'rgba(154,144,128,.38)' : 'rgba(138,116,80,.34)';
+      g.fillRect(x, top - 1, 1, 1);
+      g.fillStyle = fluss ? 'rgba(154,144,128,.2)' : 'rgba(138,116,80,.18)';
+      g.fillRect(x, top - 2, 1, 1);
+      if (srnd() < .25) { g.fillStyle = fluss ? 'rgba(168,162,148,.35)' : 'rgba(125,122,112,.3)'; g.fillRect(x, top - 3 - Math.floor(srnd() * 2), 1, 1); }
+    }
     px(x, top, fluss ? '#9a9080' : '#8a7450');
     for (let y = top + 1; y < H; y++) {
       const kies = ((x * 3 + y * 5) % 7 === 0) ? (fluss ? '#6a6252' : '#4e3d2a') : (fluss ? '#7c7466' : '#5e4a33');
@@ -619,12 +632,14 @@ function buildBg() {
     }
   }
   if (fluss) {
-    // Uferkante drüben: Gras auf Erde, bis ins Wasser
-    for (let x = 243; x <= W; x++) {
-      const k = Math.round(bot[x]) - 4;
-      g.fillStyle = '#6a5a44'; g.fillRect(x, k, 1, H - k);
-      g.fillStyle = '#5f8f4e'; g.fillRect(x, k - 2, 1, 2);
-      if ((x * 5) % 7 === 0) { g.fillStyle = '#54462f'; g.fillRect(x, k + 2 + (x % 4), 1, 1); }
+    // Uferkante drüben: Grasnarbe und Erde auf dem Grund, nur über der Wasserlinie
+    for (let x = 230; x <= W; x++) {
+      const top = Math.round(bot[x]);
+      if (top > SURF - 1) continue;                  // hier steht noch Wasser
+      g.fillStyle = '#6a5a44'; g.fillRect(x, top, 1, 10);
+      g.fillStyle = '#5f8f4e'; g.fillRect(x, top - 2, 1, 2);
+      g.fillStyle = '#4f7f3f'; if ((x * 3) % 5 === 0) g.fillRect(x, top - 3, 1, 1);
+      if ((x * 5) % 7 === 0) { g.fillStyle = '#54462f'; g.fillRect(x, top + 3 + (x % 4), 1, 1); }
     }
     // Kiesbank statt Steg
     g.fillStyle = '#8e8676'; g.fillRect(0, 53, 46, H - 53);

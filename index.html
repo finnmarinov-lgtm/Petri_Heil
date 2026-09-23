@@ -48,6 +48,13 @@ body{font-family:var(--f-body);font-size:20px;line-height:1.2;padding-inline:16p
 .stage{position:relative;max-width:100%;border:3px solid var(--cream);box-shadow:6px 6px 0 var(--shadow)}
 #game{display:block;width:768px;max-width:100%;height:auto;image-rendering:pixelated;image-rendering:crisp-edges;touch-action:none;cursor:pointer;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 .toast{position:absolute;left:50%;top:8px;transform:translateX(-50%);width:max-content;max-width:calc(100% - 16px);padding:4px 10px;background:var(--ink);border:2px solid var(--gold);color:var(--cream);font-size:18px;line-height:1.1;text-align:center;pointer-events:none}
+.tapzone{display:none;width:100%;min-height:clamp(90px,20vh,170px);align-items:center;justify-content:center;text-align:center;
+  padding:12px;background:var(--ink-2);border:3px dashed var(--line);color:var(--muted);
+  font-family:var(--f-disp);font-size:13px;letter-spacing:.06em;text-transform:uppercase;line-height:1.5;
+  touch-action:none;-webkit-user-select:none;user-select:none;cursor:pointer}
+.tapzone.aktiv{border-style:solid;border-color:var(--gold);color:var(--cream)}
+.tapzone.gedrueckt{background:#24344f}
+@media (max-width:520px){.tapzone{display:flex}}
 .hint{margin:0;color:var(--muted);text-align:center;font-size:19px;max-width:62ch}
 .hint b{color:var(--cream);font-weight:400}
 kbd{font-family:var(--f-disp);font-size:11px;padding:1px 5px;border:2px solid var(--line);background:var(--ink-2)}
@@ -98,7 +105,21 @@ kbd{font-family:var(--f-disp);font-size:11px;padding:1px 5px;border:2px solid va
 .pips{display:flex;gap:3px;margin-top:6px}
 .pips i{width:12px;height:6px;background:var(--line)}
 .pips i.on{background:var(--gold)}
-@media (max-width:520px){.item{grid-template-columns:40px 1fr}.item .btn{grid-column:1/-1}.facts dd{font-size:15px}}
+@media (max-width:520px){
+  .item{grid-template-columns:40px 1fr}.item .btn{grid-column:1/-1}.facts dd{font-size:15px}
+  body{padding-inline:6px;padding-block:6px 10px;background-image:none}
+  .app{gap:6px}
+  .logo{font-size:17px;text-shadow:2px 2px 0 var(--bob)}
+  .stat{min-width:0;padding:2px 6px 3px}
+  .stat .k{font-size:9px}
+  .stat .v{font-size:15px}
+  .icon{width:34px;min-height:34px}
+  .hud{gap:4px}
+  .hint{font-size:16px;line-height:1.1}
+  .stage{border-width:2px;box-shadow:3px 3px 0 var(--shadow)}
+}
+#albumGrid{display:flex;flex-direction:column;gap:6px}
+#albumGrid .eyebrow{margin-top:6px}
 .album{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
 .card{padding:10px;background:var(--ink-2);border:2px solid var(--line);display:flex;flex-direction:column;gap:4px}
 .card .pic{height:48px;display:flex;align-items:center;justify-content:center}
@@ -151,6 +172,7 @@ kbd{font-family:var(--f-disp);font-size:11px;padding:1px 5px;border:2px solid va
     <canvas id="game" width="256" height="192" role="img" aria-label="Pixel-Angelsee mit Steg und Angler"></canvas>
     <div class="toast" id="toast" hidden></div>
   </div>
+  <div class="tapzone" id="tapzone"><span id="tapLabel">Tippen zum Auswerfen</span></div>
   <p class="hint" id="hint"><b>Tippen</b>, Klicken oder <kbd>Leertaste</kbd>: auswerfen · <b>gedrückt halten</b>: Köder einholen</p>
 </div>
 
@@ -208,6 +230,10 @@ kbd{font-family:var(--f-disp);font-size:11px;padding:1px 5px;border:2px solid va
     <div class="box-head"><h2 id="kTitle">Angeltasche packen</h2><p class="purse">Münzen: <b id="kCoins">0</b></p></div>
     <p class="eyebrow" id="kModus"></p>
     <div>
+      <p class="eyebrow">Gewässer</p>
+      <div class="wahl" id="kGewaesser"></div>
+    </div>
+    <div>
       <p class="eyebrow">Rute</p>
       <div class="wahl" id="kRuten"></div>
     </div>
@@ -244,7 +270,7 @@ kbd{font-family:var(--f-disp);font-size:11px;padding:1px 5px;border:2px solid va
 <div class="modal" id="mAlbum" hidden>
   <div class="box wide" role="dialog" aria-labelledby="aTitle">
     <div class="box-head"><h2 id="aTitle">Fangbuch</h2><p class="purse"><b id="aCount">0/13</b> entdeckt</p></div>
-    <div class="album" id="albumGrid"></div>
+    <div id="albumGrid"></div>
     <div class="actions"><button class="btn" data-back type="button">Zurück</button></div>
   </div>
 </div>
@@ -314,7 +340,7 @@ const RUTEN = [
     info: 'Feines Gerät mit weitem Wurf, ideal für Weißfisch.' },
   { id: 'feeder',  name: 'Feederrute',    preis: 180, zone: .30, kraft: 4, weite: 246, typ: 'natur', futter: true, genau: .7, anschlag: .85,
     info: 'Weit hinaus an den Grund, arbeitet mit dem Futterkorb.' },
-  { id: 'karpfen', g: 'r', name: 'Karpfenrute',   preis: 420, zone: .26, kraft: 5, weite: 246, typ: 'natur', futter: true, genau: .45, anschlag: .5,
+  { id: 'karpfen', name: 'Karpfenrute',   preis: 420, zone: .26, kraft: 5, weite: 246, typ: 'natur', futter: true, genau: .45, anschlag: .5,
     info: 'Hält jeden Großfisch, ist dafür grob: ungenauer Wurf, später Biss, kleiner Drillbereich.' },
   { id: 'spinn',   name: 'Spinnrute',     preis: 260, zone: .32, kraft: 3, weite: 230, typ: 'kunst', genau: .8, anschlag: 1,
     info: 'Für Kunstköder. Räuber packen nur zu, während du einholst, und hängen dann sofort.' },
@@ -338,20 +364,23 @@ const KRAFT_TXT = ['', 'sehr leicht', 'leicht', 'mittel', 'stark', 'sehr stark']
 
 // Farben: [Körper, Bauch, Flossen, Muster]
 const SPECIES = [
-  { id: 'rotauge', g: 's',  name: 'Rotauge',            band: 'flach',  len: [12, 30],   pts: 5,   wild: .15, w: 10,  kraft: 1, koe: ['brot', 'maden', 'mais'],            shape: 's', c: ['#b9c6cc', '#eef2f3', '#d9534f', '#8fa3ad'] },
-  { id: 'rotfeder', g: 'e', name: 'Rotfeder',           band: 'flach',  len: [14, 32],   pts: 6,   wild: .2,  w: 7,   kraft: 1, koe: ['brot', 'maden', 'mais'],            shape: 's', c: ['#c9a55a', '#f0dfae', '#e0452f', '#a8843e'] },
-  { id: 'brasse', g: 'e',   name: 'Brasse',             band: 'mittel', len: [30, 65],   pts: 12,  wild: .25, w: 7,   kraft: 2, koe: ['maden', 'mais', 'wurm', 'pellets'], shape: 'm', c: ['#9c8a62', '#d8cba6', '#6b5d45', '#857350'] },
-  { id: 'barsch', g: 'r',   name: 'Barsch',             band: 'flach',  len: [15, 40],   pts: 10,  wild: .4,  w: 6,   kraft: 2, koe: ['maden', 'wurm', 'gummi', 'blinker'], shape: 's', c: ['#7f9a4c', '#d8d7a0', '#e8742c', '#3e4d24'] },
-  { id: 'schleie', g: 'e',  name: 'Schleie',            band: 'mittel', len: [25, 55],   pts: 18,  wild: .35, w: 4,   kraft: 2, koe: ['maden', 'wurm', 'mais'],           shape: 'm', c: ['#5d6b2c', '#a8a860', '#3f4a1c', '#4b5722'] },
-  { id: 'forelle', g: 'e',  name: 'Regenbogenforelle',  band: 'flach',  len: [25, 55],   pts: 22,  wild: .55, w: 4,   kraft: 2, koe: ['fliege', 'maden', 'blinker'],      shape: 'm', c: ['#8a9aa8', '#f0e6d8', '#e0707e', '#d76a7a'] },
-  { id: 'aal', g: 'r',      name: 'Aal',                band: 'grund',  len: [45, 95],   pts: 25,  wild: .75, w: 3,   kraft: 3, koe: ['wurm', 'maden'],                   shape: 'l', c: ['#3d3a2a', '#8a8466', '#2c2a1e', '#34311f'] },
-  { id: 'karpfen',  name: 'Karpfen',            band: 'tief',   len: [40, 90],   pts: 35,  wild: .5,  w: 4,   kraft: 4, koe: ['mais', 'pellets', 'boilies'],      shape: 'b', c: ['#a8863a', '#e2c979', '#7a5f26', '#8c6f2c'] },
-  { id: 'hecht', g: 'r',    name: 'Hecht',              band: 'mittel', len: [50, 110],  pts: 45,  wild: .8,  w: 2,   kraft: 4, koe: ['gummi', 'blinker'],                shape: 'l', c: ['#6c8a3a', '#e4e2b0', '#a0602a', '#c8d68a'] },
-  { id: 'zander', g: 'r',   name: 'Zander',             band: 'tief',   len: [40, 85],   pts: 40,  wild: .6,  w: 2,   kraft: 3, koe: ['gummi', 'wurm'],                   shape: 'm', c: ['#8c9a8c', '#e2e6de', '#5a665a', '#5f6d60'] },
-  { id: 'spiegel', g: 'r',  name: 'Spiegelkarpfen',     band: 'tief',   len: [50, 100],  pts: 60,  wild: .6,  w: 1.4, kraft: 5, koe: ['boilies', 'pellets'],             shape: 'b', c: ['#c99a3a', '#f0d890', '#8a5f20', '#f4d27a'] },
-  { id: 'wels', g: 'r',     name: 'Wels',               band: 'grund',  len: [80, 220],  pts: 90,  wild: .85, w: 1,   kraft: 5, koe: ['wurm', 'boilies', 'gummi'],        shape: 'x', c: ['#4a4a58', '#9a98a0', '#33333d', '#3c3c48'] },
-  { id: 'stoer', g: 'r',    name: 'Stör',               band: 'grund',  len: [100, 190], pts: 150, wild: .9,  w: .35, kraft: 5, koe: ['pellets', 'boilies'],             shape: 'x', c: ['#7f8896', '#d4d8de', '#5c6470', '#c3c9d2'], legend: true },
-  { id: 'stiefel', g: 'r',  name: 'Gummistiefel',       band: 'junk',   len: [38, 47],   pts: 1,   wild: .05, w: 0,   kraft: 1, koe: [],                                  shape: 'boot', c: ['#2f5a3a', '#1f3a26', '#1f3a26', '#4f8a5e'] },
+  { id: 'rotauge', wo: ['see', 'fluss'], g: 's',  name: 'Rotauge',            band: 'flach',  len: [12, 30],   pts: 5,   wild: .15, w: 10,  kraft: 1, koe: ['brot', 'maden', 'mais'],            shape: 's', c: ['#b9c6cc', '#eef2f3', '#d9534f', '#8fa3ad'] },
+  { id: 'rotfeder', wo: ['see'], g: 'e', name: 'Rotfeder',           band: 'flach',  len: [14, 32],   pts: 6,   wild: .2,  w: 7,   kraft: 1, koe: ['brot', 'maden', 'mais'],            shape: 's', c: ['#c9a55a', '#f0dfae', '#e0452f', '#a8843e'] },
+  { id: 'brasse', wo: ['see', 'fluss'], g: 'e',   name: 'Brasse',             band: 'mittel', len: [30, 65],   pts: 12,  wild: .25, w: 7,   kraft: 2, koe: ['maden', 'mais', 'wurm', 'pellets'], shape: 'm', c: ['#9c8a62', '#d8cba6', '#6b5d45', '#857350'] },
+  { id: 'barsch', wo: ['see', 'fluss'], g: 'r',   name: 'Barsch',             band: 'flach',  len: [15, 40],   pts: 10,  wild: .4,  w: 6,   kraft: 2, koe: ['maden', 'wurm', 'gummi', 'blinker'], shape: 's', c: ['#7f9a4c', '#d8d7a0', '#e8742c', '#3e4d24'] },
+  { id: 'schleie', wo: ['see'], g: 'e',  name: 'Schleie',            band: 'mittel', len: [25, 55],   pts: 18,  wild: .35, w: 4,   kraft: 2, koe: ['maden', 'wurm', 'mais'],           shape: 'm', c: ['#5d6b2c', '#a8a860', '#3f4a1c', '#4b5722'] },
+  { id: 'forelle', wo: ['see', 'fluss'], g: 'e',  name: 'Regenbogenforelle',  band: 'flach',  len: [25, 55],   pts: 22,  wild: .55, w: 4,   kraft: 2, koe: ['fliege', 'maden', 'blinker'],      shape: 'm', c: ['#8a9aa8', '#f0e6d8', '#e0707e', '#d76a7a'] },
+  { id: 'aal', wo: ['see', 'fluss'], g: 'r',      name: 'Aal',                band: 'grund',  len: [45, 95],   pts: 25,  wild: .75, w: 3,   kraft: 3, koe: ['wurm', 'maden'],                   shape: 'l', c: ['#3d3a2a', '#8a8466', '#2c2a1e', '#34311f'] },
+  { id: 'karpfen', wo: ['see'], g: 'r', name: 'Karpfen',            band: 'tief',   len: [40, 90],   pts: 35,  wild: .5,  w: 4,   kraft: 4, koe: ['mais', 'pellets', 'boilies'],      shape: 'b', c: ['#a8863a', '#e2c979', '#7a5f26', '#8c6f2c'] },
+  { id: 'hecht', wo: ['see', 'fluss'], g: 'r',    name: 'Hecht',              band: 'mittel', len: [50, 110],  pts: 45,  wild: .8,  w: 2,   kraft: 4, koe: ['gummi', 'blinker'],                shape: 'l', c: ['#6c8a3a', '#e4e2b0', '#a0602a', '#c8d68a'] },
+  { id: 'zander', wo: ['see', 'fluss'], g: 'r',   name: 'Zander',             band: 'tief',   len: [40, 85],   pts: 40,  wild: .6,  w: 2,   kraft: 3, koe: ['gummi', 'wurm'],                   shape: 'm', c: ['#8c9a8c', '#e2e6de', '#5a665a', '#5f6d60'] },
+  { id: 'spiegel', wo: ['see'], g: 'r',  name: 'Spiegelkarpfen',     band: 'tief',   len: [50, 100],  pts: 60,  wild: .6,  w: 1.4, kraft: 5, koe: ['boilies', 'pellets'],             shape: 'b', c: ['#c99a3a', '#f0d890', '#8a5f20', '#f4d27a'] },
+  { id: 'wels', wo: ['see', 'fluss'], g: 'r',     name: 'Wels',               band: 'grund',  len: [80, 220],  pts: 90,  wild: .85, w: 1,   kraft: 5, koe: ['wurm', 'boilies', 'gummi'],        shape: 'x', c: ['#4a4a58', '#9a98a0', '#33333d', '#3c3c48'] },
+  { id: 'stoer', wo: ['see'], g: 'r',    name: 'Stör',               band: 'grund',  len: [100, 190], pts: 150, wild: .9,  w: .35, kraft: 5, koe: ['pellets', 'boilies'],             shape: 'x', c: ['#7f8896', '#d4d8de', '#5c6470', '#c3c9d2'], legend: true },
+  { id: 'aesche',   wo: ['fluss'], g: 'e', name: 'Äsche',              band: 'mittel', len: [25, 50],   pts: 24,  wild: .5,  w: 5,   kraft: 2, koe: ['fliege', 'maden', 'wurm'],         shape: 'm', c: ['#8a95a8', '#e8eaf0', '#6a6fa0', '#a3aac0'] },
+  { id: 'doebel',   wo: ['fluss'], g: 'r', name: 'Döbel',              band: 'mittel', len: [30, 70],   pts: 20,  wild: .45, w: 6,   kraft: 3, koe: ['brot', 'mais', 'wurm', 'maden'],   shape: 'm', c: ['#9aa0a8', '#e6e8ea', '#c8a45a', '#868c94'] },
+  { id: 'barbe',    wo: ['fluss'], g: 'e', name: 'Barbe',              band: 'grund',  len: [40, 90],   pts: 38,  wild: .7,  w: 4,   kraft: 4, koe: ['wurm', 'mais', 'pellets'],         shape: 'l', c: ['#a89060', '#e0d2a8', '#c07a4a', '#8a7450'] },
+  { id: 'stiefel', wo: ['see', 'fluss'], g: 'r',  name: 'Gummistiefel',       band: 'junk',   len: [38, 47],   pts: 1,   wild: .05, w: 0,   kraft: 1, koe: [],                                  shape: 'boot', c: ['#2f5a3a', '#1f3a26', '#1f3a26', '#4f8a5e'] },
 ];
 const SP = Object.fromEntries(SPECIES.map(s => [s.id, s]));
 
@@ -369,7 +398,7 @@ const SHOP = [
 const DEF = () => ({ v: 2, coins: 0, best: 0, bestFish: 0, bestTop: '', rounds: 0,
   up: { rolle: 0, feeder: 0, blei: 0, thermo: 0 },
   ruten: ['stippe'], vorrat: { maden: 3 }, tackle: { rute: 'stippe', koeder: 'maden' },
-  tag: { datum: '', punkte: 0, fische: 0, fang: '' }, pokale: { siege: 0, podeste: 0 },
+  tag: { datum: '', runden: {}, punkte: 0, fische: 0, fang: '' }, pokale: { siege: 0, podeste: 0 }, gewaesser: 'see',
   album: {}, nick: '', code: '', lbSent: 0, lbNick: '', savedAt: 0 });
 
 // ---------- Pixel-Sprites (Kopf zeigt nach rechts) ----------
@@ -464,15 +493,36 @@ function scaled(src, s) {
   return c.toDataURL();
 }
 
-// ---------- Seegrund ----------
+// ---------- Gewässer ----------
+const GEWAESSER = [
+  {
+    id: 'see', name: 'See', stroemung: 0,
+    info: 'Ruhiges Wasser. Flach am Steg, weit draußen tief. Karpfen, Wels und Stör leben hier.',
+    grund: x => { const t = clamp((x - 40) / 205, 0, 1), u = t * t * (3 - 2 * t);
+      return Math.min(186, 66 + 118 * u + 2.5 * Math.sin(x * .09) + 1.5 * Math.sin(x * .23)); },
+    schilf: [{ x: 45, h: 26, c: 1 }, { x: 47, h: 32, c: 1 }, { x: 50, h: 22, c: 0 }, { x: 53, h: 29, c: 1 }, { x: 56, h: 18, c: 0 }, { x: 59, h: 13, c: 0 }],
+  },
+  {
+    id: 'fluss', name: 'Fluss', stroemung: -10,
+    info: 'Die Strömung treibt den Köder ab, du musst öfter neu auswerfen. In der tiefen Rinne stehen die Großen.',
+    grund: x => { const t = clamp((x - 44) / 200, 0, 1), u = Math.sin(Math.PI * Math.pow(t, 2));
+      return Math.min(186, 66 + 120 * u + 2 * Math.sin(x * .11) + 1.2 * Math.sin(x * .27)); },
+    schilf: [{ x: 46, h: 18, c: 0 }, { x: 49, h: 24, c: 1 }, { x: 52, h: 14, c: 0 }, { x: 236, h: 20, c: 1 }, { x: 240, h: 26, c: 1 }, { x: 245, h: 16, c: 0 }],
+  },
+];
+const G_BY = Object.fromEntries(GEWAESSER.map(g => [g.id, g]));
+let gew = GEWAESSER[0];
+
 const bot = new Float32Array(W + 1);
-for (let x = 0; x <= W; x++) {
-  const t = clamp((x - 40) / 205, 0, 1), s = t * t * (3 - 2 * t);
-  bot[x] = Math.min(186, 66 + 118 * s + 2.5 * Math.sin(x * .09) + 1.5 * Math.sin(x * .23));
-}
 const botAt = x => bot[clamp(Math.round(x), 0, W)];
 function xMinFor(lowerY) { for (let x = 40; x <= W; x++) if (bot[x] > lowerY + 2) return x; return W + 99; }
+function xMaxFor(lowerY) { for (let x = W; x >= 40; x--) if (bot[x] > lowerY + 2) return x; return 0; }
 const depthM = x => ((botAt(x) - SURF) / 14).toFixed(1).replace('.', ',');
+function setGew(id) {
+  gew = G_BY[id] || GEWAESSER[0];
+  for (let x = 0; x <= W; x++) bot[x] = gew.grund(x);
+  buildBg();
+}
 
 // Deterministischer Zufall für den Hintergrund
 let seed = 7;
@@ -499,13 +549,24 @@ function buildBg() {
   }
   // Baumreihe am anderen Ufer, zwei Ebenen
   for (let x = 0; x < W; x++) {
+    if (gew.id === 'fluss' && x > 228) continue;   // rechts steht das Ufer selbst
     const t1 = Math.round(46 - 3 * Math.abs(Math.sin(x * .21)) - 2 * Math.abs(Math.sin(x * .53 + 1)) - (x % 11 < 2 ? 2 : 0));
     g.fillStyle = '#2a3f45'; g.fillRect(x, t1, 1, SURF - t1);
     const t2 = Math.round(52 - 2 * Math.abs(Math.sin(x * .31 + 2)) - (x % 7 === 0 ? 1 : 0));
     g.fillStyle = '#1f3336'; g.fillRect(x, t2, 1, SURF - t2);
   }
+  if (gew.id === 'fluss') {
+    // Steiles Ufer am anderen Flussrand
+    for (let x = 228; x <= W; x++) {
+      const h0 = Math.round(38 + 6 * Math.sin(x * .4));
+      g.fillStyle = '#3a4a34'; g.fillRect(x, h0, 1, 8);
+      g.fillStyle = '#6a5a44'; g.fillRect(x, h0 + 8, 1, SURF - h0 - 8);
+    }
+  }
   // Wasser nach Tiefe
-  const WATER = ['#3a7a94', '#2f6a86', '#275a78', '#1f4a68', '#183d58', '#122f47'];
+  const WATER = gew.id === 'fluss'
+    ? ['#4f8f9a', '#40808c', '#35707e', '#2a5f6d', '#204e5c', '#183f4c']
+    : ['#3a7a94', '#2f6a86', '#275a78', '#1f4a68', '#183d58', '#122f47'];
   for (let y = SURF; y < H; y++) {
     const t = (y - SURF) / (H - SURF) * 6, band = Math.min(5, Math.floor(t)), f = t - band;
     for (let x = 0; x < W; x++) {
@@ -513,32 +574,50 @@ function buildBg() {
       px(x, y, WATER[next ? band + 1 : band]);
     }
   }
-  // Grund mit Steinen und Kraut
+  // Grund: See hat Schlamm und Kraut, der Fluss Kies
+  const fluss = gew.id === 'fluss';
   for (let x = 0; x <= W; x++) {
     const top = Math.round(bot[x]);
-    px(x, top, '#8a7450');
-    for (let y = top + 1; y < H; y++) px(x, y, ((x * 3 + y * 5) % 7 === 0) ? '#4e3d2a' : '#5e4a33');
-    if (srnd() < .12) px(x, top + 1 + Math.floor(srnd() * 4), '#7d7a70');
-    if (x > 60 && srnd() < .06) {
+    px(x, top, fluss ? '#9a9080' : '#8a7450');
+    for (let y = top + 1; y < H; y++) {
+      const kies = ((x * 3 + y * 5) % 7 === 0) ? (fluss ? '#6a6252' : '#4e3d2a') : (fluss ? '#7c7466' : '#5e4a33');
+      px(x, y, kies);
+    }
+    if (srnd() < (fluss ? .3 : .12)) px(x, top + 1 + Math.floor(srnd() * 4), fluss ? '#a8a294' : '#7d7a70');
+    if (!fluss && x > 60 && srnd() < .06) {
       const hgt = 3 + Math.floor(srnd() * 6);
       for (let k = 1; k <= hgt; k++) px(x + (k % 3 === 0 ? 1 : 0), top - k, k % 2 ? '#3f6b35' : '#4f7f3f');
     }
+    if (fluss && srnd() < .05) { // größere Steine in der Strömung
+      const st = Math.round(bot[x]);
+      for (let k = 0; k < 3; k++) for (let j = 0; j < 2; j++) px(x + k, st - j, k === 1 ? '#b0a89a' : '#8e8676');
+    }
   }
-  // Steg
-  g.fillStyle = '#4a2f22';
-  for (const p of [4, 20, 36]) g.fillRect(p, 56, 3, 16);
-  g.fillStyle = '#8a5a3c'; g.fillRect(0, 53, 45, 4);
-  g.fillStyle = '#a8744c'; g.fillRect(0, 53, 45, 1);
-  g.fillStyle = '#6b4430';
-  for (let x = 5; x < 45; x += 7) g.fillRect(x, 54, 1, 3);
-  g.fillRect(0, 56, 45, 1);
-  // Eimer auf dem Steg
-  g.fillStyle = '#5c6b7a'; g.fillRect(6, 48, 6, 5);
-  g.fillStyle = '#8a99a8'; g.fillRect(6, 48, 6, 1);
+  if (fluss) {
+    // Kiesbank statt Steg
+    g.fillStyle = '#8e8676'; g.fillRect(0, 53, 46, H - 53);
+    g.fillStyle = '#a8a294'; g.fillRect(0, 53, 46, 2);
+    g.fillStyle = '#6a6252';
+    for (let i = 0; i < 40; i++) { const x = Math.floor(srnd() * 44), y = 56 + Math.floor(srnd() * 30); g.fillRect(x, y, 2, 1); }
+    // Kescher im Kies
+    g.fillStyle = '#6b4226'; g.fillRect(9, 44, 1, 9);
+    g.fillStyle = '#c8ccd2'; g.fillRect(6, 41, 7, 1); g.fillRect(6, 41, 1, 3); g.fillRect(12, 41, 1, 3); g.fillRect(7, 44, 5, 1);
+  } else {
+    // Steg
+    g.fillStyle = '#4a2f22';
+    for (const q of [4, 20, 36]) g.fillRect(q, 56, 3, 16);
+    g.fillStyle = '#8a5a3c'; g.fillRect(0, 53, 45, 4);
+    g.fillStyle = '#a8744c'; g.fillRect(0, 53, 45, 1);
+    g.fillStyle = '#6b4430';
+    for (let x = 5; x < 45; x += 7) g.fillRect(x, 54, 1, 3);
+    g.fillRect(0, 56, 45, 1);
+    g.fillStyle = '#5c6b7a'; g.fillRect(6, 48, 6, 5);
+    g.fillStyle = '#8a99a8'; g.fillRect(6, 48, 6, 1);
+  }
   // Angler
   g.drawImage(paint(ANGLER, ANGLER_COL, false), 20, 38);
 }
-buildBg();
+setGew('see');
 
 // ---------- Sound (kleine Chiptune-Töne) ----------
 let actx = null, muted = false;
@@ -597,8 +676,20 @@ function normalize(r) {
   if (r.vorrat) for (const k of KOEDER) if (Number.isFinite(r.vorrat[k.id])) d.vorrat[k.id] = Math.max(0, Math.round(r.vorrat[k.id]));
   if (r.tackle) { if (R_BY[r.tackle.rute]) d.tackle.rute = r.tackle.rute; if (K_BY[r.tackle.koeder]) d.tackle.koeder = r.tackle.koeder; }
   if (r.pokale) d.pokale = { siege: Math.max(0, Number(r.pokale.siege) || 0), podeste: Math.max(0, Number(r.pokale.podeste) || 0) };
-  if (r.tag && typeof r.tag.datum === 'string') d.tag = { datum: r.tag.datum.slice(0, 10), punkte: Number(r.tag.punkte) || 0,
-    fische: Number(r.tag.fische) || 0, fang: String(r.tag.fang || '').slice(0, 40) };
+  if (G_BY[r.gewaesser]) d.gewaesser = r.gewaesser;
+  if (r.tag && typeof r.tag.datum === 'string') {
+    d.tag = { datum: r.tag.datum.slice(0, 10), runden: {}, punkte: Number(r.tag.punkte) || 0,
+      fische: Number(r.tag.fische) || 0, fang: String(r.tag.fang || '').slice(0, 40) };
+    if (r.tag.runden && typeof r.tag.runden === 'object') {
+      for (const g of GEWAESSER) {
+        const x = r.tag.runden[g.id];
+        if (x) d.tag.runden[g.id] = { punkte: Number(x.punkte) || 0, fische: Number(x.fische) || 0, fang: String(x.fang || '').slice(0, 40) };
+      }
+    } else if (d.tag.punkte || d.tag.fische) {
+      // alter Spielstand: das Tagesergebnis gehörte zum See
+      d.tag.runden.see = { punkte: d.tag.punkte, fische: d.tag.fische, fang: d.tag.fang };
+    }
+  }
   if (!r.ruten && r.up) {
     // alter Spielstand: Stufen werden in Gegenstände umgerechnet
     const alteRute = [['stippe'], ['stippe', 'match', 'feeder'], ['stippe', 'match', 'feeder', 'karpfen'],
@@ -626,7 +717,7 @@ const magKoeder = (sp, kid) => sp.koe.includes(kid || save.tackle.koeder);
 const koederPasstZurRute = (k, r) => k.typ !== 'kunst' || r.typ === 'kunst';
 function fangbar(sp, r, k) {
   r = r || rute(); k = k || koeder();
-  if (sp.band === 'junk') return false;
+  if (sp.band === 'junk' || !imGewaesser(sp)) return false;
   if (!magKoeder(sp, k.id) || !koederPasstZurRute(k, r)) return false;
   const [a, b] = BANDS[sp.band];
   return xMinFor(a + sp.sh / 2) + sp.sw / 2 < r.weite;
@@ -636,7 +727,7 @@ function fangbar(sp, r, k) {
 const G = { mode: 'menu', phase: 'idle', t: 0, time: 60, score: 0, catches: [], fish: [], junk: [], parts: [], texts: [],
   hook: null, fight: null, land: null, biss: null, aimT: 0, lastCall: false, pressed: false, needRelease: false, spawnT: 0, teased: {}, lastSec: 99 };
 const clouds = [{ x: 20, y: 12, w: 22 }, { x: 110, y: 22, w: 16 }, { x: 170, y: 8, w: 28 }];
-const REEDS = [{ x: 45, h: 26, c: 1 }, { x: 47, h: 32, c: 1 }, { x: 50, h: 22, c: 0 }, { x: 53, h: 29, c: 1 }, { x: 56, h: 18, c: 0 }, { x: 59, h: 13, c: 0 }];
+
 const roundLen = () => 60 + 5 * lvl('thermo');
 const aimX = () => 78 + (.5 - .5 * Math.cos(G.aimT * 2.2)) * (clamp(rute().weite, 110, 246) - 78);
 // Je schwerer die Rute und je weiter der Wurf, desto größer die Streuung
@@ -645,8 +736,10 @@ function streuung(x) {
   return (1 - (r.genau != null ? r.genau : .8)) * 30 * (.35 + .65 * weit);
 }
 
+const imGewaesser = sp => sp.wo.includes(gew.id);
 function pickSpecies(band) {
-  const pool = SPECIES.filter(s => s.w > 0 && (!band || s.band === band));
+  const pool = SPECIES.filter(s => s.w > 0 && imGewaesser(s) && (!band || s.band === band));
+  if (!pool.length) return SPECIES.find(s => s.w > 0 && imGewaesser(s)) || SPECIES[0];
   let tot = 0;
   for (const s of pool) tot += s.w;
   let r = seeRnd() * tot;
@@ -654,6 +747,7 @@ function pickSpecies(band) {
   return pool[0];
 }
 const minXFor = f => xMinFor(f.y + f.sp.sh / 2) + f.sp.sw / 2;
+const maxXFor = f => xMaxFor(f.y + f.sp.sh / 2) - f.sp.sw / 2;
 function spawnFish(inside, band) {
   const sp = pickSpecies(band), [a, b] = BANDS[sp.band];
   const f = { sp, y: Math.round(seeZahl(a, b)), dir: -1, x: W + sp.sw, speed: seeZahl(8, 15), state: 'swim', wob: Math.random() * 6, bub: rnd(1, 5), cool: rnd(0, 1), len: 0 };
@@ -684,9 +778,22 @@ function datumSeed(txt) {
 }
 let seeRnd = Math.random;                       // Zufall für den Fischbestand
 const seeZahl = (a, b) => a + seeRnd() * (b - a);
-const TAGESRUNDEN = 1;   // ein Gewässer, später drei
-const tagGespielt = () => save.tag.datum === heute();
-const tagRestlich = () => (tagGespielt() ? 0 : TAGESRUNDEN);
+const TAGESRUNDEN = () => GEWAESSER.length;
+const tagAktuell = () => (save.tag.datum === heute() ? save.tag.runden : {});
+const tagGespielt = (id) => !!tagAktuell()[id || gew.id];
+const tagOffen = () => GEWAESSER.filter(g => !tagGespielt(g.id));
+const tagRestlich = () => tagOffen().length;
+const tagSumme = () => {
+  const r = tagAktuell();
+  let punkte = 0, fische = 0, fang = '', fangPunkte = -1;
+  for (const g of GEWAESSER) {
+    const x = r[g.id];
+    if (!x) continue;
+    punkte += x.punkte; fische += x.fische;
+    if (x.punkte > fangPunkte) { fangPunkte = x.punkte; fang = x.fang; }
+  }
+  return { punkte, fische, fang };
+};
 
 const derDie = sp => (sp.g === 'e' ? 'Die' : sp.g === 's' ? 'Das' : 'Der');
 const rollLen = sp => Math.round(sp.len[0] + (sp.len[1] - sp.len[0]) * Math.pow(seeRnd(), 1.6));
@@ -712,7 +819,7 @@ function toast(s) {
 function startRound(tagesrunde) {
   hideAll();
   G.tagModus = !!tagesrunde;
-  seeRnd = tagesrunde ? mkRng(datumSeed(heute() + '|see')) : Math.random;
+  seeRnd = tagesrunde ? mkRng(datumSeed(heute() + '|' + gew.id)) : Math.random;
   Object.assign(G, { mode: 'play', phase: 'aim', time: roundLen(), score: 0, catches: [], hook: null, fight: null, land: null,
     aimT: 0, lastCall: false, pressed: false, needRelease: false, teased: {}, lastSec: 99, biss: null });
   G.fish = [];   // frischer See, sonst schwimmen noch die Fische aus dem Menue herum
@@ -726,7 +833,7 @@ function startRound(tagesrunde) {
     if (!save.vorrat[k.id]) { delete save.vorrat[k.id]; toast(k.name + ' aufgebraucht. Nächste Runde mit Brotflocke.'); }
     persist();
   }
-  audio(); updateHud();
+  audio(); updateHud(); updateHint();
 }
 function cast() {
   const ziel = aimX(), str = streuung(ziel);
@@ -755,8 +862,13 @@ function updHook(dt) {
     h.x += vx / d * 40 * dt; h.y += vy / d * 40 * dt;
   } else {
     h.y += SINK[lvl('blei')] * dt;
+    if (gew.stroemung) h.x += gew.stroemung * dt * (1 - .35 * lvl('blei'));
   }
   h.x = clamp(h.x, 44, W - 3);
+  if (gew.stroemung && h.x <= 46 && G.phase === 'sink') {
+    toast('Der Köder ist abgetrieben. Neu auswerfen!');
+    splash(h.x, 4); backToAim(); return;
+  }
   h.y = Math.min(h.y, botAt(h.x) - 2);
   if (h.y <= SURF + .5) { splash(h.x, 5); backToAim(); return; }
   for (let i = 0; i < G.junk.length; i++) {
@@ -822,6 +934,7 @@ function updFish(dt) {
     }
     f.x += f.dir * f.speed * dt;
     if (f.dir < 0 && (f.x < f.turnX || f.x < minXFor(f))) f.dir = 1;
+    else if (f.dir > 0 && f.x > maxXFor(f)) f.dir = -1;
     f.cool -= dt;
     if (fishing && f.cool <= 0) {
       f.cool = rnd(.5, 1.1);
@@ -933,9 +1046,12 @@ function endRound() {
   seeRnd = Math.random;
   G.tagGewertet = false;
   if (G.tagModus && !tagGespielt()) {
+    if (save.tag.datum !== heute()) save.tag = { datum: heute(), runden: {}, punkte: 0, fische: 0, fang: '' };
     const top = G.catches.slice().sort((a, b) => b.pts - a.pts)[0];
-    save.tag = { datum: heute(), punkte: G.score, fische: G.catches.length,
+    save.tag.runden[gew.id] = { punkte: G.score, fische: G.catches.length,
       fang: top ? SP[top.id].name + ', ' + fmtLen(SP[top.id], top.len) : '' };
+    const sum = tagSumme();
+    save.tag.punkte = sum.punkte; save.tag.fische = sum.fische; save.tag.fang = sum.fang;
     G.tagGewertet = true;
   }
   const rec = G.score > save.best;
@@ -1013,6 +1129,14 @@ function drawClouds() {
 function drawSurface() {
   const t = RM ? 0 : G.t;
   for (let x = 0; x < W; x++) rect(x, SURF, 1, 1, Math.sin(x * .3 + t * 2) > .2 ? '#9fd0d8' : '#6fb0c0');
+  if (gew.stroemung) {
+    // Strömungsstriche, die mit dem Wasser ziehen
+    for (let i = 0; i < 9; i++) {
+      const y = SURF + 6 + i * 13, laenge = 7 + (i % 3) * 4;
+      const x = ((i * 53 + t * -gew.stroemung * 2.2) % (W + 40)) - 20;
+      rect(W - x, y, laenge, 1, 'rgba(159,208,216,.35)');
+    }
+  }
   for (let k = 0; k < 7; k++) {
     const w = Math.max(2, Math.round(13 - k * 1.7)), off = Math.round(Math.sin(t * 2 + k) * 2);
     rect(196 - w / 2 + off, SURF + 2 + k * 2, w, 1, k < 3 ? '#f6c177' : '#d99a6a');
@@ -1020,7 +1144,7 @@ function drawSurface() {
 }
 function drawReeds() {
   const t = RM ? 0 : G.t;
-  for (const r of REEDS) {
+  for (const r of gew.schilf) {
     const base = Math.round(botAt(r.x)), top = base - r.h, sway = Math.round(Math.sin(t * 1.3 + r.x) * 1.2);
     for (let y = top; y < base; y++) rect(r.x + (y < top + r.h / 3 ? sway : 0), y, 1, 1, y < SURF ? '#5f8f4e' : '#3f6b35');
     if (r.c) rect(r.x + sway, top - 5, 2, 5, '#6b4226');
@@ -1133,7 +1257,17 @@ const img = (src, w) => { const i = new Image(); i.src = src; i.alt = ''; if (w)
 const de = n => n.toLocaleString('de-DE');
 const hud = {};
 function setTxt(id, v) { if (hud[id] !== v) { hud[id] = v; $(id).textContent = v; } }
+const TAP_TXT = { aim: 'Tippen: auswerfen', fly: 'Der Köder fliegt …', sink: 'Halten: einholen · loslassen: sinken',
+  biss: 'Jetzt anschlagen!', fight: 'Halten: grünen Balken hoch', land: 'Gefangen!' };
+function updateTap() {
+  const spielt = G.mode === 'play';
+  const txt = spielt ? (TAP_TXT[G.phase] || '') : 'Hier tippen, sobald die Runde läuft';
+  if (hud.tap !== txt) { hud.tap = txt; $('tapLabel').textContent = txt; }
+  const aktiv = spielt && (G.phase === 'biss' || G.phase === 'fight');
+  if (hud.tapAktiv !== aktiv) { hud.tapAktiv = aktiv; $('tapzone').classList.toggle('aktiv', aktiv); }
+}
 function updateHud() {
+  updateTap();
   const playing = G.mode === 'play' || G.mode === 'paused';
   setTxt('hudTime', String(playing ? Math.ceil(G.time) : roundLen()));
   setTxt('hudScore', de(G.score));
@@ -1159,27 +1293,36 @@ function show(id) {
   if (kbd) { const b = $(id).querySelector('.btn'); if (b) b.focus({ preventScroll: true }); }
 }
 function discovered() { return SPECIES.filter(s => save.album[s.id]).length; }
+function updateHint() {
+  const h = $('hint');
+  h.textContent = '';
+  h.append(el('b', '', gew.name), document.createTextNode(' · ' + rute().name + ' mit ' + koeder().name + ' · '),
+    el('b', '', 'Tippen'), document.createTextNode(' wirft aus, gedrückt halten holt ein'));
+}
 function renderTitle() {
+  updateHint();
   $('tTime').textContent = roundLen();
   $('tBest').textContent = de(save.best);
   $('tCoins').textContent = de(save.coins);
   $('tAlbum').textContent = discovered() + '/' + SPECIES.length;
   const d = new Date();
-  $('tTagInfo').textContent = tagGespielt()
-    ? `Tagessee vom ${d.getDate()}.${d.getMonth() + 1}.: ${TAGESRUNDEN} von ${TAGESRUNDEN} gewerteten Runden gefischt, ${de(save.tag.punkte)} Punkte mit ${save.tag.fische} Fischen. Freies Angeln geht weiterhin unbegrenzt.`
-    : `Tagessee vom ${d.getDate()}.${d.getMonth() + 1}.: noch ${tagRestlich()} von ${TAGESRUNDEN} gewerteten Runden übrig. Alle angeln denselben See.`;
-  $('bStart').textContent = tagGespielt() ? 'Tagessee nochmal' : 'Tagessee';
+  const offen = tagOffen().map(g => g.name);
+  const sum = tagSumme();
+  $('tTagInfo').textContent = offen.length
+    ? `Tagesrunden vom ${d.getDate()}.${d.getMonth() + 1}.: noch ${offen.length} von ${TAGESRUNDEN()} offen (${offen.join(', ')}). Alle angeln dieselben Gewässer.`
+    : `Tagesrunden vom ${d.getDate()}.${d.getMonth() + 1}. erledigt: ${de(sum.punkte)} Punkte mit ${sum.fische} Fischen. Freies Angeln geht weiterhin unbegrenzt.`;
+  $('bStart').textContent = tagRestlich() ? 'Tagesrunde' : 'Tagesrunde nochmal';
   $('tPokale').textContent = save.pokale.siege + (save.pokale.podeste > save.pokale.siege ? ' + ' + (save.pokale.podeste - save.pokale.siege) : '');
-  $('hint').innerHTML = '';
-  $('hint').append(document.createTextNode(rute().name + ' mit ' + koeder().name + ' · '),
-    (() => { const b = el('b', '', 'Tippen'); return b; })(),
-    document.createTextNode(' wirft aus, gedrückt halten holt ein'));
+
 }
 function renderResult(rec) {
   $('rScore').textContent = de(G.score);
   $('rRecord').hidden = !rec || G.score === 0;
+  const restlich = tagOffen().map(g => g.name);
   $('rTagInfo').textContent = G.tagModus
-    ? (G.tagGewertet ? 'Tagessee gewertet. Mal sehen, was die anderen heute fangen.' : 'Tagessee heute schon gespielt, diese Runde zählt nur für Münzen und das Fangbuch.')
+    ? (G.tagGewertet
+        ? (restlich.length ? `Gewertet. Heute fehlt noch: ${restlich.join(', ')}.` : 'Gewertet. Alle Tagesrunden erledigt, Abrechnung gibt es morgen.')
+        : 'Diese Tagesrunde war heute schon dran, sie zählt nur für Münzen und das Fangbuch.')
     : 'Freies Angeln: Münzen und Fangbuch zählen, die Tagesrangliste nicht.';
   const list = $('rList'); list.textContent = '';
   const groups = {};
@@ -1217,10 +1360,21 @@ const genauTxt = r => (r.genau >= .9 ? 'sehr genauer Wurf' : r.genau >= .8 ? 'ge
 const anschlagTxt = r => (r.typ === 'kunst' ? 'hakt beim Einholen selbst' : r.anschlag >= 1.3 ? 'viel Zeit zum Anschlag' : r.anschlag >= .8 ? 'wenig Zeit zum Anschlag' : 'kaum Zeit zum Anschlag');
 function renderTackle() {
   $('kCoins').textContent = de(save.coins);
+  const gb = $('kGewaesser'); gb.textContent = '';
+  for (const g of GEWAESSER) {
+    const b = el('button', 'opt'); b.type = 'button';
+    b.setAttribute('aria-pressed', String(gew.id === g.id));
+    const kopf = el('b'); kopf.append(document.createTextNode(g.name));
+    const erledigt = save.tag.datum === heute() && save.tag.runden[g.id];
+    b.append(kopf, el('small', '', g.info),
+      el('small', '', erledigt ? `Tagesrunde erledigt: ${de(save.tag.runden[g.id].punkte)} Punkte` : 'Tagesrunde heute noch offen'));
+    b.onclick = () => { setGew(g.id); save.gewaesser = g.id; persist(); renderTackle(); updateHint(); };
+    gb.append(b);
+  }
   $('kModus').textContent = modusTag
-    ? (tagGespielt() ? `Tagessee · heute schon gewertet (${de(save.tag.punkte)} Punkte), weitere Runden zählen nur für Münzen und Fangbuch`
-      : `Tagessee · noch ${tagRestlich()} von ${TAGESRUNDEN} gewerteten Runden heute`)
-    : 'Freies Angeln · unbegrenzt, zählt für Münzen, Fangbuch und den ewigen Rekord';
+    ? (tagGespielt() ? `Tagesrunde im ${gew.name} heute schon gewertet, diese Runde zählt nur für Münzen und Fangbuch`
+      : `Tagesrunde im ${gew.name} · zählt für die Tagesrangliste, noch ${tagRestlich()} von ${TAGESRUNDEN()} offen`)
+    : `Freies Angeln im ${gew.name} · unbegrenzt, zählt für Münzen, Fangbuch und den ewigen Rekord`;
   const rb = $('kRuten'); rb.textContent = '';
   for (const r of RUTEN) {
     if (!save.ruten.includes(r.id)) continue;
@@ -1233,7 +1387,7 @@ function renderTackle() {
       save.tackle.rute = r.id;
       if (!koederPasstZurRute(koeder(), r)) save.tackle.koeder = r.typ === 'kunst' ? 'gummi' : 'brot';
       if (!hatVorrat(save.tackle.koeder)) save.tackle.koeder = 'brot';
-      persist(); renderTackle();
+      persist(); renderTackle(); updateHint();
     };
     rb.append(b);
   }
@@ -1249,7 +1403,7 @@ function renderTackle() {
       el('small', '', rest < 0 ? 'unbegrenzt, fängt aber wenig' : rest + (rest === 1 ? ' Runde übrig' : ' Runden übrig')),
       el('small', '', passt ? (k.typ === 'kunst' ? 'Bisse nur beim Einholen' : 'liegt ruhig im Wasser') : 'braucht eine Kunstköderrute'));
     b.disabled = !passt;
-    b.onclick = () => { save.tackle.koeder = k.id; persist(); renderTackle(); };
+    b.onclick = () => { save.tackle.koeder = k.id; persist(); renderTackle(); updateHint(); };
     kb.append(b);
   }
   const liste = $('kFische'); liste.textContent = '';
@@ -1336,8 +1490,19 @@ function buy(it) {
 }
 function renderAlbum() {
   $('aCount').textContent = discovered() + '/' + SPECIES.length;
-  const grid = $('albumGrid'); grid.textContent = '';
-  for (const sp of SPECIES) {
+  const wrap = $('albumGrid'); wrap.textContent = '';
+  for (const g of GEWAESSER) {
+    const arten = SPECIES.filter(sp => sp.wo.includes(g.id));
+    const gefunden = arten.filter(sp => save.album[sp.id]).length;
+    const kopf = el('p', 'eyebrow', `${g.name} · ${gefunden} von ${arten.length}`);
+    wrap.append(kopf);
+    const grid = el('div', 'album');
+    wrap.append(grid);
+    fuelleAlbum(grid, arten);
+  }
+}
+function fuelleAlbum(grid, arten) {
+  for (const sp of arten) {
     const a = save.album[sp.id], card = el('div', a ? 'card' : 'card unk'), pic = el('div', 'pic');
     pic.append(img(a ? sp.img : sp.sil));
     card.append(pic, el('h3', '', a ? sp.name : '???'));
@@ -1603,17 +1768,27 @@ function press() {
   if (G.mode !== 'play' || G.pressed) return;
   G.pressed = true;
   audio();
+  $('tapzone').classList.add('gedrueckt');
   if (G.phase === 'aim') cast();
   else if (G.phase === 'biss') anschlag();
 }
-function release() { G.pressed = false; G.needRelease = false; }
+function release() {
+  G.pressed = false; G.needRelease = false;
+  $('tapzone').classList.remove('gedrueckt');
+}
 function pause() { if (G.mode !== 'play') return; G.mode = 'paused'; G.pressed = false; show('mPause'); }
 function resume() { hideAll(); G.mode = 'play'; G.pressed = false; last = performance.now(); }
-cv.addEventListener('pointerdown', e => {
+function tippBeginn(e) {
+  if (current()) return;                       // ein Fenster ist offen
+  if (e.target.closest('button, input, a')) return;
   e.preventDefault(); kbd = false;
-  if (cv.setPointerCapture) try { cv.setPointerCapture(e.pointerId); } catch (err) {}
   press();
+}
+cv.addEventListener('pointerdown', e => {
+  if (cv.setPointerCapture) try { cv.setPointerCapture(e.pointerId); } catch (err) {}
+  tippBeginn(e);
 });
+document.addEventListener('pointerdown', e => { if (e.target !== cv) tippBeginn(e); });
 addEventListener('pointerup', release);
 addEventListener('pointercancel', release);
 addEventListener('pointerdown', () => { kbd = false; }, true);
@@ -1647,10 +1822,15 @@ document.addEventListener('click', e => {
   if (e.target.closest('[data-back]')) show(backTo);
 });
 let modusTag = true;
-const zurTasche = tag => { modusTag = tag; backTo = current() || 'mTitle'; show('mTackle'); };
+const zurTasche = tag => {
+  modusTag = tag;
+  if (tag && tagGespielt() && tagOffen().length) setGew(tagOffen()[0].id);
+  backTo = current() || 'mTitle';
+  show('mTackle');
+};
 $('bStart').onclick = () => zurTasche(true);
 $('bFrei').onclick = () => zurTasche(false);
-$('bAgain').onclick = () => zurTasche(!tagGespielt());
+$('bAgain').onclick = () => zurTasche(tagRestlich() > 0);
 $('bShopPlay').onclick = () => zurTasche(modusTag);
 $('kLos').onclick = () => startRound(modusTag);
 $('pzOk').onclick = () => show('mTitle');
@@ -1719,9 +1899,9 @@ $('bShare').onclick = async () => {
 
 // ---------- Größe: Pixel möglichst ganzzahlig skalieren ----------
 function fit() {
-  const availW = document.querySelector('.app').clientWidth - 6;
+  const availW = document.querySelector('.app').clientWidth - (innerWidth <= 520 ? 4 : 6);
   const topY = $('stage').getBoundingClientRect().top;
-  const availH = Math.max(200, innerHeight - topY - $('hint').offsetHeight - 40);
+  const availH = Math.max(200, innerHeight - topY - $('hint').offsetHeight - (innerWidth <= 520 ? 16 : 40));
   let s = Math.min(availW / W, availH / H, 4);
   if (s >= 2) s = Math.floor(s);
   cv.style.width = Math.floor(W * s) + 'px';
@@ -1735,6 +1915,7 @@ if (!window.claude && 'serviceWorker' in navigator && location.protocol.startsWi
 }
 
 // ---------- Start ----------
+setGew(save.gewaesser);
 for (let i = 0; i < 6; i++) spawnFish(true);
 syncSound();
 renderTitle();

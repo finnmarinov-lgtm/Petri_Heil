@@ -492,8 +492,9 @@ const GEWAESSER = [
     id: 'fluss', name: 'Fluss', stroemung: -10,
     info: 'Die Strömung treibt den Köder ab, du musst öfter neu auswerfen. In der tiefen Rinne stehen die Großen.',
     grund: x => {
-      if (x < 48) return 61 + x * .11;                      // Kiesbank, praktisch kein Wasser
-      const t = clamp((x - 48) / 196, 0, 1), u = Math.sin(Math.PI * Math.pow(t, 2));
+      if (x < 46) return 56 + x * .07;                      // Kiesbank: Land, kein Wasser
+      if (x > 242) return Math.max(56, 96 - (x - 242) * 3.4); // drüben steigt das Ufer aus dem Wasser
+      const t = clamp((x - 46) / 196, 0, 1), u = Math.sin(Math.PI * Math.pow(t, 2));
       return Math.min(186, 66 + 120 * u + 2 * Math.sin(x * .11) + 1.2 * Math.sin(x * .27));
     },
     schilf: [{ x: 46, h: 18, c: 0 }, { x: 49, h: 24, c: 1 }, { x: 52, h: 14, c: 0 }, { x: 236, h: 20, c: 1 }, { x: 240, h: 26, c: 1 }, { x: 245, h: 16, c: 0 }],
@@ -539,23 +540,34 @@ function buildBg() {
     const d = x * x + y * y;
     if (d <= 121) px(196 + x, 47 + y, d < 60 ? '#fff1c8' : '#fbe3a0');
   }
-  // Baumreihe am anderen Ufer, zwei Ebenen
-  for (let x = 0; x < W; x++) {
-    if (gew.id === 'fluss' && x > 228) continue;   // rechts steht das Ufer selbst
-    const t1 = Math.round(46 - 3 * Math.abs(Math.sin(x * .21)) - 2 * Math.abs(Math.sin(x * .53 + 1)) - (x % 11 < 2 ? 2 : 0));
-    g.fillStyle = '#2a3f45'; g.fillRect(x, t1, 1, SURF - t1);
-    const t2 = Math.round(52 - 2 * Math.abs(Math.sin(x * .31 + 2)) - (x % 7 === 0 ? 1 : 0));
-    g.fillStyle = '#1f3336'; g.fillRect(x, t2, 1, SURF - t2);
-  }
   if (gew.id === 'fluss') {
-    // Flaches Ufer am anderen Flussrand: Erdkante mit Grasnarbe
-    for (let x = 236; x <= W; x++) {
-      const k = Math.round(52 - Math.abs(Math.sin(x * .7)) * 1.5);
-      g.fillStyle = '#4f7f3f'; g.fillRect(x, k, 1, 2);
-      g.fillStyle = '#6a5a44'; g.fillRect(x, k + 2, 1, SURF - k - 2);
-      g.fillStyle = '#54462f'; if ((x * 5) % 7 === 0) g.fillRect(x, k + 3 + (x % 3), 1, 1);
+    // Heller Laubwald: runde Kronen mit Stämmen, dahinter eine weiche Hügellinie
+    for (let x = 0; x < W; x++) {
+      const h0 = Math.round(48 - 2 * Math.abs(Math.sin(x * .12 + 1)));
+      g.fillStyle = '#7d9a6a'; g.fillRect(x, h0, 1, SURF - h0);
+    }
+    for (let i = -1; i < 27; i++) {
+      const cx0 = i * 10 + Math.round(srnd() * 5), r = 4 + Math.round(srnd() * 3);
+      const cy0 = 42 + Math.round(srnd() * 4);
+      g.fillStyle = '#6b4226';
+      g.fillRect(cx0, cy0, 2, SURF - cy0);                       // Stamm
+      for (let y = -r; y <= r; y++) for (let x2 = -r - 1; x2 <= r + 1; x2++) {
+        if (x2 * x2 * .7 + y * y > r * r) continue;
+        const hell = y < -r * .2 || x2 < -r * .3;
+        g.fillStyle = hell ? '#a8c47a' : '#7fa855';
+        g.fillRect(cx0 + x2, cy0 + y, 1, 1);
+      }
+    }
+  } else {
+    // Dunkler Nadelwald am See, zwei Ebenen
+    for (let x = 0; x < W; x++) {
+      const t1 = Math.round(46 - 3 * Math.abs(Math.sin(x * .21)) - 2 * Math.abs(Math.sin(x * .53 + 1)) - (x % 11 < 2 ? 2 : 0));
+      g.fillStyle = '#2a3f45'; g.fillRect(x, t1, 1, SURF - t1);
+      const t2 = Math.round(52 - 2 * Math.abs(Math.sin(x * .31 + 2)) - (x % 7 === 0 ? 1 : 0));
+      g.fillStyle = '#1f3336'; g.fillRect(x, t2, 1, SURF - t2);
     }
   }
+
   // Wasser nach Tiefe
   const WATER = gew.id === 'fluss'
     ? ['#4f8f9a', '#40808c', '#35707e', '#2a5f6d', '#204e5c', '#183f4c']
@@ -587,6 +599,13 @@ function buildBg() {
     }
   }
   if (fluss) {
+    // Uferkante drüben: Gras auf Erde, bis ins Wasser
+    for (let x = 243; x <= W; x++) {
+      const k = Math.round(bot[x]) - 4;
+      g.fillStyle = '#6a5a44'; g.fillRect(x, k, 1, H - k);
+      g.fillStyle = '#5f8f4e'; g.fillRect(x, k - 2, 1, 2);
+      if ((x * 5) % 7 === 0) { g.fillStyle = '#54462f'; g.fillRect(x, k + 2 + (x % 4), 1, 1); }
+    }
     // Kiesbank statt Steg
     g.fillStyle = '#8e8676'; g.fillRect(0, 53, 46, H - 53);
     g.fillStyle = '#a8a294'; g.fillRect(0, 53, 46, 2);

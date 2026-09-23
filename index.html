@@ -142,6 +142,18 @@ kbd{font-family:var(--f-disp);font-size:11px;padding:1px 5px;border:2px solid va
 .board .n{text-align:right;font-variant-numeric:tabular-nums}
 .board td.n{font-family:var(--f-disp);font-size:14px}
 .board tr.me td{background:rgba(242,193,78,.12);color:var(--gold)}
+.radfenster{position:relative;overflow:hidden;background:var(--ink);border:3px solid var(--line);height:78px}
+.radstreifen{display:flex;gap:6px;padding:8px 0;transform:translateX(0)}
+.radchip{flex:none;width:88px;height:60px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  background:var(--ink-2);border:2px solid var(--line);font-family:var(--f-disp);font-size:15px;color:var(--cream)}
+.radchip small{font-family:var(--f-body);font-size:15px;color:var(--muted);letter-spacing:0}
+.radchip.gut{border-color:var(--gold);color:var(--gold)}
+.radchip.top{border-color:var(--bob);color:var(--bob);background:#2a2036}
+.radzeiger{position:absolute;left:50%;top:0;bottom:0;width:3px;margin-left:-2px;background:var(--bob);pointer-events:none}
+.radzeiger::before,.radzeiger::after{content:"";position:absolute;left:-4px;border-left:5px solid transparent;border-right:5px solid transparent}
+.radzeiger::before{top:0;border-top:7px solid var(--bob)}
+.radzeiger::after{bottom:0;border-bottom:7px solid var(--bob)}
+.gewinn{margin:0;font-family:var(--f-disp);font-size:18px;color:var(--gold);text-align:center}
 .kacheln{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:8px}
 .kachel{display:flex;flex-direction:column;gap:3px;padding:11px 12px;text-align:left;background:var(--ink-2);
   border:3px solid var(--line);color:var(--cream);font-family:var(--f-body);font-size:19px;line-height:1.15;cursor:pointer}
@@ -321,6 +333,20 @@ kbd{font-family:var(--f-disp);font-size:11px;padding:1px 5px;border:2px solid va
   </div>
 </div>
 
+<div class="modal" id="mRad" hidden>
+  <div class="box" role="dialog" aria-labelledby="radTitle">
+    <p class="eyebrow">Einmal am Tag</p>
+    <h2 id="radTitle">Glücksrad</h2>
+    <div class="radfenster"><div class="radstreifen" id="radStreifen"></div><div class="radzeiger"></div></div>
+    <p class="gewinn" id="radGewinn" hidden></p>
+    <p class="muted small" id="radText"></p>
+    <div class="actions">
+      <button class="btn primary" id="bDrehen" type="button">Drehen</button>
+      <button class="btn" data-back type="button">Zurück</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal" id="mBelohnung" hidden>
   <div class="box small" role="dialog" aria-labelledby="pzTitle">
     <p class="eyebrow" id="pzTag">Tagessee</p>
@@ -439,6 +465,7 @@ const DEF = () => ({ v: 2, coins: 0, best: 0, bestFish: 0, bestTop: '', rounds: 
   up: { rolle: 0, feeder: 0, blei: 0, thermo: 0 },
   ruten: ['stippe'], vorrat: { maden: 3 }, tackle: { rute: 'stippe', koeder: 'maden' },
   tag: { datum: '', runden: {}, punkte: 0, fische: 0, fang: '' }, pokale: { siege: 0, podeste: 0 }, gewaesser: 'see',
+  rad: { datum: '', gewinn: 0 },
   album: {}, nick: '', code: '', lbSent: 0, lbNick: '', savedAt: 0 });
 
 // ---------- Pixel-Sprites (Kopf zeigt nach rechts) ----------
@@ -800,6 +827,7 @@ function normalize(r) {
   if (Array.isArray(r.ruten)) for (const id of r.ruten) if (R_BY[id] && !d.ruten.includes(id)) d.ruten.push(id);
   if (r.vorrat) for (const k of KOEDER) if (Number.isFinite(r.vorrat[k.id])) d.vorrat[k.id] = Math.max(0, Math.round(r.vorrat[k.id]));
   if (r.tackle) { if (R_BY[r.tackle.rute]) d.tackle.rute = r.tackle.rute; if (K_BY[r.tackle.koeder]) d.tackle.koeder = r.tackle.koeder; }
+  if (r.rad && typeof r.rad.datum === 'string') d.rad = { datum: r.rad.datum.slice(0, 10), gewinn: Math.max(0, Number(r.rad.gewinn) || 0) };
   if (r.pokale) d.pokale = { siege: Math.max(0, Number(r.pokale.siege) || 0), podeste: Math.max(0, Number(r.pokale.podeste) || 0) };
   if (G_BY[r.gewaesser]) d.gewaesser = r.gewaesser;
   if (r.tag && typeof r.tag.datum === 'string') {
@@ -1410,7 +1438,7 @@ function frame(now) {
 }
 
 // ---------- Oberfläche ----------
-const MODALS = ['mTitle', 'mResult', 'mTackle', 'mShop', 'mAlbum', 'mBoard', 'mBelohnung', 'mPause'];
+const MODALS = ['mTitle', 'mResult', 'mTackle', 'mShop', 'mAlbum', 'mBoard', 'mRad', 'mBelohnung', 'mPause'];
 let backTo = 'mTitle', kbd = false;
 const el = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
 const img = (src, w) => { const i = new Image(); i.src = src; i.alt = ''; if (w) i.style.width = w + 'px'; return i; };
@@ -1457,6 +1485,7 @@ function show(id) {
   if (id === 'mTackle') renderTackle();
   if (id === 'mShop') renderShop();
   if (id === 'mAlbum') renderAlbum();
+  if (id === 'mRad') renderRad();
   if (id === 'mBoard') { renderBoard(); if (sbOn) { sbBoard(); clearInterval(boardTimer); boardTimer = setInterval(sbBoard, 20000); } }
   if (kbd) { const b = $(id).querySelector('.btn'); if (b) b.focus({ preventScroll: true }); }
 }
@@ -1501,6 +1530,9 @@ function renderMenu() {
   box.append(kachel(() => { backTo = 'mTitle'; show('mBoard'); }, 'Rangliste',
     [save.nick ? 'Als ' + save.nick + ' eingetragen' : 'Noch kein Name eingetragen',
       platz >= 0 ? 'Platz ' + (platz + 1) + ' in der ewigen Liste' : 'Dein Rekord: ' + de(save.best) + ' Punkte']));
+  box.append(kachel(() => { backTo = 'mTitle'; show('mRad'); }, 'Glücksrad',
+    [radGedreht() ? 'Heute gedreht: +' + de(save.rad.gewinn) + ' Münzen' : 'Heute noch frei, einmal am Tag',
+      'Zwischen 10 und 300 Münzen']));
 }
 function renderTitle() {
   updateHint();
@@ -1850,6 +1882,84 @@ async function codeHolen(eingabe) {
   return 'Spielstand geladen: ' + de(save.coins) + ' Münzen, Rekord ' + de(save.best) + '.';
 }
 
+// ---------- Glücksrad ----------
+const RAD = [
+  { muenzen: 10, w: 30, txt: 'Kleinkram' },
+  { muenzen: 20, w: 25, txt: 'Madendose' },
+  { muenzen: 30, w: 18, txt: 'Schnurrolle' },
+  { muenzen: 50, w: 12, txt: 'Futterpaket' },
+  { muenzen: 80, w: 8, txt: 'Guter Tag' },
+  { muenzen: 120, w: 4, txt: 'Fette Beute' },
+  { muenzen: 200, w: 2, txt: 'Jackpot' },
+  { muenzen: 300, w: 1, txt: 'Petri Jackpot!' },
+];
+const radGedreht = () => save.rad.datum === heute();
+let radLaeuft = false;
+function radChip(preis) {
+  const c = el('div', 'radchip' + (preis.muenzen >= 200 ? ' top' : preis.muenzen >= 80 ? ' gut' : ''));
+  c.append(document.createTextNode(preis.muenzen + ' \u00b7'), el('small', '', preis.txt));
+  return c;
+}
+function radZiehen() {
+  let tot = 0;
+  for (const r of RAD) tot += r.w;
+  let z = Math.random() * tot;
+  for (const r of RAD) { z -= r.w; if (z <= 0) return r; }
+  return RAD[0];
+}
+function renderRad() {
+  const streifen = $('radStreifen');
+  streifen.style.transition = 'none';
+  streifen.style.transform = 'translateX(0)';
+  streifen.textContent = '';
+  for (let i = 0; i < 14; i++) streifen.append(radChip(RAD[i % RAD.length]));
+  const fertig = radGedreht();
+  $('radGewinn').hidden = !fertig;
+  if (fertig) $('radGewinn').textContent = '+' + de(save.rad.gewinn) + ' Münzen';
+  $('radText').textContent = fertig
+    ? 'Heute schon gedreht. Morgen darfst du wieder, jeden Tag einmal.'
+    : 'Zwischen 10 und 300 Münzen. Die großen Gewinne sind selten.';
+  $('bDrehen').disabled = fertig;
+  $('bDrehen').textContent = fertig ? 'Morgen wieder' : 'Drehen';
+}
+function drehen() {
+  if (radLaeuft || radGedreht()) return;
+  radLaeuft = true;
+  audio();
+  const preis = radZiehen();
+  const streifen = $('radStreifen');
+  streifen.style.transition = 'none';
+  streifen.style.transform = 'translateX(0)';
+  streifen.textContent = '';
+  const ziel = 26;
+  for (let i = 0; i < 34; i++) streifen.append(radChip(i === ziel ? preis : radZiehen()));
+  $('radGewinn').hidden = true;
+  $('radText').textContent = 'Es dreht …';
+  $('bDrehen').disabled = true;
+  const breite = 94;   // Chipbreite plus Abstand
+  const mitte = $('radStreifen').parentElement.clientWidth / 2;
+  const weg = ziel * breite + breite / 2 - mitte + (Math.random() * 20 - 10);
+  requestAnimationFrame(() => {
+    streifen.style.transition = 'transform 3.4s cubic-bezier(.12,.72,.12,1)';
+    streifen.style.transform = 'translateX(' + (-weg) + 'px)';
+  });
+  let ticks = 0;
+  const takt = setInterval(() => { ticks++; if (ticks > 26) { clearInterval(takt); return; } SFX.tick(); }, 110);
+  setTimeout(() => {
+    clearInterval(takt);
+    save.rad = { datum: heute(), gewinn: preis.muenzen };
+    save.coins += preis.muenzen;
+    persist(); updateHud(); renderMenu();
+    $('radGewinn').hidden = false;
+    $('radGewinn').textContent = '+' + de(preis.muenzen) + ' Münzen · ' + preis.txt;
+    $('radText').textContent = preis.muenzen >= 120
+      ? 'Starker Tag! Das reicht für ordentlich Ausrüstung.'
+      : 'Morgen darfst du wieder drehen.';
+    $('bDrehen').textContent = 'Morgen wieder';
+    if (preis.muenzen >= 120) tone([523, 659, 784, 1047, 1319], .09); else SFX.buy();
+    radLaeuft = false;
+  }, 3500);
+}
 // ---------- Speichern: Gerät + claude.ai (geräteübergreifend) ----------
 const use = n => (window.claude && typeof window.claude.use === 'function') ? window.claude.use(n).catch(() => null) : Promise.resolve(null);
 let progDoc = null, lbCol = null, lbRows = [], lbState = 'loading', pkey = null, writing = false, again = false;
@@ -2034,6 +2144,7 @@ $('bAgain').onclick = () => zurTasche(tagRestlich() > 0);
 $('bShopPlay').onclick = () => zurTasche(modusTag);
 $('kLos').onclick = () => startRound(modusTag);
 $('pzOk').onclick = () => show('mTitle');
+$('bDrehen').onclick = drehen;
 $('bTabTag').onclick = () => setBoardTab('tag');
 $('bTabAll').onclick = () => setBoardTab('all');
 $('bResume').onclick = resume;

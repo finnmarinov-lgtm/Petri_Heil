@@ -914,7 +914,10 @@ const tagSumme = () => {
 
 const derDie = sp => (sp.g === 'e' ? 'Die' : sp.g === 's' ? 'Das' : 'Der');
 const rollLen = sp => Math.round(sp.len[0] + (sp.len[1] - sp.len[0]) * Math.pow(seeRnd(), 1.6));
-const fmtLen = (sp, len) => sp.band === 'junk' ? (sp.id === 'stiefel' ? 'Gr. ' + len : 'Fundstück') : len + ' cm';
+const fmtLen = (sp, len) => sp.band === 'junk' ? (sp.id === 'stiefel' ? 'Gr. ' + len : '') : len + ' cm';
+// Artikel und Beugung richten sich nach dem Geschlecht der Art
+const groesster = sp => (sp.g === 'e' ? 'größte' : sp.g === 's' ? 'größtes' : 'größter');
+const fangText = (sp, len) => { const l = fmtLen(sp, len); return sp.name + (l ? ', ' + l : ''); };
 const pointsFor = (sp, len) => sp.band === 'junk' ? 1 : Math.max(1, Math.round(sp.pts * len / ((sp.len[0] + sp.len[1]) / 2)));
 function rodTip() {
   if (G.phase === 'fight') return { x: 49 + Math.round(Math.sin(G.t * 23)), y: 25 + Math.round(Math.sin(G.t * 17) * 1.5) };
@@ -1118,7 +1121,7 @@ function landFish() {
   SFX.catch();
   toast(isNew ? `Neu im Fangbuch: ${sp.name}! +${pts}`
     : sp.band === 'junk' ? `Kein Fisch: ${sp.name}, aber immerhin +1` 
-    : `Petri Heil! ${sp.name}, ${fmtLen(sp, f.len)} · +${pts}`);
+    : `Petri Heil! ${fangText(sp, f.len)} · +${pts}`);
   G.fish = G.fish.filter(x => x !== f);
   G.land = { f, t: 0, x0: f.x, y0: f.y, pts };
   G.fight = null; G.hook = null; G.phase = 'land';
@@ -1177,7 +1180,7 @@ function endRound() {
     if (save.tag.datum !== heute()) save.tag = { datum: heute(), runden: {}, punkte: 0, fische: 0, fang: '' };
     const top = G.catches.slice().sort((a, b) => b.pts - a.pts)[0];
     save.tag.runden[gew.id] = { punkte: G.score, fische: G.catches.length,
-      fang: top ? SP[top.id].name + ', ' + fmtLen(SP[top.id], top.len) : '' };
+      fang: top ? fangText(SP[top.id], top.len) : '' };
     const sum = tagSumme();
     save.tag.punkte = sum.punkte; save.tag.fische = sum.fische; save.tag.fang = sum.fang;
     G.tagGewertet = true;
@@ -1186,7 +1189,7 @@ function endRound() {
   if (rec) {
     save.best = G.score; save.bestFish = G.catches.length;
     const top = G.catches.slice().sort((a, b) => b.pts - a.pts)[0];
-    save.bestTop = top ? SP[top.id].name + ', ' + fmtLen(SP[top.id], top.len) : '';
+    save.bestTop = top ? fangText(SP[top.id], top.len) : '';
   }
   persist(); renderResult(rec); show('mResult'); submitScore();
 }
@@ -1504,7 +1507,8 @@ function renderResult(rec) {
   if (!ids.length) list.append(el('li', 'muted', 'Kein Fang diesmal. Wirf weiter raus, dort ist es tiefer und die Fische sind größer.'));
   for (const id of ids) {
     const g = groups[id], sp = SP[id], li = el('li');
-    li.append(img(sp.icon, 35), el('span', '', `${g.n}× ${sp.name} · größter ${fmtLen(sp, g.max)}`), el('span', 'pts', '+' + g.pts));
+    const zusatz = sp.band === 'junk' ? '' : ' · ' + groesster(sp) + ' ' + fmtLen(sp, g.max);
+    li.append(img(sp.icon, 35), el('span', '', g.n + '× ' + sp.name + zusatz), el('span', 'pts', '+' + g.pts));
     list.append(li);
   }
   $('rCoins').textContent = `+${de(G.score)} Münzen · jetzt ${de(save.coins)} im Beutel`;
@@ -1680,7 +1684,9 @@ function fuelleAlbum(grid, arten) {
     const a = save.album[sp.id], card = el('div', a ? 'card' : 'card unk'), pic = el('div', 'pic');
     pic.append(img(a ? sp.img : sp.sil));
     card.append(pic, el('h3', '', a ? sp.name : '???'));
-    if (a) card.append(el('p', '', `${a.n}× gefangen · Rekord ${fmtLen(sp, a.max)}`));
+    if (a) card.append(el('p', '', sp.band === 'junk'
+      ? a.n + '× gefunden'
+      : a.n + '× gefangen · ' + groesster(sp) + ' ' + fmtLen(sp, a.max)));
     card.append(el('p', '', `${BAND_TXT[sp.band]}${sp.band === 'junk' ? '' : ' · ' + sp.koe.map(k => K_BY[k].name).join(', ')}`));
     if (sp.legend) card.append(el('span', 'tag', 'legendär'));
     grid.append(card);

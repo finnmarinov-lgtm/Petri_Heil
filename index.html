@@ -217,7 +217,7 @@ kbd{font-family:var(--f-disp);font-size:11px;padding:1px 5px;border:2px solid va
   <div class="box" role="dialog" aria-labelledby="tTitle">
     <p class="eyebrow">Arcade-Angeln · <span id="tTime">60</span> Sekunden</p>
     <h2 id="tTitle" class="big">Petri Heil!</h2>
-    <p class="lead">Drei Gewässer, 27 Arten, eine Runde dauert eine Minute.</p>
+    <p class="lead" id="tLead">Drei Gewässer, eine Runde dauert eine Minute.</p>
     <dl class="facts">
       <div><dt>Rekord</dt><dd id="tBest">0</dd></div>
       <div><dt>Pokale</dt><dd id="tPokale">0</dd></div>
@@ -336,7 +336,7 @@ kbd{font-family:var(--f-disp);font-size:11px;padding:1px 5px;border:2px solid va
 <div class="modal" id="mRad" hidden>
   <div class="box" role="dialog" aria-labelledby="radTitle">
     <p class="eyebrow">Einmal am Tag</p>
-    <h2 id="radTitle">Glücksrad</h2>
+    <div class="box-head"><h2 id="radTitle">Glücksrad</h2><img id="radIcon" alt="" width="44"></div>
     <div class="radfenster"><div class="radstreifen" id="radStreifen"></div><div class="radzeiger"></div></div>
     <p class="gewinn" id="radGewinn" hidden></p>
     <p class="muted small" id="radText"></p>
@@ -489,9 +489,11 @@ const ICONS = {
   bait:   ['........', '..yy....', '.yyyy.rr', '.yyyy.rr', '..yy.rrr', '....rrr.', '........', '........'],
   feeder: ['...kk...', '...kk...', '.gggggg.', '.gyygyg.', '.gggggg.', '.gyygyg.', '.gggggg.', '........'],
   lead:   ['...kk...', '...kk...', '..wwww..', '.wwwwww.', '.wwwwww.', '.wwwwww.', '..wwww..', '........'],
+  rad:    ['.....kk.....', '...kkkkkk...', '..kyyggrrk..', '.kyyyggrrrk.', 'kyyyykkrrrrk', 'kyyykwwkrrrk',
+           'kbbbkwwkccck', 'kbbbbkkcccck', '.kbbbbcccck.', '..kbbcccck..', '...kkkkkk...', '............'],
   thermo: ['..kkkk..', '..rrrr..', '.rrrrrr.', '.rwwwwr.', '.rrrrrr.', '.rrrrrr.', '.rrrrrr.', '..rrrr..'],
 };
-const ICON_COL = { k: '#2a1a14', w: '#c8ccd2', g: '#6fa35a', y: '#f2c14e', r: '#e4573d' };
+const ICON_COL = { k: '#2a1a14', w: '#f3e9d2', g: '#6fa35a', y: '#f2c14e', r: '#e4573d', b: '#5c6b7a', c: '#c8ccd2' };
 
 // Köder, 10x10
 const K_ICONS = {
@@ -1496,12 +1498,12 @@ function updateHint() {
   h.append(el('b', '', gew.name), document.createTextNode(' · ' + rute().name + ' mit ' + koeder().name + ' · '),
     el('b', '', 'Tippen'), document.createTextNode(' wirft aus, gedrückt halten holt ein'));
 }
-function kachel(ziel, titel, zeilen, klasse, bilder) {
+function kachel(ziel, titel, zeilen, klasse, bilder, bildGroesse) {
   const b = el('button', 'kachel' + (klasse ? ' ' + klasse : '')); b.type = 'button';
   b.append(el('b', '', titel));
   if (bilder && bilder.length) {
     const z = el('div', 'zeile');
-    for (const bild of bilder) z.append(img(bild, 22));
+    for (const bild of bilder) z.append(img(bild, bildGroesse || 22));
     b.append(z);
   }
   for (const t of zeilen) if (t) b.append(el('small', '', t));
@@ -1531,13 +1533,14 @@ function renderMenu() {
     [save.nick ? 'Als ' + save.nick + ' eingetragen' : 'Noch kein Name eingetragen',
       platz >= 0 ? 'Platz ' + (platz + 1) + ' in der ewigen Liste' : 'Dein Rekord: ' + de(save.best) + ' Punkte']));
   box.append(kachel(() => { backTo = 'mTitle'; show('mRad'); }, 'Glücksrad',
-    [radGedreht() ? 'Heute gedreht: ' + (save.rad.text || '+' + de(save.rad.gewinn) + ' Münzen') : 'Heute noch frei, einmal am Tag',
-      'Münzen, Köderpakete, selten eine Rute']));
+    [radGedreht() ? 'Heute gedreht: ' + (save.rad.text || '+' + de(save.rad.gewinn) + ' Münzen') : 'Heute noch frei, einmal am Tag'],
+    '', [ICON_IMG.rad], 44));
 }
 function renderTitle() {
   updateHint();
   renderMenu();
   $('tTime').textContent = roundLen();
+  $('tLead').textContent = GEWAESSER.length + ' Gewässer, ' + SPECIES.length + ' Arten, eine Runde dauert eine Minute.';
   $('tBest').textContent = de(save.best);
   $('tPokale').textContent = save.pokale.siege + (save.pokale.podeste > save.pokale.siege ? ' + ' + (save.pokale.podeste - save.pokale.siege) : '');
 
@@ -1944,6 +1947,7 @@ function radGutschrift(preis) {
   return { text: '+' + de(preis.muenzen) + ' Münzen · ' + preis.txt, gross: preis.muenzen >= 120 };
 }
 function renderRad() {
+  $('radIcon').src = ICON_IMG.rad;
   const streifen = $('radStreifen');
   streifen.style.transition = 'none';
   streifen.style.transform = 'translateX(0)';

@@ -123,9 +123,17 @@ kbd{font-family:var(--f-disp);font-size:11px;padding:1px 5px;border:2px solid va
 .album{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
 .card{padding:10px;background:var(--ink-2);border:2px solid var(--line);display:flex;flex-direction:column;gap:4px}
 .card .pic{height:48px;display:flex;align-items:center;justify-content:center}
-.card h3{margin:0;font-family:var(--f-disp);font-size:12px;letter-spacing:.04em}
-.card p{margin:0;color:var(--muted);font-size:17px;line-height:1.1}
+.card h3{margin:0;font-family:var(--f-disp);font-size:11px;letter-spacing:.03em;line-height:1.35;overflow-wrap:anywhere;hyphens:auto}
+.card p{margin:0;color:var(--muted);font-size:17px;line-height:1.15;overflow-wrap:anywhere}
 .card.unk h3{color:var(--muted)}
+.album.komplett{outline:3px solid var(--gold);outline-offset:5px}
+.kopf-komplett{display:flex;flex-wrap:wrap;align-items:center;gap:8px;color:var(--gold)}
+.pokalband{font-family:var(--f-disp);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink);background:var(--gold);padding:3px 7px}
+@media (prefers-reduced-motion:no-preference){
+  .album.komplett{animation:glanz 2.6s ease-in-out infinite}
+  @keyframes glanz{0%,100%{outline-color:var(--gold)}50%{outline-color:#fff0b8}}
+}
+.tag.episch{background:#8f63d6;color:#f6f1ff}
 .tag{align-self:flex-start;font-family:var(--f-disp);font-size:9px;letter-spacing:.08em;text-transform:uppercase;padding:2px 5px;background:var(--gold);color:var(--ink)}
 .tablewrap{overflow-x:auto}
 .board{width:100%;border-collapse:collapse;font-size:20px}
@@ -390,18 +398,24 @@ const SPECIES = [
   { id: 'karpfen', wo: ['see'], g: 'r', name: 'Karpfen',            band: 'tief',   len: [40, 90],   pts: 35,  wild: .5,  w: 4,   kraft: 4, koe: ['mais', 'pellets', 'boilies'],      shape: 'b', c: ['#a8863a', '#e2c979', '#7a5f26', '#8c6f2c'] },
   { id: 'hecht', wo: ['see', 'fluss'], g: 'r',    name: 'Hecht',              band: 'mittel', len: [50, 110],  pts: 45,  wild: .8,  w: 2,   kraft: 4, koe: ['gummi', 'blinker'],                shape: 'l', c: ['#6c8a3a', '#e4e2b0', '#a0602a', '#c8d68a'] },
   { id: 'zander', wo: ['see', 'fluss'], g: 'r',   name: 'Zander',             band: 'tief',   len: [40, 85],   pts: 40,  wild: .6,  w: 2,   kraft: 3, koe: ['gummi', 'wurm'],                   shape: 'm', c: ['#8c9a8c', '#e2e6de', '#5a665a', '#5f6d60'] },
-  { id: 'spiegel', wo: ['see'], g: 'r',  name: 'Spiegelkarpfen',     band: 'tief',   len: [50, 100],  pts: 60,  wild: .6,  w: 1.4, kraft: 5, koe: ['boilies', 'pellets'],             shape: 'b', c: ['#c99a3a', '#f0d890', '#8a5f20', '#f4d27a'] },
-  { id: 'wels', wo: ['see', 'fluss'], g: 'r',     name: 'Wels',               band: 'grund',  len: [80, 220],  pts: 90,  wild: .85, w: 1,   kraft: 5, koe: ['wurm', 'boilies', 'gummi'],        shape: 'x', c: ['#4a4a58', '#9a98a0', '#33333d', '#3c3c48'] },
-  { id: 'stoer', wo: ['see'], g: 'r',    name: 'Stör',               band: 'grund',  len: [100, 190], pts: 150, wild: .9,  w: .35, kraft: 5, koe: ['pellets', 'boilies'],             shape: 'x', c: ['#7f8896', '#d4d8de', '#5c6470', '#c3c9d2'], legend: true },
+  { id: 'spiegel', wo: ['see'], g: 'r',  name: 'Spiegelkarpfen',     band: 'tief',   len: [50, 100],  pts: 60,  wild: .6,  w: 1.4, kraft: 5, koe: ['boilies', 'pellets'], rar: 'episch',   shape: 'b', c: ['#c99a3a', '#f0d890', '#8a5f20', '#f4d27a'] },
+  { id: 'wels', wo: ['see', 'fluss'], g: 'r',     name: 'Wels',               band: 'grund',  len: [80, 220],  pts: 90,  wild: .85, w: 1,   kraft: 5, koe: ['wurm', 'boilies', 'gummi'], rar: 'episch', shape: 'x', c: ['#4a4a58', '#9a98a0', '#33333d', '#3c3c48'] },
+  { id: 'stoer', wo: ['see'], g: 'r',    name: 'Stör',               band: 'grund',  len: [100, 190], pts: 150, wild: .9,  w: .35, kraft: 5, koe: ['pellets', 'boilies'],             shape: 'x', c: ['#7f8896', '#d4d8de', '#5c6470', '#c3c9d2'], rar: 'legendär' },
   { id: 'aesche',   wo: ['fluss'], g: 'e', name: 'Äsche',              band: 'mittel', len: [25, 50],   pts: 24,  wild: .5,  w: 5,   kraft: 2, koe: ['fliege', 'maden', 'wurm'],         shape: 'm', c: ['#8a95a8', '#e8eaf0', '#6a6fa0', '#a3aac0'] },
   { id: 'doebel',   wo: ['fluss'], g: 'r', name: 'Döbel',              band: 'mittel', len: [30, 70],   pts: 20,  wild: .45, w: 6,   kraft: 3, koe: ['brot', 'mais', 'wurm', 'maden'],   shape: 'm', c: ['#9aa0a8', '#e6e8ea', '#c8a45a', '#868c94'] },
   { id: 'barbe',    wo: ['fluss'], g: 'e', name: 'Barbe',              band: 'grund',  len: [40, 90],   pts: 38,  wild: .7,  w: 4,   kraft: 4, koe: ['wurm', 'mais', 'pellets'],         shape: 'l', c: ['#a89060', '#e0d2a8', '#c07a4a', '#8a7450'] },
+  { id: 'graskarpfen', wo: ['see'],   g: 'r', name: 'Graskarpfen',        band: 'tief',   len: [60, 130],  pts: 110, wild: .75, w: 1.2, kraft: 5, koe: ['mais', 'brot', 'pellets'],      shape: 'b', c: ['#7a8a4a', '#dfe2b8', '#5a6a32', '#8f9f58'], rar: 'episch' },
+  { id: 'koi',         wo: ['see'],   g: 'r', name: 'Koi',                band: 'mittel', len: [40, 90],   pts: 200, wild: .65, w: .3,  kraft: 4, koe: ['boilies', 'pellets'],           shape: 'b', c: ['#f2ead8', '#ffffff', '#e4573d', '#e4573d'], rar: 'legendär' },
+  { id: 'meerforelle', wo: ['fluss'], g: 'e', name: 'Meerforelle',        band: 'mittel', len: [45, 95],   pts: 95,  wild: .8,  w: 1.6, kraft: 4, koe: ['blinker', 'fliege', 'gummi'],   shape: 'm', c: ['#b8c4cc', '#f2f5f8', '#7a8894', '#98a4b0'], rar: 'episch' },
+  { id: 'huchen',      wo: ['fluss'], g: 'r', name: 'Huchen',             band: 'tief',   len: [80, 150],  pts: 220, wild: .9,  w: .3,  kraft: 5, koe: ['gummi', 'blinker'],             shape: 'l', c: ['#a8774a', '#eddcc0', '#8a5a2a', '#c08a55'], rar: 'legendär' },
+  { id: 'rochen',      wo: ['hochsee'], g: 'r', name: 'Rochen',           band: 'grund',  len: [50, 110],  pts: 105, wild: .7,  w: 1.4, kraft: 5, koe: ['wattwurm'],                     shape: 'pl', c: ['#5a6a72', '#d8dee2', '#3f4c53', '#6e7f88'], rar: 'episch' },
+  { id: 'hai',         wo: ['hochsee'], g: 'r', name: 'Blauhai',          band: 'tief',   len: [120, 240], pts: 260, wild: .95, w: .25, kraft: 5, koe: ['pilker', 'wattwurm'],           shape: 'x', c: ['#5f7a90', '#eef2f5', '#41576a', '#74899c'], rar: 'legendär' },
   { id: 'makrele',  wo: ['hochsee'], g: 'e', name: 'Makrele',            band: 'flach',  len: [25, 50],   pts: 20,  wild: .6,  w: 8,   kraft: 2, koe: ['pilker', 'blinker'],            shape: 'm', c: ['#4a7a8a', '#e8eef0', '#2a4a5a', '#22333f'] },
   { id: 'koehler',  wo: ['hochsee'], g: 'r', name: 'Köhler',             band: 'mittel', len: [40, 90],   pts: 34,  wild: .7,  w: 5,   kraft: 4, koe: ['pilker', 'wattwurm'],           shape: 'm', c: ['#4a5a6a', '#dfe4ea', '#33414f', '#5d6e80'] },
   { id: 'dorsch',   wo: ['hochsee'], g: 'r', name: 'Dorsch',             band: 'tief',   len: [40, 100],  pts: 40,  wild: .55, w: 6,   kraft: 4, koe: ['pilker', 'wattwurm'],           shape: 'b', c: ['#9a8a5a', '#efe6cc', '#7a6a3a', '#b5a060'] },
   { id: 'scholle',  wo: ['hochsee'], g: 'e', name: 'Scholle',            band: 'grund',  len: [25, 55],   pts: 26,  wild: .35, w: 5,   kraft: 2, koe: ['wattwurm'],                     shape: 'pl', c: ['#8a7a52', '#e6dcc4', '#6a5c3a', '#c47a3a'] },
-  { id: 'leng',     wo: ['hochsee'], g: 'r', name: 'Leng',               band: 'grund',  len: [70, 150],  pts: 70,  wild: .8,  w: 2.5, kraft: 5, koe: ['pilker', 'wattwurm'],           shape: 'l', c: ['#7a6a4a', '#d8cba8', '#5a4a2a', '#8f7d57'] },
-  { id: 'heilbutt', wo: ['hochsee'], g: 'r', name: 'Heilbutt',           band: 'grund',  len: [90, 200],  pts: 160, wild: .9,  w: .5,  kraft: 5, koe: ['pilker', 'wattwurm'],           shape: 'x', c: ['#5a5a52', '#e0dcd0', '#3f3f38', '#6e6e64'], legend: true },
+  { id: 'leng',     wo: ['hochsee'], g: 'r', name: 'Leng',               band: 'grund',  len: [70, 150],  pts: 70,  wild: .8,  w: 2.5, kraft: 5, koe: ['pilker', 'wattwurm'], rar: 'episch', shape: 'l', c: ['#7a6a4a', '#d8cba8', '#5a4a2a', '#8f7d57'] },
+  { id: 'heilbutt', wo: ['hochsee'], g: 'r', name: 'Heilbutt',           band: 'grund',  len: [90, 200],  pts: 160, wild: .9,  w: .5,  kraft: 5, koe: ['pilker', 'wattwurm'],           shape: 'x', c: ['#5a5a52', '#e0dcd0', '#3f3f38', '#6e6e64'], rar: 'legendär' },
   { id: 'netz',     wo: ['hochsee'], g: 'r', name: 'Netzrest',           band: 'junk',   len: [0, 0],     pts: 1,   wild: .05, w: 0,   kraft: 1, koe: [], shape: 'netz', c: ['#6a7a6a', '#4a5a4a', '#4a5a4a', '#8a9a8a'] },
   { id: 'dose',     wo: ['see', 'fluss', 'hochsee'], g: 'e', name: 'Konservendose',      band: 'junk',   len: [0, 0],     pts: 1,   wild: .05, w: 0,   kraft: 1, koe: [], shape: 'dose', c: ['#8a99a8', '#5c6b7a', '#5c6b7a', '#d9534f'] },
   { id: 'ast',      wo: ['fluss'],         g: 'r', name: 'Wurzel',             band: 'junk',   len: [0, 0],     pts: 1,   wild: .05, w: 0,   kraft: 1, koe: [], shape: 'ast',  c: ['#6b4226', '#4a2f22', '#4a2f22', '#8a5a3c'] },
@@ -1100,7 +1114,11 @@ function updFight(dt) {
   F.prog += (F.in ? .24 * REEL[lvl('rolle')] / (1 + w * .7) : -(.12 + w * .1)) * dt;
   if (F.ueber > 0) {
     // Die Rute ist zu leicht: beim Kurbeln steigt die Spannung, beim Nachgeben fällt sie
-    F.spannung = clamp(F.spannung + (G.pressed ? .13 * F.ueber : -.22) * dt, 0, 1);
+    // Zu leichte Rute: Spannung steigt beim Kurbeln deutlich schneller als früher,
+    // und bei sehr großem Unterschied auch dann, wenn man nachgibt
+    const steigt = .21 * F.ueber + (F.in ? 0 : .04);
+    const faellt = -.2 + .05 * (F.ueber - 1);
+    F.spannung = clamp(F.spannung + (G.pressed ? steigt : faellt) * dt, 0, 1);
     if (F.spannung >= 1) { schnurBruch(); return; }
   }
   // Fisch zappelt am Haken und kommt mit dem Drill näher
@@ -1119,9 +1137,10 @@ function landFish() {
   const isNew = a.n === 0;
   a.n++; if (f.len > a.max) a.max = f.len;
   SFX.catch();
+  if (sp.rar) { tone(sp.rar === 'legendär' ? [784, 1047, 1319, 1568] : [659, 880, 1047], .09); addText(sp.rar === 'legendär' ? 'LEGENDÄR!' : 'EPISCH!', f.x, f.y - 16, sp.rar === 'legendär' ? '#f2c14e' : '#c8a0ff'); }
   toast(isNew ? `Neu im Fangbuch: ${sp.name}! +${pts}`
     : sp.band === 'junk' ? `Kein Fisch: ${sp.name}, aber immerhin +1` 
-    : `Petri Heil! ${fangText(sp, f.len)} · +${pts}`);
+    : `${sp.rar === 'legendär' ? 'LEGENDÄR! ' : sp.rar === 'episch' ? 'Episch! ' : 'Petri Heil! '}${fangText(sp, f.len)} · +${pts}`);
   G.fish = G.fish.filter(x => x !== f);
   G.land = { f, t: 0, x0: f.x, y0: f.y, pts };
   G.fight = null; G.hook = null; G.phase = 'land';
@@ -1672,9 +1691,12 @@ function renderAlbum() {
   for (const g of GEWAESSER) {
     const arten = SPECIES.filter(sp => sp.wo.includes(g.id));
     const gefunden = arten.filter(sp => save.album[sp.id]).length;
-    const kopf = el('p', 'eyebrow', `${g.name} · ${gefunden} von ${arten.length}`);
+    const voll = gefunden === arten.length;
+    const kopf = el('p', 'eyebrow' + (voll ? ' kopf-komplett' : ''), '');
+    kopf.append(document.createTextNode(g.name + ' · ' + gefunden + ' von ' + arten.length));
+    if (voll) kopf.append(el('span', 'pokalband', 'Komplett! Alle Arten gefangen'));
     wrap.append(kopf);
-    const grid = el('div', 'album');
+    const grid = el('div', 'album' + (voll ? ' komplett' : ''));
     wrap.append(grid);
     fuelleAlbum(grid, arten);
   }
@@ -1688,7 +1710,7 @@ function fuelleAlbum(grid, arten) {
       ? a.n + '× gefunden'
       : a.n + '× gefangen · ' + groesster(sp) + ' ' + fmtLen(sp, a.max)));
     card.append(el('p', '', `${BAND_TXT[sp.band]}${sp.band === 'junk' ? '' : ' · ' + sp.koe.map(k => K_BY[k].name).join(', ')}`));
-    if (sp.legend) card.append(el('span', 'tag', 'legendär'));
+    if (sp.rar) card.append(el('span', 'tag' + (sp.rar === 'episch' ? ' episch' : ''), sp.rar));
     grid.append(card);
   }
 }

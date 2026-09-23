@@ -134,10 +134,26 @@ kbd{font-family:var(--f-disp);font-size:11px;padding:1px 5px;border:2px solid va
 .board .n{text-align:right;font-variant-numeric:tabular-nums}
 .board td.n{font-family:var(--f-disp);font-size:14px}
 .board tr.me td{background:rgba(242,193,78,.12);color:var(--gold)}
+.kacheln{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:8px}
+.kachel{display:flex;flex-direction:column;gap:3px;padding:11px 12px;text-align:left;background:var(--ink-2);
+  border:3px solid var(--line);color:var(--cream);font-family:var(--f-body);font-size:19px;line-height:1.15;cursor:pointer}
+.kachel:hover{border-color:var(--cream)}
+.kachel b{font-family:var(--f-disp);font-size:13px;letter-spacing:.05em;text-transform:uppercase}
+.kachel small{color:var(--muted);font-size:17px;line-height:1.15}
+.kachel .zeile{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.kachel .zeile img{image-rendering:pixelated}
+.kachel.haupt{grid-column:1/-1;border-color:var(--bob)}
+.kachel.haupt b{font-size:16px;color:var(--bob)}
+.kachel.fertig{opacity:.75}
+.hilfe summary{cursor:pointer;font-family:var(--f-disp);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:4px 0}
+.hilfe[open] summary{color:var(--cream)}
+.modus{margin:0;align-self:center;font-family:var(--f-disp);font-size:10px;letter-spacing:.08em;text-transform:uppercase;
+  padding:5px 8px;border:2px solid var(--line);background:var(--ink-2);color:var(--muted)}
+.modus.zaehlt{border-color:var(--gold);color:var(--gold)}
 .tabs{display:flex;gap:6px}
 .tab{font-family:var(--f-disp);font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:8px 10px;background:var(--ink-2);border:2px solid var(--line);color:var(--muted);cursor:pointer}
 .tab[aria-selected="true"]{color:var(--ink);background:var(--gold);border-color:var(--gold)}
-.wahl{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px}
+.wahl{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:6px}
 .opt{display:flex;flex-direction:column;gap:2px;padding:8px 10px;text-align:left;background:var(--ink-2);border:2px solid var(--line);color:var(--cream);font-family:var(--f-body);font-size:19px;line-height:1.15;cursor:pointer}
 .opt:hover{border-color:var(--muted)}
 .opt[aria-pressed="true"]{border-color:var(--gold);background:#24344f}
@@ -160,6 +176,7 @@ kbd{font-family:var(--f-disp);font-size:11px;padding:1px 5px;border:2px solid va
 <div class="app">
   <header class="top">
     <h1 class="logo">Petri Heil</h1>
+    <p class="modus" id="modeBadge" hidden></p>
     <div class="hud">
       <div class="stat"><span class="k">Zeit</span><span class="v" id="hudTime">60</span></div>
       <div class="stat"><span class="k">Punkte</span><span class="v" id="hudScore">0</span></div>
@@ -180,26 +197,21 @@ kbd{font-family:var(--f-disp);font-size:11px;padding:1px 5px;border:2px solid va
   <div class="box" role="dialog" aria-labelledby="tTitle">
     <p class="eyebrow">Arcade-Angeln · <span id="tTime">60</span> Sekunden</p>
     <h2 id="tTitle" class="big">Petri Heil!</h2>
-    <p class="lead">Wirf aus, halte den Fisch im grünen Bereich und fang in einer Runde so viel wie möglich.</p>
-    <p class="muted small" id="tTagInfo"></p>
+    <p class="lead">Drei Gewässer, 27 Arten, eine Runde dauert eine Minute.</p>
     <dl class="facts">
       <div><dt>Rekord</dt><dd id="tBest">0</dd></div>
-      <div><dt>Münzen</dt><dd id="tCoins">0</dd></div>
-      <div><dt>Fangbuch</dt><dd id="tAlbum">0/14</dd></div>
       <div><dt>Pokale</dt><dd id="tPokale">0</dd></div>
     </dl>
-    <div class="actions">
-      <button class="btn primary" id="bStart" type="button">Tagessee</button>
-      <button class="btn" id="bFrei" type="button">Freies Angeln</button>
-      <button class="btn" data-open="mShop" type="button">Angelladen</button>
-      <button class="btn" data-open="mAlbum" type="button">Fangbuch</button>
-      <button class="btn" data-open="mBoard" type="button">Rangliste</button>
-    </div>
-    <ol class="howto">
-      <li><b>Auswerfen:</b> tippen, wenn der rote Pfeil über der richtigen Stelle steht. Weiter draußen ist es tiefer.</li>
-      <li><b>Führen:</b> gedrückt halten holt den Köder zu dir, loslassen lässt ihn sinken.</li>
-      <li><b>Drillen:</b> nach dem Biss den grünen Balken am Fisch halten, bis die goldene Leiste voll ist.</li>
-    </ol>
+    <div class="kacheln" id="menuKacheln"></div>
+    <details class="hilfe">
+      <summary>So wird gespielt</summary>
+      <ol class="howto">
+        <li><b>Auswerfen:</b> tippen, wenn der rote Pfeil über der richtigen Stelle steht. Weiter draußen ist es tiefer.</li>
+        <li><b>Führen:</b> gedrückt halten holt den Köder zu dir, loslassen lässt ihn sinken.</li>
+        <li><b>Anschlagen:</b> beim Biss blinkt ein Ausrufezeichen. Dann sofort tippen, sonst spuckt der Fisch aus.</li>
+        <li><b>Drillen:</b> den grünen Balken am Fisch halten, bis die goldene Leiste voll ist. Wird die Schnur rot, kurz loslassen.</li>
+      </ol>
+    </details>
   </div>
 </div>
 
@@ -346,6 +358,8 @@ const RUTEN = [
     info: 'Für Kunstköder. Räuber packen nur zu, während du einholst, und hängen dann sofort.' },
   { id: 'fliege',  name: 'Fliegenrute',   preis: 340, zone: .44, kraft: 3, weite: 150, typ: 'kunst', genau: .85, anschlag: 1.5,
     info: 'Trockenfliege dicht unter der Oberfläche. Größter Drillbereich, viel Zeit zum Anschlag.' },
+  { id: 'pilk',    name: 'Pilkrute',      preis: 520, zone: .30, kraft: 5, weite: 210, typ: 'kunst', genau: .7, anschlag: .9,
+    info: 'Kurze, harte Bootsrute für schwere Pilker. Bringt auch Leng und Heilbutt hoch.' },
 ];
 const KOEDER = [
   { id: 'brot',    name: 'Brotflocke',    preis: 0,   runden: 0, typ: 'natur', c: '#f3e9d2' },
@@ -357,6 +371,8 @@ const KOEDER = [
   { id: 'fliege',  name: 'Trockenfliege', preis: 90,  runden: 6, typ: 'kunst', c: '#d8d0b0' },
   { id: 'blinker', name: 'Blinker',       preis: 130, runden: 8, typ: 'kunst', c: '#c8ccd2' },
   { id: 'gummi',   name: 'Gummifisch',    preis: 150, runden: 8, typ: 'kunst', c: '#e4573d' },
+  { id: 'wattwurm', name: 'Wattwurm',     preis: 60,  runden: 5, typ: 'natur', c: '#b86a5a' },
+  { id: 'pilker',  name: 'Pilker',        preis: 160, runden: 8, typ: 'kunst', c: '#c8ccd2' },
 ];
 const R_BY = Object.fromEntries(RUTEN.map(r => [r.id, r]));
 const K_BY = Object.fromEntries(KOEDER.map(k => [k.id, k]));
@@ -380,7 +396,14 @@ const SPECIES = [
   { id: 'aesche',   wo: ['fluss'], g: 'e', name: 'Äsche',              band: 'mittel', len: [25, 50],   pts: 24,  wild: .5,  w: 5,   kraft: 2, koe: ['fliege', 'maden', 'wurm'],         shape: 'm', c: ['#8a95a8', '#e8eaf0', '#6a6fa0', '#a3aac0'] },
   { id: 'doebel',   wo: ['fluss'], g: 'r', name: 'Döbel',              band: 'mittel', len: [30, 70],   pts: 20,  wild: .45, w: 6,   kraft: 3, koe: ['brot', 'mais', 'wurm', 'maden'],   shape: 'm', c: ['#9aa0a8', '#e6e8ea', '#c8a45a', '#868c94'] },
   { id: 'barbe',    wo: ['fluss'], g: 'e', name: 'Barbe',              band: 'grund',  len: [40, 90],   pts: 38,  wild: .7,  w: 4,   kraft: 4, koe: ['wurm', 'mais', 'pellets'],         shape: 'l', c: ['#a89060', '#e0d2a8', '#c07a4a', '#8a7450'] },
-  { id: 'dose',     wo: ['see', 'fluss'], g: 'e', name: 'Konservendose',      band: 'junk',   len: [0, 0],     pts: 1,   wild: .05, w: 0,   kraft: 1, koe: [], shape: 'dose', c: ['#8a99a8', '#5c6b7a', '#5c6b7a', '#d9534f'] },
+  { id: 'makrele',  wo: ['hochsee'], g: 'e', name: 'Makrele',            band: 'flach',  len: [25, 50],   pts: 20,  wild: .6,  w: 8,   kraft: 2, koe: ['pilker', 'blinker'],            shape: 'm', c: ['#4a7a8a', '#e8eef0', '#2a4a5a', '#22333f'] },
+  { id: 'koehler',  wo: ['hochsee'], g: 'r', name: 'Köhler',             band: 'mittel', len: [40, 90],   pts: 34,  wild: .7,  w: 5,   kraft: 4, koe: ['pilker', 'wattwurm'],           shape: 'm', c: ['#4a5a6a', '#dfe4ea', '#33414f', '#5d6e80'] },
+  { id: 'dorsch',   wo: ['hochsee'], g: 'r', name: 'Dorsch',             band: 'tief',   len: [40, 100],  pts: 40,  wild: .55, w: 6,   kraft: 4, koe: ['pilker', 'wattwurm'],           shape: 'b', c: ['#9a8a5a', '#efe6cc', '#7a6a3a', '#b5a060'] },
+  { id: 'scholle',  wo: ['hochsee'], g: 'e', name: 'Scholle',            band: 'grund',  len: [25, 55],   pts: 26,  wild: .35, w: 5,   kraft: 2, koe: ['wattwurm'],                     shape: 'pl', c: ['#8a7a52', '#e6dcc4', '#6a5c3a', '#c47a3a'] },
+  { id: 'leng',     wo: ['hochsee'], g: 'r', name: 'Leng',               band: 'grund',  len: [70, 150],  pts: 70,  wild: .8,  w: 2.5, kraft: 5, koe: ['pilker', 'wattwurm'],           shape: 'l', c: ['#7a6a4a', '#d8cba8', '#5a4a2a', '#8f7d57'] },
+  { id: 'heilbutt', wo: ['hochsee'], g: 'r', name: 'Heilbutt',           band: 'grund',  len: [90, 200],  pts: 160, wild: .9,  w: .5,  kraft: 5, koe: ['pilker', 'wattwurm'],           shape: 'x', c: ['#5a5a52', '#e0dcd0', '#3f3f38', '#6e6e64'], legend: true },
+  { id: 'netz',     wo: ['hochsee'], g: 'r', name: 'Netzrest',           band: 'junk',   len: [0, 0],     pts: 1,   wild: .05, w: 0,   kraft: 1, koe: [], shape: 'netz', c: ['#6a7a6a', '#4a5a4a', '#4a5a4a', '#8a9a8a'] },
+  { id: 'dose',     wo: ['see', 'fluss', 'hochsee'], g: 'e', name: 'Konservendose',      band: 'junk',   len: [0, 0],     pts: 1,   wild: .05, w: 0,   kraft: 1, koe: [], shape: 'dose', c: ['#8a99a8', '#5c6b7a', '#5c6b7a', '#d9534f'] },
   { id: 'ast',      wo: ['fluss'],         g: 'r', name: 'Wurzel',             band: 'junk',   len: [0, 0],     pts: 1,   wild: .05, w: 0,   kraft: 1, koe: [], shape: 'ast',  c: ['#6b4226', '#4a2f22', '#4a2f22', '#8a5a3c'] },
   { id: 'reifen',   wo: ['see', 'fluss'],  g: 'r', name: 'Alter Reifen',       band: 'junk',   len: [0, 0],     pts: 1,   wild: .05, w: 0,   kraft: 1, koe: [], shape: 'reif', c: ['#2a2a30', '#4a4a52', '#4a4a52', '#3a3a42'] },
   { id: 'stiefel', wo: ['see', 'fluss'], g: 'r',  name: 'Gummistiefel',       band: 'junk',   len: [38, 47],   pts: 1,   wild: .05, w: 0,   kraft: 1, koe: [],                                  shape: 'boot', c: ['#2f5a3a', '#1f3a26', '#1f3a26', '#4f8a5e'] },
@@ -411,6 +434,8 @@ const SHAPES = {
   l: ['...........ff.......', 'ff..bbbbbbbbbbbbbb..', 'fbbbbpbbbbpbbbbbbbeb', 'ff..llllllllllllllbb', '..........f.........'],
   b: ['........fff.......', '.....bbbbbbbbb....', 'f..bbbbpbbbbbbbb..', 'ffbbbbbbbbpbbbbbe.', 'ffbbbpbbbbbbbbbbbb', 'f..bbbbbbbbbbbbbb.', '....lllllllllll...', '......f....f......'],
   x: ['............ff............', '......bbbbbbbbbbbbbbbb....', 'ff..bbbbbbbbbbbbbbbbbbbb..', 'fffbbbbpbbbbbbbpbbbbbbbbeb', 'fffbbbbbbbbbbbbbbbbbbbbbbb', 'ff..llllllllllllllllllllb.', '...........f.....f....ff..'],
+  pl:   ['....ffff......', '..bbbbbbbbb...', '.bbbbpbbbbbbe.', 'bbbbbbbbbbbbbb', '.bbbbbbbbbbbb.', '..llllllllll..', '....ffff......'],
+  netz: ['nn.nn.nn', '.nnnnnn.', 'nn.nn.nn', '.nnnnnn.', 'nn.nn.nn', '.nnnnnn.', 'nn.nn.nn', '........'],
   boot: ['..bbbb..', '..bpbb..', '..bbbb..', '..bbbb..', '..bbbb..', '.bbbbbb.', 'bbbbbbbb', 'llllllll'],
   dose: ['..bbbb..', '.bllllb.', '.blpplb.', '.blpplb.', '.bllllb.', '.blllb..', '..bbbb..', '........'],
   ast:  ['........', '....bb..', '...bb.l.', '.bbbb.b.', 'bbl.bbb.', '.b...b..', '........', '........'],
@@ -445,6 +470,10 @@ const K_ICONS = {
              col: { f: '#eae4d2', h: '#8a5a3c', k: '#c8ccd2' } },
   blinker: { rows: ['....k.....', '...ss.....', '..ssss....', '..shss....', '.ssssss...', '..ssss.r..', '..ssss.rr.', '...ss..rr.', '....k..r..', '..........'],
              col: { s: '#c8ccd2', h: '#f3f5f8', k: '#8a99a8', r: '#d9534f' } },
+  wattwurm:{ rows: ['..........', '..wwww....', '.ww..ww...', '.wd..dw...', '..wwww....', '....wwww..', '...wd..dw.', '...ww..ww.', '....wwww..', '..........'],
+             col: { w: '#b86a5a', d: '#8f4a3f' } },
+  pilker:  { rows: ['....k.....', '...ss.....', '..shss....', '..ssss....', '..ssss....', '..shss....', '...ss.....', '...r.r....', '..r...r...', '..........'],
+             col: { s: '#c8ccd2', h: '#f3f5f8', k: '#8a99a8', r: '#d9534f' } },
   gummi:   { rows: ['..........', '..r..ggg..', '.rrrgggggg', 'rrrrgggghe', '.rrrgggggg', '..r..ggg..', '..........', '..........', '..........', '..........'],
              col: { g: '#6fa35a', r: '#e4573d', h: '#e8f0e0', e: '#101418' } },
 };
@@ -455,6 +484,7 @@ const R_ICONS = {
   feeder:  ['..........kk', '.........kk.', '........kk..', '.......kk...', '......kk....', '.....kk..gg.', '....kk..gygg', '...kk...ggyg', '..hh.rr.gggg', '.hh.rwwr.gg.', 'hh...rr.....', '............'],
   karpfen: ['.........kkk', '........kkk.', '.......kkk..', '......kkk...', '.....kkk....', '....kkk.....', '...kkk......', '..hh.rrrr...', '.hh.rwwwwr..', 'hh..rwwwwr..', '.....rrrr...', '............'],
   spinn:   ['..........kk', '.........kk.', '........kk..', '.......kk...', '......kk....', '.....kk.....', '....kk...s..', '...kk...sss.', '..hh.rr.sss.', '.hh.rwwr.s..', 'hh...rr.....', '............'],
+  pilk:    ['.........kk.', '........kk..', '.......kk...', '......kk....', '.....kk.....', '....kk...s..', '...kk....s..', '..hh.rrr.s..', '.hh.rwwwr...', 'hh..rwwwr...', '.....rrr....', '............'],
   fliege:  ['.........kk.', '........kk..', '.......kk...', '......kk....', '.....kk.....', '....kk......', '...kk.......', '..hh........', '.hh..llll...', 'hh..l....l..', '.....llll...', '............'],
 };
 const R_ICON_COL = { k: '#c8b89a', h: '#6b4226', r: '#8a99a8', w: '#5c6b7a', g: '#6fa35a', y: '#f2c14e', s: '#c8ccd2', l: '#f3e9d2' };
@@ -524,6 +554,12 @@ const GEWAESSER = [
     },
     schilf: [{ x: 46, h: 18, c: 0 }, { x: 49, h: 24, c: 1 }, { x: 52, h: 14, c: 0 }, { x: 236, h: 20, c: 1 }, { x: 240, h: 26, c: 1 }, { x: 245, h: 16, c: 0 }],
   },
+  {
+    id: 'hochsee', name: 'Hochsee', stroemung: -7, tiefe: 4.2, wellen: true,
+    info: 'Vom Kutter senkrecht nach unten, dreißig Meter tief. Dorsch, Leng und Heilbutt, aber nur mit Pilker oder Wattwurm.',
+    grund: x => 174 + 5 * Math.sin(x * .05 + 1) + 2.5 * Math.sin(x * .17),
+    schilf: [],
+  },
 ];
 const G_BY = Object.fromEntries(GEWAESSER.map(g => [g.id, g]));
 let gew = GEWAESSER[0];
@@ -532,7 +568,7 @@ const bot = new Float32Array(W + 1);
 const botAt = x => bot[clamp(Math.round(x), 0, W)];
 function xMinFor(lowerY) { for (let x = 40; x <= W; x++) if (bot[x] > lowerY + 2) return x; return W + 99; }
 function xMaxFor(lowerY) { for (let x = W; x >= 40; x--) if (bot[x] > lowerY + 2) return x; return 0; }
-const depthM = x => ((botAt(x) - SURF) / 14).toFixed(1).replace('.', ',');
+const depthM = x => ((botAt(x) - SURF) / (gew.tiefe || 14)).toFixed(1).replace('.', ',');
 function setGew(id) {
   const vorher = gew && gew.id;
   gew = G_BY[id] || GEWAESSER[0];
@@ -565,7 +601,19 @@ function buildBg() {
     const d = x * x + y * y;
     if (d <= 121) px(196 + x, 47 + y, d < 60 ? '#fff1c8' : '#fbe3a0');
   }
-  if (gew.id === 'fluss') {
+  if (gew.id === 'hochsee') {
+    // Offene See: dunstiger Horizont, ein zweiter Kutter, Leuchtturm und Tonne
+    for (let x = 0; x < W; x++) {
+      g.fillStyle = '#3f5f6e'; g.fillRect(x, SURF - 4, 1, 4);
+      g.fillStyle = '#54798a'; g.fillRect(x, SURF - 5, 1, 1);
+    }
+    g.fillStyle = '#1f3336';                       // ferner Kutter
+    g.fillRect(150, SURF - 9, 13, 4); g.fillRect(154, SURF - 13, 3, 4); g.fillRect(159, SURF - 12, 1, 3);
+    g.fillStyle = '#2a3f45';                       // Leuchtturm am Horizont
+    g.fillRect(228, SURF - 16, 4, 12); g.fillStyle = '#d9534f'; g.fillRect(228, SURF - 16, 4, 2);
+    g.fillStyle = '#e4573d';                       // Tonne
+    g.fillRect(96, SURF - 5, 3, 5); g.fillStyle = '#f3e9d2'; g.fillRect(96, SURF - 6, 3, 1);
+  } else if (gew.id === 'fluss') {
     // Heller Laubwald: runde Kronen mit Stämmen, dahinter eine weiche Hügellinie
     for (let x = 0; x < W; x++) {
       const h0 = Math.round(48 - 2 * Math.abs(Math.sin(x * .12 + 1)));
@@ -596,7 +644,9 @@ function buildBg() {
   // Wasser nach Tiefe
   const WATER = gew.id === 'fluss'
     ? ['#4f8f9a', '#40808c', '#35707e', '#2a5f6d', '#204e5c', '#183f4c']
-    : ['#3a7a94', '#2f6a86', '#275a78', '#1f4a68', '#183d58', '#122f47'];
+    : gew.id === 'hochsee'
+      ? ['#2f7a8f', '#276a80', '#205a70', '#194a60', '#133c50', '#0e2e40']
+      : ['#3a7a94', '#2f6a86', '#275a78', '#1f4a68', '#183d58', '#122f47'];
   for (let y = SURF; y < H; y++) {
     const t = (y - SURF) / (H - SURF) * 6, band = Math.min(5, Math.floor(t)), f = t - band;
     for (let x = 0; x < W; x++) {
@@ -604,8 +654,8 @@ function buildBg() {
       px(x, y, WATER[next ? band + 1 : band]);
     }
   }
-  // Grund: See hat Schlamm und Kraut, der Fluss Kies
-  const fluss = gew.id === 'fluss';
+  // Grund: See hat Schlamm und Kraut, der Fluss Kies, die Hochsee Sand
+  const fluss = gew.id === 'fluss', meer = gew.id === 'hochsee';
   for (let x = 0; x <= W; x++) {
     const top = Math.round(bot[x]);
     if (top > SURF + 2) {
@@ -616,13 +666,16 @@ function buildBg() {
       g.fillRect(x, top - 2, 1, 1);
       if (srnd() < .25) { g.fillStyle = fluss ? 'rgba(168,162,148,.35)' : 'rgba(125,122,112,.3)'; g.fillRect(x, top - 3 - Math.floor(srnd() * 2), 1, 1); }
     }
-    px(x, top, fluss ? '#9a9080' : '#8a7450');
+    px(x, top, meer ? '#b0a68c' : fluss ? '#9a9080' : '#8a7450');
     for (let y = top + 1; y < H; y++) {
-      const kies = ((x * 3 + y * 5) % 7 === 0) ? (fluss ? '#6a6252' : '#4e3d2a') : (fluss ? '#7c7466' : '#5e4a33');
+      const kies = ((x * 3 + y * 5) % 7 === 0)
+        ? (meer ? '#8f866e' : fluss ? '#6a6252' : '#4e3d2a')
+        : (meer ? '#a09a82' : fluss ? '#7c7466' : '#5e4a33');
       px(x, y, kies);
     }
+    if (meer && (x % 9) < 4) px(x, top + 1, '#bcb298');    // Sandrippel
     if (srnd() < (fluss ? .3 : .12)) px(x, top + 1 + Math.floor(srnd() * 4), fluss ? '#a8a294' : '#7d7a70');
-    if (!fluss && x > 60 && srnd() < .06) {
+    if (!fluss && !meer && x > 60 && srnd() < .06) {
       const hgt = 3 + Math.floor(srnd() * 6);
       for (let k = 1; k <= hgt; k++) px(x + (k % 3 === 0 ? 1 : 0), top - k, k % 2 ? '#3f6b35' : '#4f7f3f');
     }
@@ -631,7 +684,18 @@ function buildBg() {
       for (let k = 0; k < 3; k++) for (let j = 0; j < 2; j++) px(x + k, st - j, k === 1 ? '#b0a89a' : '#8e8676');
     }
   }
-  if (fluss) {
+  if (meer) {
+    // Kutter: Bordwand, Reling und Rettungsring
+    g.fillStyle = '#b8352f'; g.fillRect(0, 54, 44, 10);
+    g.fillStyle = '#8f2822'; g.fillRect(0, 62, 44, 4);
+    g.fillStyle = '#f3e9d2'; g.fillRect(0, 52, 44, 2);
+    g.fillStyle = '#5c6b7a'; g.fillRect(0, 66, 42, 3);
+    g.fillStyle = '#8a99a8';
+    for (const q of [6, 18, 30, 40]) g.fillRect(q, 44, 2, 9);
+    g.fillRect(0, 43, 42, 2);
+    g.fillStyle = '#e4573d'; g.fillRect(33, 36, 7, 7);
+    g.fillStyle = '#f3e9d2'; g.fillRect(35, 38, 3, 3); g.fillRect(33, 36, 7, 1);
+  } else if (fluss) {
     // Uferkante drüben: Grasnarbe und Erde auf dem Grund, nur über der Wasserlinie
     for (let x = 230; x <= W; x++) {
       const top = Math.round(bot[x]);
@@ -873,6 +937,7 @@ function startRound(tagesrunde) {
   hideAll();
   G.tagModus = !!tagesrunde;
   seeRnd = tagesrunde ? mkRng(datumSeed(heute() + '|' + gew.id)) : Math.random;
+  G.zaehlt = !!tagesrunde && !tagGespielt();
   Object.assign(G, { mode: 'play', phase: 'aim', time: roundLen(), score: 0, catches: [], hook: null, fight: null, land: null,
     aimT: 0, lastCall: false, pressed: false, needRelease: false, teased: {}, lastSec: 99, biss: null });
   G.fish = [];   // frischer See, sonst schwimmen noch die Fische aus dem Menue herum
@@ -1341,6 +1406,14 @@ function updateTap() {
 }
 function updateHud() {
   updateTap();
+  const spieltGerade = G.mode === 'play' || G.mode === 'paused';
+  const badge = spieltGerade ? ((G.zaehlt ? 'Tagesrunde · ' : 'Übung · ') + gew.name) : '';
+  if (hud.badge !== badge) {
+    hud.badge = badge;
+    $('modeBadge').textContent = badge;
+    $('modeBadge').hidden = !badge;
+    $('modeBadge').classList.toggle('zaehlt', !!G.zaehlt);
+  }
   const playing = G.mode === 'play' || G.mode === 'paused';
   setTxt('hudTime', String(playing ? Math.ceil(G.time) : roundLen()));
   setTxt('hudScore', de(G.score));
@@ -1372,19 +1445,46 @@ function updateHint() {
   h.append(el('b', '', gew.name), document.createTextNode(' · ' + rute().name + ' mit ' + koeder().name + ' · '),
     el('b', '', 'Tippen'), document.createTextNode(' wirft aus, gedrückt halten holt ein'));
 }
+function kachel(ziel, titel, zeilen, klasse, bilder) {
+  const b = el('button', 'kachel' + (klasse ? ' ' + klasse : '')); b.type = 'button';
+  b.append(el('b', '', titel));
+  if (bilder && bilder.length) {
+    const z = el('div', 'zeile');
+    for (const bild of bilder) z.append(img(bild, 22));
+    b.append(z);
+  }
+  for (const t of zeilen) if (t) b.append(el('small', '', t));
+  b.onclick = ziel;
+  return b;
+}
+function renderMenu() {
+  const box = $('menuKacheln');
+  box.textContent = '';
+  const offen = tagOffen().map(g => g.name), sum = tagSumme();
+  box.append(kachel(() => zurTasche(true), tagRestlich() ? 'Tagesrunde' : 'Tagesrunde nochmal',
+    [tagRestlich() ? 'Noch ' + offen.length + ' von ' + TAGESRUNDEN() + ' offen: ' + offen.join(', ')
+      : 'Heute erledigt: ' + de(sum.punkte) + ' Punkte mit ' + sum.fische + ' Fischen',
+      'Zählt für die Tagesrangliste. Alle angeln dasselbe Wasser.'],
+    'haupt' + (tagRestlich() ? '' : ' fertig')));
+  box.append(kachel(() => zurTasche(false), 'Freies Angeln',
+    ['Beliebig oft, zufälliger Bestand', 'Münzen und Fangbuch zählen, die Rangliste nicht']));
+  box.append(kachel(() => { modusTag = tagRestlich() > 0; backTo = 'mTitle'; show('mTackle'); }, 'Angeltasche',
+    [gew.name + ' · ' + rute().name, 'Köder: ' + koeder().name], '', [rute().bild, koeder().bild]));
+  box.append(kachel(() => { backTo = 'mTitle'; show('mShop'); }, 'Angelladen',
+    [de(save.coins) + ' Münzen im Beutel', save.ruten.length + ' von ' + RUTEN.length + ' Ruten gekauft']));
+  box.append(kachel(() => { backTo = 'mTitle'; show('mAlbum'); }, 'Fangbuch',
+    [discovered() + ' von ' + SPECIES.length + ' Arten entdeckt',
+      save.bestTop ? 'Bester Fang: ' + save.bestTop : 'Noch kein Rekordfang']));
+  const platz = lbRows.findIndex(r => r.me || r.id === pkey);
+  box.append(kachel(() => { backTo = 'mTitle'; show('mBoard'); }, 'Rangliste',
+    [save.nick ? 'Als ' + save.nick + ' eingetragen' : 'Noch kein Name eingetragen',
+      platz >= 0 ? 'Platz ' + (platz + 1) + ' in der ewigen Liste' : 'Dein Rekord: ' + de(save.best) + ' Punkte']));
+}
 function renderTitle() {
   updateHint();
+  renderMenu();
   $('tTime').textContent = roundLen();
   $('tBest').textContent = de(save.best);
-  $('tCoins').textContent = de(save.coins);
-  $('tAlbum').textContent = discovered() + '/' + SPECIES.length;
-  const d = new Date();
-  const offen = tagOffen().map(g => g.name);
-  const sum = tagSumme();
-  $('tTagInfo').textContent = offen.length
-    ? `Tagesrunden vom ${d.getDate()}.${d.getMonth() + 1}.: noch ${offen.length} von ${TAGESRUNDEN()} offen (${offen.join(', ')}). Alle angeln dieselben Gewässer.`
-    : `Tagesrunden vom ${d.getDate()}.${d.getMonth() + 1}. erledigt: ${de(sum.punkte)} Punkte mit ${sum.fische} Fischen. Freies Angeln geht weiterhin unbegrenzt.`;
-  $('bStart').textContent = tagRestlich() ? 'Tagesrunde' : 'Tagesrunde nochmal';
   $('tPokale').textContent = save.pokale.siege + (save.pokale.podeste > save.pokale.siege ? ' + ' + (save.pokale.podeste - save.pokale.siege) : '');
 
 }
@@ -1439,8 +1539,8 @@ function renderTackle() {
     b.setAttribute('aria-pressed', String(gew.id === g.id));
     const kopf = el('b'); kopf.append(document.createTextNode(g.name));
     const erledigt = save.tag.datum === heute() && save.tag.runden[g.id];
-    b.append(kopf, el('small', '', g.info),
-      el('small', '', erledigt ? `Tagesrunde erledigt: ${de(save.tag.runden[g.id].punkte)} Punkte` : 'Tagesrunde heute noch offen'));
+    b.append(kopf, el('small', '', erledigt ? `Tagesrunde erledigt: ${de(save.tag.runden[g.id].punkte)} Punkte` : 'Tagesrunde heute noch offen'));
+    if (gew.id === g.id) b.append(el('small', '', g.info));
     b.onclick = () => { setGew(g.id); save.gewaesser = g.id; persist(); renderTackle(); updateHint(); };
     gb.append(b);
   }
@@ -1454,8 +1554,8 @@ function renderTackle() {
     const b = el('button', 'opt'); b.type = 'button';
     b.setAttribute('aria-pressed', String(save.tackle.rute === r.id));
     const kopf = el('b'); kopf.append(img(r.bild, 24), document.createTextNode(r.name));
-    b.append(kopf, el('small', '', r.info),
-      el('small', '', `Wurf ${Math.round((r.weite - 64) / 182 * 100)} % · Tragkraft ${KRAFT_TXT[r.kraft]} · ${genauTxt(r)} · ${anschlagTxt(r)}`));
+    b.append(kopf, el('small', '', `Wurf ${Math.round((r.weite - 64) / 182 * 100)} % · ${KRAFT_TXT[r.kraft]}`));
+    if (save.tackle.rute === r.id) b.append(el('small', '', r.info), el('small', '', `${genauTxt(r)} · ${anschlagTxt(r)}`));
     b.onclick = () => {
       save.tackle.rute = r.id;
       if (!koederPasstZurRute(koeder(), r)) save.tackle.koeder = r.typ === 'kunst' ? 'gummi' : 'brot';
@@ -1472,9 +1572,10 @@ function renderTackle() {
     const b = el('button', 'opt' + (passt ? '' : ' weg')); b.type = 'button';
     b.setAttribute('aria-pressed', String(save.tackle.koeder === k.id));
     const kopf = el('b'); kopf.append(img(k.bild, 22), document.createTextNode(k.name));
-    b.append(kopf,
-      el('small', '', rest < 0 ? 'unbegrenzt, fängt aber wenig' : rest + (rest === 1 ? ' Runde übrig' : ' Runden übrig')),
-      el('small', '', passt ? (k.typ === 'kunst' ? 'Bisse nur beim Einholen' : 'liegt ruhig im Wasser') : 'braucht eine Kunstköderrute'));
+    b.append(kopf, el('small', '', rest < 0 ? 'unbegrenzt' : rest + (rest === 1 ? ' Runde übrig' : ' Runden übrig')));
+    if (save.tackle.koeder === k.id || !passt) {
+      b.append(el('small', '', passt ? (k.typ === 'kunst' ? 'Bisse nur beim Einholen' : 'liegt ruhig im Wasser') : 'braucht Spinn-, Fliegen- oder Pilkrute'));
+    }
     b.disabled = !passt;
     b.onclick = () => { save.tackle.koeder = k.id; persist(); renderTackle(); updateHint(); };
     kb.append(b);
@@ -1901,8 +2002,6 @@ const zurTasche = tag => {
   backTo = current() || 'mTitle';
   show('mTackle');
 };
-$('bStart').onclick = () => zurTasche(true);
-$('bFrei').onclick = () => zurTasche(false);
 $('bAgain').onclick = () => zurTasche(tagRestlich() > 0);
 $('bShopPlay').onclick = () => zurTasche(modusTag);
 $('kLos').onclick = () => startRound(modusTag);

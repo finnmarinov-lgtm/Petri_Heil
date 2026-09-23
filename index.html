@@ -465,7 +465,7 @@ const DEF = () => ({ v: 2, coins: 0, best: 0, bestFish: 0, bestTop: '', rounds: 
   up: { rolle: 0, feeder: 0, blei: 0, thermo: 0 },
   ruten: ['stippe'], vorrat: { maden: 3 }, tackle: { rute: 'stippe', koeder: 'maden' },
   tag: { datum: '', runden: {}, punkte: 0, fische: 0, fang: '' }, pokale: { siege: 0, podeste: 0 }, gewaesser: 'see',
-  rad: { datum: '', gewinn: 0 },
+  rad: { datum: '', gewinn: 0, text: '' },
   album: {}, nick: '', code: '', lbSent: 0, lbNick: '', savedAt: 0 });
 
 // ---------- Pixel-Sprites (Kopf zeigt nach rechts) ----------
@@ -827,7 +827,7 @@ function normalize(r) {
   if (Array.isArray(r.ruten)) for (const id of r.ruten) if (R_BY[id] && !d.ruten.includes(id)) d.ruten.push(id);
   if (r.vorrat) for (const k of KOEDER) if (Number.isFinite(r.vorrat[k.id])) d.vorrat[k.id] = Math.max(0, Math.round(r.vorrat[k.id]));
   if (r.tackle) { if (R_BY[r.tackle.rute]) d.tackle.rute = r.tackle.rute; if (K_BY[r.tackle.koeder]) d.tackle.koeder = r.tackle.koeder; }
-  if (r.rad && typeof r.rad.datum === 'string') d.rad = { datum: r.rad.datum.slice(0, 10), gewinn: Math.max(0, Number(r.rad.gewinn) || 0) };
+  if (r.rad && typeof r.rad.datum === 'string') d.rad = { datum: r.rad.datum.slice(0, 10), gewinn: Math.max(0, Number(r.rad.gewinn) || 0), text: String(r.rad.text || '').slice(0, 60) };
   if (r.pokale) d.pokale = { siege: Math.max(0, Number(r.pokale.siege) || 0), podeste: Math.max(0, Number(r.pokale.podeste) || 0) };
   if (G_BY[r.gewaesser]) d.gewaesser = r.gewaesser;
   if (r.tag && typeof r.tag.datum === 'string') {
@@ -1531,8 +1531,8 @@ function renderMenu() {
     [save.nick ? 'Als ' + save.nick + ' eingetragen' : 'Noch kein Name eingetragen',
       platz >= 0 ? 'Platz ' + (platz + 1) + ' in der ewigen Liste' : 'Dein Rekord: ' + de(save.best) + ' Punkte']));
   box.append(kachel(() => { backTo = 'mTitle'; show('mRad'); }, 'Glücksrad',
-    [radGedreht() ? 'Heute gedreht: +' + de(save.rad.gewinn) + ' Münzen' : 'Heute noch frei, einmal am Tag',
-      'Zwischen 10 und 300 Münzen']));
+    [radGedreht() ? 'Heute gedreht: ' + (save.rad.text || '+' + de(save.rad.gewinn) + ' Münzen') : 'Heute noch frei, einmal am Tag',
+      'Münzen, Köderpakete, selten eine Rute']));
 }
 function renderTitle() {
   updateHint();
@@ -1883,21 +1883,40 @@ async function codeHolen(eingabe) {
 }
 
 // ---------- Glücksrad ----------
+// Gewinne: Münzen, Köderpakete und ganz selten eine Rute
 const RAD = [
-  { muenzen: 10, w: 30, txt: 'Kleinkram' },
-  { muenzen: 20, w: 25, txt: 'Madendose' },
-  { muenzen: 30, w: 18, txt: 'Schnurrolle' },
-  { muenzen: 50, w: 12, txt: 'Futterpaket' },
-  { muenzen: 80, w: 8, txt: 'Guter Tag' },
-  { muenzen: 120, w: 4, txt: 'Fette Beute' },
-  { muenzen: 200, w: 2, txt: 'Jackpot' },
-  { muenzen: 300, w: 1, txt: 'Petri Jackpot!' },
+  { art: 'muenzen', muenzen: 10, w: 22, txt: 'Kleinkram' },
+  { art: 'muenzen', muenzen: 20, w: 17, txt: 'Trinkgeld' },
+  { art: 'muenzen', muenzen: 30, w: 13, txt: 'Schnurrolle' },
+  { art: 'koeder', koeder: 'maden', runden: 5, w: 10 },
+  { art: 'koeder', koeder: 'mais', runden: 5, w: 8 },
+  { art: 'muenzen', muenzen: 50, w: 8, txt: 'Futterpaket' },
+  { art: 'koeder', koeder: 'wurm', runden: 5, w: 6 },
+  { art: 'koeder', koeder: 'pellets', runden: 4, w: 5 },
+  { art: 'muenzen', muenzen: 80, w: 5, txt: 'Guter Tag' },
+  { art: 'koeder', koeder: 'boilies', runden: 4, w: 3 },
+  { art: 'koeder', koeder: 'gummi', runden: 8, w: 2.5 },
+  { art: 'muenzen', muenzen: 120, w: 2.5, txt: 'Fette Beute' },
+  { art: 'koeder', koeder: 'wattwurm', runden: 5, w: 2 },
+  { art: 'koeder', koeder: 'pilker', runden: 8, w: 1.5 },
+  { art: 'muenzen', muenzen: 200, w: 1.5, txt: 'Jackpot' },
+  { art: 'muenzen', muenzen: 300, w: 1, txt: 'Petri Jackpot!' },
+  { art: 'rute', w: .7, txt: 'Überraschungsrute' },
 ];
 const radGedreht = () => save.rad.datum === heute();
 let radLaeuft = false;
+const offeneRuten = () => RUTEN.filter(r => !save.ruten.includes(r.id));
 function radChip(preis) {
-  const c = el('div', 'radchip' + (preis.muenzen >= 200 ? ' top' : preis.muenzen >= 80 ? ' gut' : ''));
-  c.append(document.createTextNode(preis.muenzen + ' \u00b7'), el('small', '', preis.txt));
+  const c = el('div', 'radchip' + (preis.art === 'rute' || preis.muenzen >= 200 ? ' top'
+    : (preis.muenzen >= 80 || preis.koeder === 'pilker' || preis.koeder === 'boilies' || preis.koeder === 'gummi') ? ' gut' : ''));
+  if (preis.art === 'koeder') {
+    const k = K_BY[preis.koeder];
+    c.append(img(k.bild, 20), el('small', '', k.name), el('small', '', preis.runden + ' Runden'));
+  } else if (preis.art === 'rute') {
+    c.append(img(ICON_IMG.rod, 20), el('small', '', 'Rute'), el('small', '', 'Überraschung'));
+  } else {
+    c.append(document.createTextNode(preis.muenzen + ' \u00b7'), el('small', '', preis.txt));
+  }
   return c;
 }
 function radZiehen() {
@@ -1907,6 +1926,23 @@ function radZiehen() {
   for (const r of RAD) { z -= r.w; if (z <= 0) return r; }
   return RAD[0];
 }
+// Gewinn gutschreiben und einen Satz dazu liefern
+function radGutschrift(preis) {
+  if (preis.art === 'koeder') {
+    const k = K_BY[preis.koeder];
+    save.vorrat[k.id] = (save.vorrat[k.id] || 0) + preis.runden;
+    return { text: k.name + ' · ' + preis.runden + ' Runden', gross: preis.koeder === 'pilker' || preis.koeder === 'boilies' || preis.koeder === 'gummi' };
+  }
+  if (preis.art === 'rute') {
+    const offen = offeneRuten();
+    if (!offen.length) { save.coins += 300; return { text: 'Alle Ruten hast du schon: 300 Münzen', gross: true }; }
+    const r = offen[Math.floor(Math.random() * offen.length)];
+    save.ruten.push(r.id);
+    return { text: r.name + ' gewonnen!', gross: true };
+  }
+  save.coins += preis.muenzen;
+  return { text: '+' + de(preis.muenzen) + ' Münzen · ' + preis.txt, gross: preis.muenzen >= 120 };
+}
 function renderRad() {
   const streifen = $('radStreifen');
   streifen.style.transition = 'none';
@@ -1915,10 +1951,10 @@ function renderRad() {
   for (let i = 0; i < 14; i++) streifen.append(radChip(RAD[i % RAD.length]));
   const fertig = radGedreht();
   $('radGewinn').hidden = !fertig;
-  if (fertig) $('radGewinn').textContent = '+' + de(save.rad.gewinn) + ' Münzen';
+  if (fertig) $('radGewinn').textContent = save.rad.text || ('+' + de(save.rad.gewinn) + ' Münzen');
   $('radText').textContent = fertig
     ? 'Heute schon gedreht. Morgen darfst du wieder, jeden Tag einmal.'
-    : 'Zwischen 10 und 300 Münzen. Die großen Gewinne sind selten.';
+    : 'Münzen von 10 bis 300, Köderpakete, und ganz selten eine Rute.';
   $('bDrehen').disabled = fertig;
   $('bDrehen').textContent = fertig ? 'Morgen wieder' : 'Drehen';
 }
@@ -1947,16 +1983,16 @@ function drehen() {
   const takt = setInterval(() => { ticks++; if (ticks > 26) { clearInterval(takt); return; } SFX.tick(); }, 110);
   setTimeout(() => {
     clearInterval(takt);
-    save.rad = { datum: heute(), gewinn: preis.muenzen };
-    save.coins += preis.muenzen;
+    const gut = radGutschrift(preis);
+    save.rad = { datum: heute(), gewinn: preis.muenzen || 0, text: gut.text };
     persist(); updateHud(); renderMenu();
     $('radGewinn').hidden = false;
-    $('radGewinn').textContent = '+' + de(preis.muenzen) + ' Münzen · ' + preis.txt;
-    $('radText').textContent = preis.muenzen >= 120
-      ? 'Starker Tag! Das reicht für ordentlich Ausrüstung.'
+    $('radGewinn').textContent = gut.text;
+    $('radText').textContent = gut.gross
+      ? 'Starker Tag! Damit lässt sich etwas anfangen.'
       : 'Morgen darfst du wieder drehen.';
     $('bDrehen').textContent = 'Morgen wieder';
-    if (preis.muenzen >= 120) tone([523, 659, 784, 1047, 1319], .09); else SFX.buy();
+    if (gut.gross) tone([523, 659, 784, 1047, 1319], .09); else SFX.buy();
     radLaeuft = false;
   }, 3500);
 }

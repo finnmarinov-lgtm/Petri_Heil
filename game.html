@@ -193,6 +193,302 @@ kbd{font-family:var(--f-disp);font-size:11px;padding:1px 5px;border:2px solid va
 @media (prefers-reduced-motion:reduce){.btn:active{transform:none}}
 </style>
 
+<script>
+// ---------- Sprache der Oberfläche ----------
+// Die Seite ist auf Deutsch geschrieben, das bleibt die Quelle und das liest auch Google.
+// Steht die Sprache auf Englisch, werden die Texte beim Start getauscht; alles, was das
+// Spiel später einbaut, übernimmt der MutationObserver. Auf Deutsch passiert nichts.
+(function () {
+  'use strict';
+  var KEY = 'petriheil.sprache';
+
+  function sprache() {
+    try {
+      var s = localStorage.getItem(KEY);
+      if (s === 'de' || s === 'en') return s;
+    } catch (e) {}
+    return 'en';
+  }
+
+  var EN = {
+    // Kopfzeile und Grundanzeige
+    'Zeit': 'Time', 'Punkte': 'Points', 'Münzen': 'Coins', 'Rekord': 'Best', 'Pokale': 'Trophies',
+    'Tippen zum Auswerfen': 'Tap to cast', 'Tippen': 'Tap', ', Klicken oder': ', click or',
+    'Leertaste': 'space', ': auswerfen ·': ': cast ·', 'gedrückt halten': 'hold',
+    ': Köder einholen': ': reel in', 'Arcade-Angeln ·': 'Arcade fishing ·', 'Sekunden': 'seconds',
+    'Drei Gewässer, eine Runde dauert eine Minute.': 'Three waters, a round lasts one minute.',
+
+    // Anleitung
+    'So wird gespielt': 'How it works',
+    'Auswerfen:': 'Cast:',
+    'tippen, wenn der rote Pfeil über der richtigen Stelle steht. Weiter draußen ist es tiefer.':
+      'tap when the red arrow is over the right spot. The further out, the deeper.',
+    'Führen:': 'Retrieve:',
+    'gedrückt halten holt den Köder zu dir, loslassen lässt ihn sinken.':
+      'holding pulls the bait towards you, letting go lets it sink.',
+    'Anschlagen:': 'Strike:',
+    'beim Biss blinkt ein Ausrufezeichen. Dann sofort tippen, sonst spuckt der Fisch aus.':
+      'an exclamation mark flashes on the bite. Tap at once, or the fish spits the bait out.',
+    'Drillen:': 'Fight:',
+
+    // Menü und Knöpfe
+    'Zeit um': 'Time up', 'Neuer Rekord!': 'New best!', 'Dein Name für die Rangliste': 'Your name for the leaderboard',
+    'Eintragen': 'Submit', 'Nochmal': 'Again', 'Angelladen': 'Tackle shop', 'Rangliste': 'Leaderboard',
+    'Menü': 'Menu', 'Angeltasche packen': 'Pack your tackle bag', 'Münzen:': 'Coins:',
+    'Gewässer': 'Water', 'Rute': 'Rod', 'Köder': 'Bait', 'Köder:': 'Bait:',
+    'Damit beißen heute': 'Biting on this today', 'Losangeln!': 'Start fishing!', 'Zurück': 'Back',
+    'Ruten': 'Rods', 'Köder nachkaufen': 'Restock bait', 'Ausrüstung': 'Equipment', 'Angeln!': 'Fish!',
+    'Fangbuch': 'Catch log', 'entdeckt': 'discovered', 'Dein Rekord': 'Your best', 'Dein Rekord:': 'Your best:',
+    'Heute': 'Today', 'Ewige Liste': 'All time', 'Lade Rangliste …': 'Loading leaderboard …',
+    'Name': 'Name', 'Fische': 'Fish', 'Bester Fang': 'Best catch',
+    'Dein Name in der Rangliste': 'Your name on the leaderboard', 'Speichern': 'Save',
+    'Dein Spielercode. Damit holst du deinen Spielstand auf ein anderes Gerät. Schreib ihn dir auf.':
+      'Your player code. Use it to move your save to another device. Write it down.',
+    'Kopieren': 'Copy', 'Link teilen': 'Share link',
+    'Spielstand von einem anderen Gerät holen': 'Get your save from another device', 'Holen': 'Get',
+    'Einmal am Tag': 'Once a day', 'Glücksrad': 'Wheel of fortune', 'Drehen': 'Spin',
+    'Tagessee': 'Daily lake', 'Platz 1': '1st place', 'Petri Dank!': 'Tight lines!',
+    'Pause': 'Pause', 'Weiter': 'Resume', 'Runde beenden': 'End round',
+    'Tagesrunde': 'Daily round', 'Tagesrunde nochmal': 'Daily round again', 'Freies Angeln': 'Free fishing',
+    'Zählt für die Tagesrangliste. Alle angeln dasselbe Wasser.':
+      'Counts for the daily leaderboard. Everyone fishes the same water.',
+    'Beliebig oft, zufälliger Bestand': 'As often as you like, random stock',
+    'Münzen und Fangbuch zählen, die Rangliste nicht': 'Coins and catch log count, the leaderboard does not',
+    'Münzen im Beutel': 'coins in the bag', 'Im Besitz': 'Owned',
+    'Noch kein Rekordfang': 'No record catch yet', 'Noch kein Name eingetragen': 'No name entered yet',
+    'in der ewigen Liste': 'in the all-time list',
+
+    // Gewässer
+    'See': 'Lake', 'Fluss': 'River', 'Hochsee': 'Open sea',
+    'Ruhiges Wasser. Flach am Steg, weit draußen tief. Karpfen, Wels und Stör leben hier.':
+      'Calm water. Shallow by the jetty, deep further out. Carp, catfish and sturgeon live here.',
+
+    // Ruten
+    'Stippe': 'Pole', 'Matchrute': 'Match rod', 'Feederrute': 'Feeder rod', 'Karpfenrute': 'Carp rod',
+    'Spinnrute': 'Spinning rod', 'Fliegenrute': 'Fly rod', 'Pilkrute': 'Boat rod',
+    'Kurz und leicht. Kommt nur ufernah, zeigt aber jeden Zupfer.':
+      'Short and light. Only reaches close in, but shows every touch.',
+    'Feines Gerät mit weitem Wurf, ideal für Weißfisch.': 'Fine tackle with a long cast, ideal for silver fish.',
+    'Weit hinaus an den Grund, arbeitet mit dem Futterkorb.': 'Far out onto the bottom, works with the feeder.',
+    'Hält jeden Großfisch, ist dafür grob: ungenauer Wurf, später Biss, kleiner Drillbereich.':
+      'Holds any big fish, but it is coarse: inaccurate cast, late bite, small fighting range.',
+    'Für Kunstköder. Räuber packen nur zu, während du einholst, und hängen dann sofort.':
+      'For lures. Predators only take while you reel in, and then hook straight away.',
+    'Trockenfliege dicht unter der Oberfläche. Größter Drillbereich, viel Zeit zum Anschlag.':
+      'Dry fly just under the surface. Largest fighting range, plenty of time to strike.',
+    'Kurze, harte Bootsrute für schwere Pilker. Bringt auch Leng und Heilbutt hoch.':
+      'Short, stiff boat rod for heavy pilkers. Brings up ling and halibut too.',
+
+    // Köder
+    'Brotflocke': 'Bread flake', 'Mais': 'Sweetcorn', 'Bienenmaden': 'Waxworms', 'Tauwurm': 'Lobworm',
+    'Trockenfliege': 'Dry fly', 'Blinker': 'Spoon', 'Gummifisch': 'Soft lure', 'Wattwurm': 'Lugworm',
+    'Pilker': 'Pilker',
+
+    // Fische und Fundstücke
+    'Rotauge': 'Roach', 'Rotfeder': 'Rudd', 'Brasse': 'Bream', 'Barsch': 'Perch', 'Schleie': 'Tench',
+    'Regenbogenforelle': 'Rainbow trout', 'Aal': 'Eel', 'Karpfen': 'Carp', 'Hecht': 'Pike',
+    'Zander': 'Zander', 'Spiegelkarpfen': 'Mirror carp', 'Wels': 'Catfish', 'Stör': 'Sturgeon',
+    'Äsche': 'Grayling', 'Döbel': 'Chub', 'Barbe': 'Barbel', 'Graskarpfen': 'Grass carp', 'Koi': 'Koi',
+    'Meerforelle': 'Sea trout', 'Huchen': 'Danube salmon', 'Rochen': 'Ray', 'Blauhai': 'Blue shark',
+    'Makrele': 'Mackerel', 'Köhler': 'Pollock', 'Dorsch': 'Cod', 'Scholle': 'Plaice', 'Leng': 'Ling',
+    'Heilbutt': 'Halibut', 'Netzrest': 'Scrap of net', 'Konservendose': 'Tin can', 'Wurzel': 'Root',
+    'Alter Reifen': 'Old tyre', 'Gummistiefel': 'Wellington boot',
+
+    // Angelladen
+    'Rolle': 'Reel', 'Futterkorb': 'Feeder', 'Blei': 'Lead', 'Thermoskanne': 'Thermos',
+    'Kinderrolle': 'Kids reel', 'Freilaufrolle': 'Baitrunner', 'Weitwurfrolle': 'Long-cast reel',
+    'Big-Pit-Rolle': 'Big pit reel', 'ohne': 'none', 'Method-Feeder': 'Method feeder',
+    'Method + Lockfutter': 'Method + groundbait',
+
+    // Meldungen im Spiel
+    'Der Köder fliegt …': 'The bait is flying …',
+    'Halten: grünen Balken hoch': 'Hold: keep the green bar up',
+    'liegt am Grund': 'on the bottom', 'am Grund, weit draußen': 'on the bottom, far out',
+    'Der Köder ist abgetrieben. Neu auswerfen!': 'The bait has drifted off. Cast again!',
+    'Hänger gelöst.': 'Snag freed.',
+    'Der Köder sinkt schneller zum Grund.': 'The bait sinks to the bottom faster.',
+    'Mit dieser Kombination beißt hier nichts.': 'Nothing bites here with this combination.',
+    'Kein Fang diesmal. Wirf weiter raus, dort ist es tiefer und die Fische sind größer.':
+      'No catch this time. Cast further out, it is deeper there and the fish are bigger.',
+    'Diese Tagesrunde war heute schon dran, sie zählt nur für Münzen und das Fangbuch.':
+      'You have already played this daily round today, so it only counts for coins and the catch log.',
+    'Freies Angeln: Münzen und Fangbuch zählen, die Tagesrangliste nicht.':
+      'Free fishing: coins and catch log count, the daily leaderboard does not.',
+    'LEGENDÄR!': 'LEGENDARY!', 'legendär': 'legendary',
+
+    // Spielercode und Rangliste
+    'Der Code sieht nicht richtig aus. Er hat die Form PETRI-A1B2-C3D4.':
+      'That code does not look right. It has the form PETRI-A1B2-C3D4.',
+    'Das ist schon dein eigener Code.': 'That is already your own code.',
+    'Das hat nicht geklappt. Bist du online?': 'That did not work. Are you online?',
+    'Zu diesem Code gibt es keinen Spielstand.': 'There is no save for that code.',
+    'Der Spielstand auf diesem Gerät wird durch den geladenen ersetzt. Weiter?':
+      'The save on this device will be replaced by the loaded one. Continue?',
+    'Die Rangliste ist gerade nicht erreichbar. Dein Rekord bleibt gespeichert.':
+      'The leaderboard cannot be reached right now. Your record stays saved.',
+    'Noch keine Einträge. Spiel eine Runde und trag dich ein.':
+      'No entries yet. Play a round and add yourself.',
+    'Heute hat noch niemand den Tagessee gefischt.': 'Nobody has fished the daily lake yet today.',
+    'Gib einen Namen ein, dann landet dein Rekord in der Rangliste.':
+      'Enter a name and your record goes on the leaderboard.',
+    'Dein Rekord wird in die Rangliste eingetragen.': 'Your record will be added to the leaderboard.',
+    'Link geteilt. Auf dem anderen Gerät öffnen, fertig.': 'Link shared. Open it on the other device, done.',
+    'Link kopiert. Öffne ihn auf dem anderen Gerät, dann ist der Spielstand dort.':
+      'Link copied. Open it on the other device and your save is there.',
+
+    // Glücksrad
+    'Heute schon gedreht. Morgen darfst du wieder, jeden Tag einmal.':
+      'Already spun today. You can spin again tomorrow, once a day.',
+    'Münzen von 10 bis 300, Köderpakete, und ganz selten eine Rute.':
+      'Coins from 10 to 300, bait packs, and very rarely a rod.',
+    'Starker Tag! Damit lässt sich etwas anfangen.': 'Strong day! That gets you somewhere.',
+    'Morgen darfst du wieder drehen.': 'You can spin again tomorrow.',
+    'Alle Ruten hast du schon: 300 Münzen': 'You already own every rod: 300 coins',
+  };
+
+  // Ergänzungen, die als ganzer Text vorkommen
+  EN['Angeltasche'] = 'Tackle bag';
+  EN['Heute noch frei, einmal am Tag'] = 'Free today, once a day';
+  EN['Ein kostenloses Angelspiel im Retro-Look: Es läuft ohne Installation direkt im Browser, am PC und am Handy, und lässt sich als App auf den Startbildschirm legen.'] =
+    'A free fishing game in retro style: it runs without any install straight in the browser, on desktop and phone, and can be added to your home screen as an app.';
+  EN['Angeln in 60 Sekunden:'] = 'Fishing in 60 seconds:';
+  EN['auswerfen, die Tiefe wählen, den Köder führen, beim Biss anschlagen und den Fisch drillen, ohne dass die Schnur reißt.'] =
+    'cast, pick your depth, work the bait, set the hook on the bite and fight the fish without snapping the line.';
+  EN['Angeltasche:'] = 'Tackle bag:';
+  EN['sechs Ruten und neun Köder. Jede Art hat ihre Vorlieben, die falsche Rute kostet den Fisch.'] =
+    'six rods and nine baits. Every species has its preferences, and the wrong rod loses you the fish.';
+  EN['Fangbuch:'] = 'Catch log:';
+  EN['Drei Gewässer:'] = 'Three waters:';
+  EN['Petri Heil – Pixel-Angelspiel im Browser'] = 'Petri Heil – a pixel fishing game in your browser';
+
+  EN['mit'] = 'with';
+  EN['wirft aus, gedrückt halten holt ein'] = 'to cast, hold to reel in';
+  EN['heimische Süßwasserfische vom Rotauge bis zum Stör, dazu Forelle, Äsche, Döbel und Barbe im Fluss und die Arten der Hochsee.'] =
+    'native freshwater fish from roach to sturgeon, plus trout, grayling, chub and barbel in the river and the species of the open sea.';
+  EN['See, Fluss mit Strömung und Hochsee – jeden Tag derselbe Fischbestand für alle, mit eigener Tagesrangliste.'] =
+    'lake, river with current and open sea – the same fish population for everyone each day, with its own daily leaderboard.';
+  EN['Gebaut als einzelne HTML-Seite, Spielstand und Rangliste über einen Spielercode statt Anmeldung.'] =
+    'Built as a single HTML page; save and leaderboard run on a player code instead of an account.';
+
+  var MUSTER = [
+    [/^Dein Rekord: (\d+) Punkte$/, 'Your best: $1 points'],
+    [/(Tippen|Tap) wirft aus, gedrückt halten holt ein/, 'tap to cast, hold to reel in'],
+    [/^(.+) · (.+) mit (.+) · Tippen wirft aus, gedrückt halten holt ein$/,
+      '$1 · $2 with $3 · tap to cast, hold to reel in'],
+    [/^Noch (\d+) von (\d+) offen: (.+)$/, '$1 of $2 left: $3'],
+    [/^(\d+) von (\d+) Arten entdeckt$/, '$1 of $2 species discovered'],
+    [/^(\d+) von (\d+) Ruten gekauft$/, '$1 of $2 rods bought'],
+    [/^(.+) aufgebraucht\. Nächste Runde mit Brotflocke\.$/, '$1 used up. Next round with bread flake.'],
+    [/^(.+) war zu stark für die (.+)$/, '$1 was too strong for the $2'],
+    [/^(.+) gekauft und eingepackt\.$/, '$1 bought and packed.'],
+    [/^(\d+) Münzen im Beutel$/, '$1 coins in the bag'],
+    [/^(\d+) Punkte mit (.+)$/, '$1 points with $2'],
+    [/^Übung · (.+)$/, 'Practice · $1'],
+    [/^Tagesrunde · (.+)$/, 'Daily round · $1'],
+    [/^(\d+) Gewässer, (\d+) Arten, eine Runde dauert eine Minute\.$/,
+      '$1 waters, $2 species, a round lasts one minute.'],
+  ];
+
+  // Alle Einträge aus einem Wort: die werden auch mitten in zusammengesetzten
+  // Zeilen ersetzt (Fischarten, Ruten, Köder, Gewässer, kurze Beschriftungen).
+  var EINZELWORT = {};
+  for (var schluessel in EN) {
+    if (!/[ ·:,.!?]/.test(schluessel) && schluessel.length <= 20 && EN[schluessel] !== schluessel) {
+      EINZELWORT[schluessel] = EN[schluessel];
+    }
+  }
+
+  var ATTRIBUTE = ['aria-label', 'title', 'placeholder'];
+
+  function text(knoten) {
+    var roh = knoten.nodeValue;
+    if (!roh) return;
+    var t = roh.trim();
+    if (!t || t.length > 400) return;
+    // Wichtig: nie ersetzen, wenn dabei derselbe Text herauskommt - das Setzen
+    // loest sonst wieder eine Meldung aus und der Beobachter dreht sich im Kreis.
+    if (EN[t]) { if (EN[t] !== t) knoten.nodeValue = roh.replace(t, EN[t]); return; }
+    for (var i = 0; i < MUSTER.length; i++) {
+      if (MUSTER[i][0].test(t)) {
+        var neu = t.replace(MUSTER[i][0], MUSTER[i][1]);
+        if (neu !== t) knoten.nodeValue = roh.replace(t, neu);
+        return;
+      }
+    }
+    // Letzter Durchgang: einzelne Wörter, die für sich stehen - Fischarten,
+    // Ruten, Köder, Gewässer. Damit werden auch zusammengesetzte Zeilen wie
+    // "See · Stippe" oder "Köder: Bienenmaden" lesbar.
+    if (t.length <= 120 && /[A-Za-zÄÖÜäöüß]/.test(t)) {
+      var teile = t.split(/([^A-Za-zÄÖÜäöüß-]+)/);
+      var getauscht = false;
+      for (var k = 0; k < teile.length; k++) {
+        var w = EINZELWORT[teile[k]];
+        if (w) { teile[k] = w; getauscht = true; }
+      }
+      if (getauscht) {
+        var zeile = teile.join('');
+        if (zeile !== t) knoten.nodeValue = roh.replace(t, zeile);
+      }
+    }
+  }
+
+  function element(el) {
+    if (!el.getAttribute) return;
+    for (var i = 0; i < ATTRIBUTE.length; i++) {
+      var w = el.getAttribute(ATTRIBUTE[i]);
+      if (w && EN[w.trim()]) el.setAttribute(ATTRIBUTE[i], EN[w.trim()]);
+    }
+  }
+
+  function uebersetze(wurzel) {
+    if (wurzel.nodeType === 3) { text(wurzel); return; }
+    if (wurzel.nodeType !== 1) return;
+    element(wurzel);
+    var lauf = document.createTreeWalker(wurzel, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT);
+    var n = lauf.nextNode();
+    while (n) { if (n.nodeType === 3) text(n); else element(n); n = lauf.nextNode(); }
+  }
+
+  function knopf() {
+    var leiste = document.getElementById('btnSound');
+    if (!leiste || !leiste.parentNode || document.getElementById('btnLang')) return;
+    var b = document.createElement('button');
+    b.id = 'btnLang';
+    b.type = 'button';
+    b.className = leiste.className;
+    b.textContent = sprache() === 'en' ? 'DE' : 'EN';
+    b.title = sprache() === 'en' ? 'Auf Deutsch umstellen' : 'Switch to English';
+    b.addEventListener('click', function () {
+      try { localStorage.setItem(KEY, sprache() === 'en' ? 'de' : 'en'); } catch (e) {}
+      location.reload();
+    });
+    leiste.parentNode.insertBefore(b, leiste);
+  }
+
+  function start() {
+    // Der Knopf sitzt in der Kopfzeile, die beim Start des Skripts noch nicht
+    // geparst ist - deshalb sofort versuchen und später noch einmal.
+    knopf();
+    document.addEventListener('DOMContentLoaded', knopf, { once: true });
+    setTimeout(knopf, 800);
+    if (sprache() === 'de') { document.documentElement.lang = 'de'; return; }
+    document.documentElement.lang = 'en';
+    uebersetze(document.body);
+    new MutationObserver(function (liste) {
+      for (var i = 0; i < liste.length; i++) {
+        var e = liste[i];
+        if (e.type === 'characterData') text(e.target);
+        else for (var j = 0; j < e.addedNodes.length; j++) uebersetze(e.addedNodes[j]);
+      }
+    }).observe(document.body, { childList: true, subtree: true, characterData: true });
+  }
+
+  if (document.body) start();
+  else document.addEventListener('DOMContentLoaded', start, { once: true });
+})();
+</script>
+
+
 <div class="app">
   <header class="top">
     <h1 class="logo">Petri Heil</h1>

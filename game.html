@@ -362,6 +362,26 @@ kbd{font-family:var(--f-disp);font-size:11px;padding:1px 5px;border:2px solid va
   EN['Petri Heil – Pixel-Angelspiel im Browser'] = 'Petri Heil – a pixel fishing game in your browser';
 
   EN['mit'] = 'with';
+  EN['Platz'] = 'Rank';
+  // Rangliste
+  EN['Rekord gespeichert. Die gemeinsame Rangliste gibt es in der Claude-Version des Spiels.'] =
+    'Record saved. The shared leaderboard lives in the Claude version of the game.';
+  EN['Du kannst die Rangliste ansehen, aber nichts eintragen.'] =
+    'You can look at the leaderboard, but not add anything.';
+  EN['Die gemeinsame Rangliste gibt es nur in der Claude-Version des Spiels. Hier zählt dein eigener Rekord.'] =
+    'The shared leaderboard only exists in the Claude version of the game. Here your own record counts.';
+  EN['Die Tagesrangliste braucht noch den neuen SQL-Block in Supabase.'] =
+    'The daily leaderboard still needs the new SQL block in Supabase.';
+  // Angelladen und Angeltasche
+  EN['Reicht für'] = 'Enough for';
+  EN['Dafür:'] = 'For this:';
+  EN['nur mit Spinn- oder Fliegenrute'] = 'only with a spinning or fly rod';
+  EN['für jede normale Rute'] = 'for any normal rod';
+  EN['Münzen, Rekord'] = 'Coins, record';
+  EN['Pause und Menü'] = 'Pause and menu';
+  EN['Pixel-Angelsee mit Steg und Angler'] = 'Pixel fishing lake with a jetty and an angler';
+  EN['Die Strömung treibt den Köder ab, du musst öfter neu auswerfen. In der tiefen Rinne stehen die Großen.'] =
+    'The current carries the bait away, so you have to cast again more often. The big ones sit in the deep channel.';
   EN['wirft aus, gedrückt halten holt ein'] = 'to cast, hold to reel in';
   EN['heimische Süßwasserfische vom Rotauge bis zum Stör, dazu Forelle, Äsche, Döbel und Barbe im Fluss und die Arten der Hochsee.'] =
     'native freshwater fish from roach to sturgeon, plus trout, grayling, chub and barbel in the river and the species of the open sea.';
@@ -372,6 +392,13 @@ kbd{font-family:var(--f-disp);font-size:11px;padding:1px 5px;border:2px solid va
 
   var MUSTER = [
     [/^Dein Rekord: (\d+) Punkte$/, 'Your best: $1 points'],
+    [/^Tagesrunde erledigt: (.+) Punkte$/, 'Daily round done: $1 points'],
+    [/^Platz (\d+)$/, 'Rank $1'],
+    [/^Platz (\d+) · (.+)$/, 'Rank $1 · $2'],
+    [/^Reicht für (.+)$/, 'Enough for $1'],
+    [/^(\d+) Runden$/, '$1 rounds'],
+    [/^(.+) Punkte$/, '$1 points'],
+    [/^(.+) Münzen$/, '$1 coins'],
     [/(Tippen|Tap) wirft aus, gedrückt halten holt ein/, 'tap to cast, hold to reel in'],
     [/^(.+) · (.+) mit (.+) · Tippen wirft aus, gedrückt halten holt ein$/,
       '$1 · $2 with $3 · tap to cast, hold to reel in'],

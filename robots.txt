@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://finnmarinov-lgtm.github.io/Petri_Heil/sitemap.xml

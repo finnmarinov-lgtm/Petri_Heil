@@ -17,7 +17,20 @@ html,body{margin:0}
 img{max-width:100%}
 [hidden]{display:none!important}
 </style>
-<title>Petri Heil</title>
+<title>Petri Heil – Pixel-Angelspiel im Browser, kostenlos und ohne Installation</title>
+<meta name="description" content="Petri Heil ist ein kostenloses Angelspiel im Browser: Pixel-Optik, 60-Sekunden-Runden, Angelladen mit Ruten und Ködern, Fangbuch mit heimischen Fischarten und eine Tagesrangliste. Ohne Installation, auch auf dem Handy.">
+<link rel="canonical" href="https://finnmarinov-lgtm.github.io/Petri_Heil/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Petri Heil">
+<meta property="og:title" content="Petri Heil – Pixel-Angelspiel im Browser">
+<meta property="og:description" content="Kostenloses Pixel-Angelspiel im Browser: auswerfen, drillen, Fangbuch füllen. Ohne Installation, auch auf dem Handy.">
+<meta property="og:url" content="https://finnmarinov-lgtm.github.io/Petri_Heil/">
+<meta property="og:locale" content="de_DE">
+<meta property="og:image" content="https://finnmarinov-lgtm.github.io/Petri_Heil/vorschau.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://finnmarinov-lgtm.github.io/Petri_Heil/vorschau.jpg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=VT323&display=swap">
@@ -32,6 +45,13 @@ img{max-width:100%}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 html,body{margin:0;background:var(--ink);color:var(--cream)}
+.about{max-width:640px;margin:18px auto 30px;padding:0 4px;color:var(--muted);font-size:17px;line-height:1.45;text-align:left}
+.about h1{font-family:var(--f-disp);font-size:19px;color:var(--cream);margin:0 0 8px;text-align:center}
+.about p{margin:0 0 8px}
+.about ul{margin:0 0 8px;padding-left:18px}
+.about li{margin-bottom:4px}
+.about b{color:var(--cream)}
+.about .tech{font-size:15px;opacity:.8}
 body{font-family:var(--f-body);font-size:20px;line-height:1.2;padding-inline:16px;padding-block:14px 28px;
   background-image:radial-gradient(var(--ink-2) 1px,transparent 1px);background-size:6px 6px}
 .app{max-width:1060px;margin-inline:auto;display:flex;flex-direction:column;align-items:center;gap:12px}
@@ -364,6 +384,18 @@ kbd{font-family:var(--f-disp);font-size:11px;padding:1px 5px;border:2px solid va
     <div class="actions"><button class="btn primary" id="bResume" type="button">Weiter</button><button class="btn" id="bQuit" type="button">Runde beenden</button></div>
   </div>
 </div>
+
+<section class="about">
+  <h1>Petri Heil – Pixel-Angelspiel im Browser</h1>
+  <p>Ein kostenloses Angelspiel im Retro-Look: Es läuft ohne Installation direkt im Browser, am PC und am Handy, und lässt sich als App auf den Startbildschirm legen.</p>
+  <ul>
+    <li><b>Angeln in 60 Sekunden:</b> auswerfen, die Tiefe wählen, den Köder führen, beim Biss anschlagen und den Fisch drillen, ohne dass die Schnur reißt.</li>
+    <li><b>Angeltasche:</b> sechs Ruten und neun Köder. Jede Art hat ihre Vorlieben, die falsche Rute kostet den Fisch.</li>
+    <li><b>Fangbuch:</b> heimische Süßwasserfische vom Rotauge bis zum Stör, dazu Forelle, Äsche, Döbel und Barbe im Fluss und die Arten der Hochsee.</li>
+    <li><b>Drei Gewässer:</b> See, Fluss mit Strömung und Hochsee – jeden Tag derselbe Fischbestand für alle, mit eigener Tagesrangliste.</li>
+  </ul>
+  <p class="tech">Gebaut als einzelne HTML-Seite, Spielstand und Rangliste über einen Spielercode statt Anmeldung.</p>
+</section>
 
 <script>
 (() => {
@@ -1755,6 +1787,27 @@ const SB = {
   url: 'https://yzzipjtounvktdhhvrnt.supabase.co',
   key: 'sb_publishable_OCNFFT4wa4CMaHyhcLAY4A_u2flZF1s', // anon public key (darf oeffentlich sein)
 };
+// Zaehlt Seitenaufrufe (nur Datum und Herkunft) in derselben Tabelle wie Feuer Frei
+(function zaehleAufruf() {
+  if (!location.protocol.startsWith('http') || location.hostname === 'localhost') return;
+  let quelle = 'direkt';
+  try {
+    if (document.referrer) {
+      let h = new URL(document.referrer).hostname;
+      if (h.indexOf('www.') === 0) h = h.slice(4);
+      if (h && h !== location.hostname) quelle = h.slice(0, 60);
+    }
+  } catch (e) {}
+  try {
+    fetch(SB.url + '/rest/v1/rpc/seite_aufgerufen', {
+      method: 'POST',
+      headers: { apikey: SB.key, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ p_quelle: quelle }),
+      keepalive: true,
+    }).catch(function () {});
+  } catch (e) {}
+})();
+
 let sbOn = false, sbBusy = false, sbDirty = false, sbTimer = 0, boardTimer = 0, sbAltDb = false;
 let lbTag = [], boardTab = 'tag';
 const CODE_RE = /^PETRI-[A-Z0-9]{4}-[A-Z0-9]{4}$/;

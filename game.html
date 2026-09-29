@@ -2090,7 +2090,7 @@ const SB = {
   url: 'https://yzzipjtounvktdhhvrnt.supabase.co',
   key: 'sb_publishable_OCNFFT4wa4CMaHyhcLAY4A_u2flZF1s', // anon public key (darf oeffentlich sein)
 };
-// Zaehlt Seitenaufrufe (nur Datum und Herkunft) in derselben Tabelle wie Feuer Frei
+// Zaehlt Seitenaufrufe (nur Datum, Herkunft und Spielname) in derselben Tabelle wie Feuer Frei
 (function zaehleAufruf() {
   if (!location.protocol.startsWith('http') || location.hostname === 'localhost') return;
   let quelle = 'direkt';
@@ -2105,7 +2105,7 @@ const SB = {
     fetch(SB.url + '/rest/v1/rpc/seite_aufgerufen', {
       method: 'POST',
       headers: { apikey: SB.key, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ p_quelle: quelle }),
+      body: JSON.stringify({ p_quelle: quelle, p_spiel: 'petri-heil' }),
       keepalive: true,
     }).catch(function () {});
   } catch (e) {}

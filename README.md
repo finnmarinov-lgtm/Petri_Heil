@@ -38,7 +38,7 @@ Danach `http://localhost:4173` im Browser öffnen. Für die Installation als App
 
 ## Veröffentlichen (GitHub Pages)
 
-Repository: `Petri_Heil` von `finnmarinov-lgtm`, Adresse https://finnmarinov-lgtm.github.io/Petri_Heil/
+Repository: `Petri_Heil` von `finnmarinov-lgtm`, Adresse https://petri.fmcode.de/
 
 Nach Änderungen die geänderten Dateien dort über *Add file → Upload files* hochladen.
 

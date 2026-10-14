@@ -120,6 +120,7 @@ kbd{font-family:var(--f-disp);font-size:11px;padding:1px 5px;border:2px solid va
   .stage{border-width:2px;box-shadow:3px 3px 0 var(--shadow)}
 }
 /* Fangbuch als Buch */
+#mAlbum{scrollbar-gutter:stable}
 .buch{position:relative;background:#4a2c1a;border:3px solid #2b180d;border-radius:6px 12px 12px 6px;padding:10px 12px 12px 10px;box-shadow:6px 6px 0 var(--shadow),inset 0 0 0 2px #6b4226;perspective:1800px}
 .buch.zu{max-width:360px;width:100%;margin-inline:auto;padding:0;border:0;background:none;box-shadow:none}
 .seiten{display:flex;position:relative}
@@ -142,7 +143,7 @@ kbd{font-family:var(--f-disp);font-size:11px;padding:1px 5px;border:2px solid va
 .legenden .eintrag img{height:96px}
 .legenden .eintrag span{font-size:22px}
 .legenden .stempel{top:auto;bottom:16px;right:16px}
-.seiten-info{margin-top:auto;border-top:2px dashed #c9ad7e;padding-top:6px;font-size:18px;line-height:1.1;color:#4a3828;height:140px;overflow:hidden}
+.seiten-info{margin-top:auto;border-top:2px dashed #c9ad7e;padding-top:6px;font-size:18px;line-height:1.1;color:#4a3828;min-height:var(--info-h,66px)}
 .seiten-info b{font-family:var(--f-disp);font-size:13px;color:#5a3418}
 .seiten-info p{margin:3px 0}
 .seiten-info .tag{margin-top:2px}
@@ -2543,35 +2544,68 @@ function renderAlbum() {
   buch.blatt = clamp(buch.blatt, 0, v.length - 1);
   const box = $('buchSeiten'), ansicht = v[buch.blatt];
   box.textContent = '';
-  buchHoehe(v);
   $('buch').classList.toggle('zu', !!ansicht[0].cover);
   for (const s of ansicht) box.append(s.cover ? buchCover() : buchSeite(s));
+  // mit der Breite der angezeigten Seite messen; ändert sich die Breite dadurch (Scrollbalken), noch einmal
+  const echt = box.querySelector('.seite');
+  for (let i = 0; i < 2; i++) {
+    const breite = echt ? echt.offsetWidth : 0;
+    buchHoehe(v, breite);
+    if (!echt || echt.offsetWidth === breite) break;
+  }
   $('buchSeite').textContent = buch.blatt === 0 ? 'Cover' : buch.blatt + ' / ' + (v.length - 1);
   $('buchZurueck').disabled = buch.blatt === 0;
   $('buchVor').disabled = buch.blatt >= v.length - 1;
 }
 // Ein Buch hat überall dieselbe Größe: alle Seiten (und das Cover) so hoch wie die höchste Seite.
-// Dafür werden alle Seiten einmal unsichtbar in voller Breite gesetzt und gemessen.
-function buchHoehe(v) {
-  const b = $('buch'), warZu = b.classList.contains('zu');
-  b.classList.remove('zu');
-  b.style.removeProperty('--seite-h');
-  const breite = $('buchSeiten').clientWidth, mess = el('div', 'seiten');
+// Dafür werden alle Seiten einmal unsichtbar in voller Breite gesetzt und gemessen, vorher der
+// Infokasten so hoch wie der längste Text, der darin je stehen kann (Breite und Sprache zählen).
+// Der Übersetzer tauscht Texte erst nach dem Anzeigen: Messseiten vorher selbst übersetzen,
+// sonst misst man die deutschen Texte (andere Längen, andere Zeilenumbrüche)
+function uebersetzt(knoten) {
+  if (!window.PH_T) return;
+  const w = document.createTreeWalker(knoten, NodeFilter.SHOW_TEXT);
+  for (let t = w.nextNode(); t; t = w.nextNode()) t.nodeValue = PH_T(t.nodeValue);
+}
+function buchHoehe(v, seitenBreite) {
+  const b = $('buch'), warZu = b.classList.contains('zu'), n = BUCH_BREIT.matches ? 2 : 1;
+  // beim Cover gibt es keine Seite zum Abmessen: Breite des aufgeschlagenen Buchs nehmen
+  if (!seitenBreite) b.classList.remove('zu');
+  const breite = seitenBreite ? seitenBreite * n : $('buchSeiten').clientWidth, mess = el('div', 'seiten');
   Object.assign(mess.style, { position: 'absolute', visibility: 'hidden', left: '0', top: '0', width: breite + 'px', flexWrap: 'wrap' });
-  const n = BUCH_BREIT.matches ? 2 : 1;
+  mess.style.setProperty('--info-h', '0px');   // die bisherige Höhe darf die Messung nicht beeinflussen
+  const probe = el('div', 'blatt seite');
+  probe.style.flex = '0 0 ' + (100 / n) + '%';
+  mess.append(probe);
+  b.append(mess);
+  let infoH = 0;
+  for (const s of buchSeiten()) {
+    for (const sp of [null, ...s.arten]) {
+      probe.textContent = '';
+      const info = buchInfo(sp, s);
+      probe.append(info);
+      uebersetzt(info);
+      infoH = Math.max(infoH, info.offsetHeight);
+    }
+  }
+  mess.textContent = '';
   for (const ansicht of v) {
     for (const s of ansicht) {
       if (s.cover) continue;
       const p = buchSeite(s);
       p.style.flex = '0 0 ' + (100 / n) + '%';
+      uebersetzt(p);
       mess.append(p);
     }
   }
-  b.append(mess);
+  // gemessene Seiten mit dem neuen Infokasten, aber ohne die alte Mindesthöhe
+  mess.style.setProperty('--info-h', infoH + 'px');
+  mess.style.setProperty('--seite-h', '0px');
   let h = 0;
   for (const p of mess.children) h = Math.max(h, p.offsetHeight);
   mess.remove();
   if (warZu) b.classList.add('zu');
+  if (infoH) b.style.setProperty('--info-h', infoH + 'px');
   if (h) b.style.setProperty('--seite-h', h + 'px');
 }
 function buchCover() {
@@ -2646,6 +2680,8 @@ $('buchVor').onclick = () => blaettern(1);
   });
 }
 BUCH_BREIT.addEventListener('change', () => { if (!$('mAlbum').hidden) { buch.blatt = 0; renderAlbum(); } });
+// Pixel-Schriften kommen erst nach dem Start: dann neu messen, sonst passen die Seitenhöhen nicht
+if (document.fonts) document.fonts.ready.then(() => { if (!$('mAlbum').hidden) renderAlbum(); });
 
 // ---------- Onlinekonto der App-Version (Supabase) ----------
 const SB = {

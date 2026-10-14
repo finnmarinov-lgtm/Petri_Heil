@@ -140,21 +140,48 @@ kbd{font-family:var(--f-disp);font-size:11px;padding:1px 5px;border:2px solid va
   .hint{font-size:16px;line-height:1.1}
   .stage{border-width:2px;box-shadow:3px 3px 0 var(--shadow)}
 }
-#albumGrid{display:flex;flex-direction:column;gap:6px}
-#albumGrid .eyebrow{margin-top:6px}
-.album{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
-.card{padding:10px;background:var(--ink-2);border:2px solid var(--line);display:flex;flex-direction:column;gap:4px}
-.card .pic{height:48px;display:flex;align-items:center;justify-content:center}
-.card h3{margin:0;font-family:var(--f-disp);font-size:11px;letter-spacing:.03em;line-height:1.35;overflow-wrap:anywhere;hyphens:auto}
-.card p{margin:0;color:var(--muted);font-size:17px;line-height:1.15;overflow-wrap:anywhere}
-.card.unk h3{color:var(--muted)}
-.album.komplett{outline:3px solid var(--gold);outline-offset:5px}
-.kopf-komplett{display:flex;flex-wrap:wrap;align-items:center;gap:8px;color:var(--gold)}
-.pokalband{font-family:var(--f-disp);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink);background:var(--gold);padding:3px 7px}
-@media (prefers-reduced-motion:no-preference){
-  .album.komplett{animation:glanz 2.6s ease-in-out infinite}
-  @keyframes glanz{0%,100%{outline-color:var(--gold)}50%{outline-color:#fff0b8}}
-}
+/* Fangbuch als Buch */
+.buch{position:relative;background:#4a2c1a;border:3px solid #2b180d;border-radius:6px 12px 12px 6px;padding:10px 12px 12px 10px;box-shadow:6px 6px 0 var(--shadow),inset 0 0 0 2px #6b4226;perspective:1800px}
+.buch.zu{max-width:360px;width:100%;margin-inline:auto;padding:0;border:0;background:none;box-shadow:none}
+.seiten{display:flex;position:relative}
+.blatt{flex:1 1 0;min-width:0;position:relative}
+.seite{background:#f4ead4 repeating-linear-gradient(180deg,#f4ead4 0 23px,#e9dcc0 23px 24px);color:#3b2a1c;padding:14px 14px 12px;min-height:440px;display:flex;flex-direction:column;gap:10px;box-shadow:inset -8px 0 12px -8px rgba(60,35,15,.35)}
+.seite + .seite{box-shadow:inset 10px 0 14px -8px rgba(60,35,15,.5)}
+.seiten-kopf{display:flex;justify-content:space-between;align-items:baseline;gap:8px;border-bottom:2px solid #b89a6a;padding-bottom:4px}
+.seiten-kopf h3{margin:0;font-family:var(--f-disp);font-size:18px;color:#5a3418}
+.seiten-kopf span{font-size:19px;color:#7a5a3a}
+.eintraege{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px 4px}
+.eintrag{all:unset;box-sizing:border-box;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:3px;padding:5px 2px;border-radius:4px;text-align:center;font-family:var(--f-body);font-size:17px;line-height:1;color:#3b2a1c;position:relative;min-height:56px}
+.eintrag img{image-rendering:pixelated;height:26px;width:auto;max-width:100%;object-fit:contain}
+.eintrag.unbekannt span{font-family:var(--f-disp);font-size:15px;color:#9a8a74}
+.eintrag.gewaehlt,.eintrag:focus-visible{background:rgba(185,140,80,.25);outline:2px solid #b8894a}
+.eintrag .rar{position:absolute;top:3px;right:6px;width:7px;height:7px;background:var(--gold);border:1px solid #6b4226}
+.eintrag .rar.episch{background:#8f63d6}
+.eintrag .rar.legende{background:#e4573d}
+.legenden .eintraege{grid-template-columns:1fr}
+.legenden .eintrag{min-height:150px}
+.legenden .eintrag img{height:96px}
+.legenden .eintrag span{font-size:22px}
+.legenden .stempel{top:auto;bottom:16px;right:16px}
+.seiten-info{margin-top:auto;border-top:2px dashed #c9ad7e;padding-top:6px;font-size:18px;line-height:1.1;color:#4a3828;min-height:66px}
+.seiten-info b{font-family:var(--f-disp);font-size:13px;color:#5a3418}
+.seiten-info p{margin:3px 0}
+.seiten-info .tag{margin-top:2px}
+.stempel{position:absolute;top:46px;right:12px;transform:rotate(-12deg);font-family:var(--f-disp);font-size:13px;color:#b8433a;border:2px solid #b8433a;padding:2px 6px;opacity:.85;pointer-events:none}
+.cover{background:#4a2c1a;border:3px solid #2b180d;border-radius:4px 12px 12px 4px;min-height:440px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;box-shadow:6px 6px 0 var(--shadow),inset 12px 0 0 #3a2213,inset 14px 0 0 #2b180d}
+.cover-rahmen{position:absolute;inset:16px 16px 16px 28px;border:2px solid #b8894a;opacity:.55;pointer-events:none}
+.cover-titel{display:flex;flex-direction:column;align-items:center;gap:14px;color:#d9a441;text-align:center;padding-left:12px}
+.cover-titel b{font-family:var(--f-disp);font-size:30px;text-shadow:2px 2px 0 #24130a}
+.cover-titel img{image-rendering:pixelated;width:132px;filter:sepia(1) saturate(1.8) brightness(.95)}
+.cover-titel span{font-size:21px;color:#e8cfa0}
+.cover-tipp{position:absolute;bottom:20px;color:#c9a87a;font-size:17px}
+.blaettern{display:flex;align-items:center;justify-content:center;gap:16px;font-family:var(--f-disp);font-size:13px;color:var(--muted)}
+.blaettern .btn{min-width:52px}
+.umblatt{position:absolute;margin:0;z-index:3;pointer-events:none;backface-visibility:hidden}
+.umblatt.vor{transform-origin:left center;animation:blattVor .45s ease-in forwards}
+.umblatt.zurueck{transform-origin:right center;animation:blattZurueck .45s ease-in forwards}
+@keyframes blattVor{from{transform:rotateY(0)}to{transform:rotateY(-180deg)}}
+@keyframes blattZurueck{from{transform:rotateY(0)}to{transform:rotateY(180deg)}}
 .tag.episch{background:#8f63d6;color:#f6f1ff}
 .tag{align-self:flex-start;font-family:var(--f-disp);font-size:9px;letter-spacing:.08em;text-transform:uppercase;padding:2px 5px;background:var(--gold);color:var(--ink)}
 .tablewrap{overflow-x:auto}
@@ -448,6 +475,25 @@ kbd{font-family:var(--f-disp);font-size:11px;padding:1px 5px;border:2px solid va
   EN['Maximal'] = 'Maxed out';
   EN['unbegrenzt'] = 'unlimited';
   EN['Komplett! Alle Arten gefangen'] = 'Complete! Every species caught';
+  // Sandkrake und Fangbuch als Buch (14.10.2026)
+  EN['Sandkrake'] = 'Sand kraken'; EN['Krakenköder'] = 'Kraken bait'; EN['Legenden'] = 'Legends';
+  EN['legende'] = 'legend'; EN['Komplett!'] = 'Complete!'; EN['Cover'] = 'Cover';
+  EN['Antippen zum Aufschlagen'] = 'Tap to open';
+  EN['Tippe auf einen Fisch für mehr.'] = 'Tap a fish for more.';
+  EN['Man erzählt sich von etwas Riesigem, das im Sand der Hochsee lauert.'] = 'People talk about something huge lurking in the sand of the open sea.';
+  EN['Lebt im Sand der Hochsee. Was sie herauslockt, gibt es im Angelladen.'] = 'Lives in the sand of the open sea. What lures it out is sold in the tackle shop.';
+  EN['Schwer: schleift beim Einholen über den Grund. Nur in der Hochsee.'] = 'Heavy: drags along the bottom when you reel in. Open sea only.';
+  EN['Der Krakenköder wirkt nur in der Hochsee. Hier beißt damit nichts.'] = 'Kraken bait only works on the open sea. Nothing bites on it here.';
+  EN['Hält, bis etwas zuschnappt · nur in der Hochsee, nur mit sehr starker Rute'] = 'Lasts until something grabs it · open sea only, very strong rod only';
+  EN['Über den Grund ziehen. Was dort im Sand lauert, ist riesig.'] = 'Drag it along the bottom. What lurks in the sand there is huge.';
+  EN['Die Sandkrake! Zieh sie aus dem Sand, aber lass bei jedem Ruck locker.'] = 'The sand kraken! Pull it out of the sand, but ease off at every jerk.';
+  EN['Raus aus dem Sand! Jetzt drillen.'] = 'Out of the sand! Now fight it.';
+  EN['Halten: weiterziehen'] = 'Hold: keep pulling'; EN['Achtung …'] = 'Watch out …';
+  EN['Halten: ziehen · beim Ruck loslassen'] = 'Hold: pull · let go at a jerk';
+  EN['HÄNGER? WEITERZIEHEN!'] = 'SNAGGED? KEEP PULLING!'; EN['DER GRUND BEBT!'] = 'THE BOTTOM IS SHAKING!';
+  EN['RUCK! LOCKER LASSEN!'] = 'JERK! EASE OFF!'; EN['SPANNUNG! LOCKER!'] = 'TENSION! EASE OFF!';
+  EN['ZIEH SIE RAUS!'] = 'PULL IT OUT!'; EN['SANDKRAKE!'] = 'SAND KRAKEN!'; EN['LEGENDE!'] = 'LEGEND!'; EN['LOS'] = 'FREE';
+  EN['Seite zurück'] = 'Previous page'; EN['Seite vor'] = 'Next page';
   // Glücksrad
   // Rutenwerte, erscheinen als Abschnitte einer Zeile mit " · "
   EN['sehr leicht'] = 'very light'; EN['leicht'] = 'light'; EN['mittel'] = 'medium';
@@ -563,6 +609,14 @@ kbd{font-family:var(--f-disp);font-size:11px;padding:1px 5px;border:2px solid va
     [/^Gewertet\. Heute fehlt noch: (.+)\.$/, 'Counted. Still missing today: $1.'],
     [/^Kopieren ging nicht\. Schreib ihn ab: (.+)$/, 'Copying failed. Write it down: $1'],
     [/^Link: (.+)$/, 'Link: $1'],
+    [/^(\d+) Versuch übrig$/, '$1 try left'],
+    [/^(\d+) Versuche übrig$/, '$1 tries left'],
+    [/^Noch (\d+) im Beutel$/, '$1 left in the bag'],
+    [/^(\d+) von (\d+) entdeckt$/, '$1 of $2 discovered'],
+    [/^Legende gefangen: (.+)! \+(\d+)$/, 'Legend caught: $1! +$2'],
+    [/^Schnurbruch! Die Sandkrake war zu stark(?: für die .+)?\. Der Köder ist weg\.$/, 'Line break! The sand kraken was too strong. The bait is gone.'],
+    [/^Die Sandkrake hat sich losgerissen! Der Köder ist weg\.$/, 'The sand kraken broke free! The bait is gone.'],
+    [/^Die Sandkrake hat sich zurück in den Sand gegraben\. Der Köder ist weg\.$/, 'The sand kraken dug itself back into the sand. The bait is gone.'],
     [/^(\d+) von (\d+)$/, '$1 of $2'],
     [/^Runde dauert (\d+) statt (\d+) Sekunden$/, 'A round lasts $1 instead of $2 seconds'],
     [/^Bis zu (\d+) statt (\d+) Fische im See, schnellere Bisse$/,
@@ -804,7 +858,12 @@ kbd{font-family:var(--f-disp);font-size:11px;padding:1px 5px;border:2px solid va
 <div class="modal" id="mAlbum" hidden>
   <div class="box wide" role="dialog" aria-labelledby="aTitle">
     <div class="box-head"><h2 id="aTitle">Fangbuch</h2><p class="purse"><b id="aCount">0/13</b> entdeckt</p></div>
-    <div id="albumGrid"></div>
+    <div class="buch" id="buch"><div class="seiten" id="buchSeiten"></div></div>
+    <div class="blaettern">
+      <button class="btn" type="button" id="buchZurueck" aria-label="Seite zurück">◀</button>
+      <span id="buchSeite"></span>
+      <button class="btn" type="button" id="buchVor" aria-label="Seite vor">▶</button>
+    </div>
     <div class="actions"><button class="btn" data-back type="button">Zurück</button></div>
   </div>
 </div>
@@ -921,6 +980,8 @@ const KOEDER = [
   { id: 'gummi',   name: 'Gummifisch',    preis: 150, runden: 8, typ: 'kunst', c: '#e4573d' },
   { id: 'wattwurm', name: 'Wattwurm',     preis: 60,  runden: 5, typ: 'natur', c: '#b86a5a' },
   { id: 'pilker',  name: 'Pilker',        preis: 160, runden: 8, typ: 'kunst', c: '#c8ccd2' },
+  // schwer: sinkt schnell und schleift beim Einholen über den Grund; hält, bis die Sandkrake zuschnappt
+  { id: 'krake',   name: 'Krakenköder',   preis: 1000, runden: 1, typ: 'natur', schwer: true, c: '#c9603f' },
 ];
 const R_BY = Object.fromEntries(RUTEN.map(r => [r.id, r]));
 const K_BY = Object.fromEntries(KOEDER.map(k => [k.id, k]));
@@ -961,6 +1022,9 @@ const SPECIES = [
   { id: 'ast',      wo: ['fluss'],         g: 'r', name: 'Wurzel',             band: 'junk',   len: [0, 0],     pts: 1,   wild: .05, w: 0,   kraft: 1, koe: [], shape: 'ast',  c: ['#6b4226', '#4a2f22', '#4a2f22', '#8a5a3c'] },
   { id: 'reifen',   wo: ['see', 'fluss'],  g: 'r', name: 'Alter Reifen',       band: 'junk',   len: [0, 0],     pts: 1,   wild: .05, w: 0,   kraft: 1, koe: [], shape: 'reif', c: ['#2a2a30', '#4a4a52', '#4a4a52', '#3a3a42'] },
   { id: 'stiefel', wo: ['see', 'fluss'], g: 'r',  name: 'Gummistiefel',       band: 'junk',   len: [38, 47],   pts: 1,   wild: .05, w: 0,   kraft: 1, koe: [],                                  shape: 'boot', c: ['#2f5a3a', '#1f3a26', '#1f3a26', '#4f8a5e'] },
+  // Legende: lebt im Sand der Hochsee, kommt nur mit dem Krakenköder heraus (siehe krakeSchleifen),
+  // schwimmt nie von selbst herum (w: 0) und bringt immer genau 2.000 Punkte (fest)
+  { id: 'sandkrake', wo: ['hochsee'], g: 'e', name: 'Sandkrake',        band: 'grund',  len: [380, 520], pts: 2000, fest: true, wild: .97, w: 0, kraft: 5, koe: ['krake'], shape: 'krake', c: ['#b4583a', '#ecbf98', '#5a2418', '#86361f'], rar: 'legende', legende: true },
 ];
 const SP = Object.fromEntries(SPECIES.map(s => [s.id, s]));
 
@@ -969,6 +1033,16 @@ const REEL = [1, 1.3, 1.6, 2];
 const SINK = [20, 30, 42];
 const MAXFISH = [5, 7, 9, 11];
 const BITE = [1, 1.3, 1.6, 2];
+// Sandkrake: Werte mit einer Simulation abgestimmt (geübter Spieler mit Reaktionszeit): mit bester Rolle
+// schafft er sie mit der Pilkrute etwa jedes vierte, mit der Karpfenrute etwa jedes sechste Mal, mit
+// schwacher Rolle kaum. Wer in Stufe 1 einfach durchzieht, reißt die Schnur; schwächere Ruten als
+// Kraft 5 reißen fast immer.
+const KRAKE = {
+  schleif: 22, haenger: [10, 22], loesen: [.5, .9], warnung: 1.7,
+  start1: .25, zug: .16, spannung: .42, rutsch: .06, entspannen: .55,
+  ruckWarn: [.3, .45], ruckZug: .05, ruckSpannung: 1.3, ruckRutsch: .14, schwach: 3,
+  start2: .35, zoneMal: .65, ruckRate2: 1.2, ruckWeite2: .28,
+};
 const SHOP = [
   { k: 'rolle',  name: 'Rolle',        icon: 'reel',   lv: ['Kinderrolle', 'Freilaufrolle', 'Weitwurfrolle', 'Big-Pit-Rolle'], cost: [50, 150, 400] },
   { k: 'feeder', name: 'Futterkorb',   icon: 'feeder', lv: ['ohne', 'Futterkorb', 'Method-Feeder', 'Method + Lockfutter'], cost: [70, 200, 420] },
@@ -997,6 +1071,54 @@ const SHAPES = {
   reif: ['..bbbb..', '.b....b.', 'b..ll..b', 'b.l..l.b', 'b.l..l.b', 'b..ll..b', '.b....b.', '..bbbb..'],
   mini: ['.fbbbb.', 'ffbbbeb', 'ffbbbbb', '.flll..'],
 };
+SHAPES.krake = krakeRows();
+// Sandkrake: groß und aus Formen gerechnet statt von Hand gezeichnet. Mantel als Ellipse rechts
+// (der Kopf zeigt nach rechts wie bei den Fischen), fünf gefächerte Arme nach links mit Saugnäpfen.
+function krakeRows() {
+  const w = 50, h = 30, g = Array.from({ length: h }, () => Array(w).fill('.'));
+  const set = (x, y, c) => { x = Math.round(x); y = Math.round(y); if (x >= 0 && y >= 0 && x < w && y < h && (c !== 'l' || g[y][x] === '.')) g[y][x] = c; };
+  const cx = 39, cy = 9, rx = 9.5, ry = 8.5;
+  // Mantel mit Flecken
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+    const d = ((x - cx) / rx) ** 2 + ((y - cy) / ry) ** 2;
+    if (d > 1) continue;
+    g[y][x] = d < .75 && ((x * 7 + y * 13) % 11 === 0 || (x * 3 + y * 5) % 17 === 0) ? 'p' : 'b';
+  }
+  // fünf Arme, gefächert von links oben nach links unten, die Spitzen rollen sich ein
+  for (let i = 0; i < 5; i++) {
+    const phi = -0.25 + i * 0.3, len = 24 + (i % 2) * 4 - i * 1.5;
+    const bx = cx - 6 + i * 1.2, by = cy + 5 + i * 0.6;
+    const dx = -Math.cos(phi), dy = Math.sin(phi);
+    let x = bx, y = by;
+    for (let t = 0; t <= len; t++) {
+      const welle = 1.6 * Math.sin(t * 0.32 + i * 1.7);
+      const px = bx + dx * t - dy * welle, py = by + dy * t + dx * welle * -1;
+      x = px; y = py;
+      const dick = t < 7 ? 3 : t < len * 0.6 ? 2 : 1;
+      for (let k = 0; k < dick; k++) set(x, y + k, 'b');
+      if (t % 2 === 0 && t > 3) set(x, y + dick, 'l');
+    }
+    // eingerollte Spitze
+    for (let a = 0; a < 5; a++) {
+      const ang = Math.PI * 0.5 + a * 0.9;
+      set(x + Math.cos(ang) * 1.6 - dx, y - 1.6 + Math.sin(ang) * 1.6, 'b');
+    }
+  }
+  // Auge mit hellem Rand, darüber eine Braue aus Flecken
+  for (const [ex, ey] of [[2, 1], [3, 1], [4, 1], [1, 2], [5, 2], [1, 3], [5, 3], [2, 4], [3, 4], [4, 4]]) g[cy + ey][cx + ex] = 'l';
+  for (const [ex, ey] of [[2, 2], [3, 2], [4, 2], [2, 3], [3, 3], [4, 3]]) g[cy + ey][cx + ex] = 'e';
+  g[cy + 2][cx + 4] = 'l';
+  // Umriss in der dunklen Farbe
+  const aus = g.map(r => r.slice());
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+    if (g[y][x] !== '.') continue;
+    for (const [ddx, ddy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+      const c = g[y + ddy] && g[y + ddy][x + ddx];
+      if (c === 'b' || c === 'p') { aus[y][x] = 'f'; break; }
+    }
+  }
+  return aus.map(r => r.join(''));
+}
 const ICONS = {
   rod:    ['.......k', '......k.', '.....k..', '....k...', '...k....', '..w.....', '.ww.....', 'w.......'],
   reel:   ['..kkkk..', '.kwwwwk.', 'kwwkkwwk', 'kwkggkwk', 'kwkggkwk', 'kwwkkwwk', '.kwwwwk.', '..kkkk..'],
@@ -1033,6 +1155,8 @@ const K_ICONS = {
              col: { s: '#c8ccd2', h: '#f3f5f8', k: '#8a99a8', r: '#d9534f' } },
   gummi:   { rows: ['..........', '..r..ggg..', '.rrrgggggg', 'rrrrgggghe', '.rrrgggggg', '..r..ggg..', '..........', '..........', '..........', '..........'],
              col: { g: '#6fa35a', r: '#e4573d', h: '#e8f0e0', e: '#101418' } },
+  krake:   { rows: ['..........', '..kk......', '.k..k.....', '....k.ss..', '...k.ssss.', '..k.ssqsss', '.k..ssssss', '.kk..ssss.', '..kkk.ss..', '..........'],
+             col: { k: '#8a99a8', s: '#c9603f', q: '#f0c9a8' } },
 };
 // Ruten, 12x12
 const R_ICONS = {
@@ -1061,8 +1185,9 @@ function paint(rows, map, flip) {
   }
   return c;
 }
-const fishMap = c => ({ b: c[0], l: c[1], f: c[2], p: c[3], e: '#101418' });
-const SIL = { b: '#2a3552', l: '#2a3552', f: '#2a3552', p: '#2a3552', e: '#2a3552' };
+// n: Maschen des Netzrests (fehlten bis 14.10.2026, der Netzrest war unsichtbar)
+const fishMap = c => ({ b: c[0], l: c[1], f: c[2], p: c[3], e: '#101418', n: c[0] });
+const SIL = { b: '#a39d93', l: '#a39d93', f: '#a39d93', p: '#a39d93', e: '#a39d93', n: '#a39d93' };
 for (const sp of SPECIES) {
   const r = SHAPES[sp.shape];
   sp.sprR = paint(r, fishMap(sp.c), false);
@@ -1394,7 +1519,8 @@ function fangbar(sp, r, k) {
 
 // ---------- Spielzustand ----------
 const G = { mode: 'menu', phase: 'idle', t: 0, time: 60, score: 0, catches: [], fish: [], junk: [], parts: [], texts: [],
-  hook: null, fight: null, land: null, biss: null, aimT: 0, lastCall: false, pressed: false, needRelease: false, spawnT: 0, teased: {}, lastSec: 99 };
+  hook: null, fight: null, land: null, biss: null, aimT: 0, lastCall: false, pressed: false, needRelease: false, spawnT: 0, teased: {}, lastSec: 99,
+  krake: null, sand: null, uhrSteht: false, shake: 0 };
 const clouds = [{ x: 20, y: 12, w: 22 }, { x: 110, y: 22, w: 16 }, { x: 170, y: 8, w: 28 }];
 
 const roundLen = () => 60 + 5 * lvl('thermo');
@@ -1476,9 +1602,13 @@ const fmtLen = (sp, len) => sp.band === 'junk' ? (sp.id === 'stiefel' ? 'Gr. ' +
 // Artikel und Beugung richten sich nach dem Geschlecht der Art
 const groesster = sp => (sp.g === 'e' ? 'größte' : sp.g === 's' ? 'größtes' : 'größter');
 const fangText = (sp, len) => { const l = fmtLen(sp, len); return sp.name + (l ? ', ' + l : ''); };
-const pointsFor = (sp, len) => sp.band === 'junk' ? 1 : Math.max(1, Math.round(sp.pts * len / ((sp.len[0] + sp.len[1]) / 2)));
+const pointsFor = (sp, len) => sp.band === 'junk' ? 1 : sp.fest ? sp.pts : Math.max(1, Math.round(sp.pts * len / ((sp.len[0] + sp.len[1]) / 2)));
+// Name im Fangbuch und in der Angeltasche: die Legende bleibt ein Rätsel, bis man sie gefangen hat
+const zeigName = sp => (sp.legende && !save.album[sp.id] ? '???' : sp.name);
 function rodTip() {
   if (G.phase === 'fight') return { x: 49 + Math.round(Math.sin(G.t * 23)), y: 25 + Math.round(Math.sin(G.t * 17) * 1.5) };
+  if (G.phase === 'sand') return { x: 48 + Math.round(Math.sin(G.t * 31) * 1.5), y: 28 + Math.round(Math.sin(G.t * 19) * 2) };
+  if (G.phase === 'haenger' || G.phase === 'warnung') return { x: 50, y: 22 + (G.pressed ? 2 : 0) };
   return { x: 50, y: 20 };
 }
 function splash(x, n = 10) {
@@ -1500,7 +1630,8 @@ function startRound(tagesrunde) {
   seeRnd = tagesrunde ? mkRng(datumSeed(heute() + '|' + gew.id)) : Math.random;
   G.zaehlt = !!tagesrunde && !tagGespielt();
   Object.assign(G, { mode: 'play', phase: 'aim', time: roundLen(), score: 0, catches: [], hook: null, fight: null, land: null,
-    aimT: 0, lastCall: false, pressed: false, needRelease: false, teased: {}, lastSec: 99, biss: null });
+    aimT: 0, lastCall: false, pressed: false, needRelease: false, teased: {}, lastSec: 99, biss: null,
+    krake: null, sand: null, uhrSteht: false, shake: 0 });
   G.fish = [];   // frischer See, sonst schwimmen noch die Fische aus dem Menue herum
   G.junk = [];
   const muell = SPECIES.filter(sp => sp.band === 'junk' && imGewaesser(sp));
@@ -1511,7 +1642,8 @@ function startRound(tagesrunde) {
   spawnFish(true, 'flach'); spawnFish(true, 'flach');
   while (G.fish.length < MAXFISH[lvl('feeder')] - 1) spawnFish(true);
   const k = koeder();
-  if (k.id !== 'brot') {
+  // Der Krakenköder wird erst verbraucht, wenn die Sandkrake zuschnappt (krakeAusbruch)
+  if (k.id !== 'brot' && !k.schwer) {
     save.vorrat[k.id] = Math.max(0, (save.vorrat[k.id] || 0) - 1);
     if (!save.vorrat[k.id]) { delete save.vorrat[k.id]; toast(k.name + ' aufgebraucht. Nächste Runde mit Brotflocke.'); }
     persist();
@@ -1539,12 +1671,20 @@ function updHook(dt) {
     if (t >= 1) { G.phase = 'sink'; h.y = SURF + 1; splash(h.x); SFX.splash(); }
     return;
   }
-  if (G.pressed && !G.needRelease) {
+  const schwer = koeder().schwer, amGrund = h.y >= botAt(h.x) - 4;
+  if (G.pressed && !G.needRelease && schwer && amGrund && h.x > 64) {
+    // Der Krakenköder ist schwer: beim Einholen schleift er über den Grund, statt aufzusteigen
+    const vorher = h.x;
+    h.x -= KRAKE.schleif * dt;
+    h.y = botAt(h.x) - 2;
+    if (Math.random() < dt * 4) sand(h.x, h.y, 1, .5);
+    if (gew.id === 'hochsee' && krakeSchleifen(vorher - h.x)) return;
+  } else if (G.pressed && !G.needRelease) {
     // Einholen: der Köder wandert Richtung Steg
     const vx = 44 - h.x, vy = SURF - h.y, d = Math.hypot(vx, vy) || 1;
     h.x += vx / d * 40 * dt; h.y += vy / d * 40 * dt;
   } else {
-    h.y += SINK[lvl('blei')] * dt;
+    h.y += SINK[lvl('blei')] * (schwer ? 1.6 : 1) * dt;
     if (gew.stroemung) h.x += gew.stroemung * dt * (1 - .35 * lvl('blei'));
   }
   h.x = clamp(h.x, 44, W - 3);
@@ -1629,7 +1769,7 @@ function updFish(dt) {
       f.cool = rnd(.5, 1.1);
       const dx = h.x - mx, dy = h.y - f.y, R = 42 + fl * 8;
       if (Math.abs(dx) < R && Math.abs(dy) < 22) {
-        if (!magKoeder(f.sp, k.id)) { tease(f.sp); }
+        if (!magKoeder(f.sp, k.id)) { if (!k.schwer) tease(f.sp); }
         else if (k.typ === 'kunst' && !ziehen) { /* Kunstköder muss sich bewegen */ }
         else {
           let ch = .5 * BITE[fl];
@@ -1649,7 +1789,12 @@ function updFight(dt) {
   const spd = .25 + w * 1.4;
   F.pos += clamp(F.tgt - F.pos, -spd * dt, spd * dt);
   if (w > .6 && Math.random() < dt * w * 1.2) F.pos = clamp(F.pos + rnd(-.12, .12), .03, .97);
-  const zh = rute().zone;
+  if (f.sp.legende && Math.random() < dt * KRAKE.ruckRate2) {
+    // Die Krake schlägt mit den Armen: der Balken springt
+    F.pos = clamp(F.pos + rnd(-KRAKE.ruckWeite2, KRAKE.ruckWeite2), .03, .97);
+    G.shake = Math.max(G.shake, .8);
+  }
+  const zh = F.zone_h;
   F.zv = clamp(F.zv + (G.pressed ? 2.8 : -2.4) * dt, -1.4, 1.4);
   F.zone += F.zv * dt;
   if (F.zone < 0) { F.zone = 0; F.zv *= -.3; }
@@ -1669,7 +1814,7 @@ function updFight(dt) {
   const h = G.hook, p = clamp(F.prog, 0, 1);
   h.x = lerp(F.x0, Math.max(60, F.x0 - 40), p * .6) + Math.sin(G.t * 9) * 2 * (1 - p * .5);
   h.y = Math.min(lerp(F.y0, SURF + 8, p * .7), botAt(h.x) - 2);
-  if (f.sp.band !== 'junk' && Math.random() < dt * 3) f.dir = -f.dir;
+  if (f.sp.band !== 'junk' && !f.sp.legende && Math.random() < dt * 3) f.dir = -f.dir;
   f.x = h.x - f.dir * f.sp.sw / 2; f.y = h.y;
   if (F.prog >= 1) landFish(); else if (F.prog <= 0) loseFish();
 }
@@ -1681,8 +1826,13 @@ function landFish() {
   const isNew = a.n === 0;
   a.n++; if (f.len > a.max) a.max = f.len;
   SFX.catch();
-  if (sp.rar) { tone(sp.rar === 'legendär' ? [784, 1047, 1319, 1568] : [659, 880, 1047], .09); addText(sp.rar === 'legendär' ? 'LEGENDÄR!' : 'EPISCH!', f.x, f.y - 16, sp.rar === 'legendär' ? '#f2c14e' : '#c8a0ff'); }
-  toast(isNew ? `Neu im Fangbuch: ${sp.name}! +${pts}`
+  if (sp.legende) {
+    tone([523, 659, 784, 1047, 1319, 1568, 2093], .1);
+    addText('LEGENDE!', clamp(f.x, 40, W - 40), f.y - 22, '#ff7a5f');
+    G.shake = 2.5; G.krake = null;
+  } else if (sp.rar) { tone(sp.rar === 'legendär' ? [784, 1047, 1319, 1568] : [659, 880, 1047], .09); addText(sp.rar === 'legendär' ? 'LEGENDÄR!' : 'EPISCH!', f.x, f.y - 16, sp.rar === 'legendär' ? '#f2c14e' : '#c8a0ff'); }
+  toast(sp.legende ? `Legende gefangen: ${fangText(sp, f.len)}! +${pts}`
+    : isNew ? `Neu im Fangbuch: ${sp.name}! +${pts}`
     : sp.band === 'junk' ? `Kein Fisch: ${sp.name}, aber immerhin +1` 
     : `${sp.rar === 'legendär' ? 'LEGENDÄR! ' : sp.rar === 'episch' ? 'Episch! ' : 'Petri Heil! '}${fangText(sp, f.len)} · +${pts}`);
   G.fish = G.fish.filter(x => x !== f);
@@ -1714,10 +1864,11 @@ function anschlag() {
 function updLand(dt) {
   const L = G.land;
   L.t += dt / .6;
-  if (L.t >= 1) { addText('+' + L.pts, 30, 30, '#f2c14e'); G.land = null; backToAim(); }
+  if (L.t >= 1) { addText('+' + L.pts, 30, 30, '#f2c14e'); G.land = null; G.uhrSteht = false; backToAim(); }
 }
 function schnurBruch() {
   const f = G.fight.f;
+  if (f.sp.legende) { krakeWeg('Schnurbruch! Die Sandkrake war zu stark.'); return; }
   SFX.lost();
   toast('Schnurbruch! ' + f.sp.name + ' war zu stark für die ' + rute().name + '.');
   f.state = 'swim'; f.dir = 1; f.speed = 34; f.cool = 8; f.turnX = -99;
@@ -1725,9 +1876,113 @@ function schnurBruch() {
 }
 function loseFish() {
   const f = G.fight.f;
+  if (f.sp.legende) { krakeWeg('Die Sandkrake hat sich losgerissen!'); return; }
   SFX.lost();
   if (f.sp.band === 'junk') { G.fish = G.fish.filter(x => x !== f); toast('Hänger gelöst.'); }
   else { f.state = 'swim'; f.dir = 1; f.speed = 30; f.cool = 6; f.turnX = -99; toast(`${f.sp.name} hat sich losgerissen!`); }
+  backToAim();
+}
+// ---------- Sandkrake ----------
+// Ablauf: Krakenköder in der Hochsee über den Grund ziehen -> Hänger -> weiterziehen -> der Grund
+// bebt -> die Krake bricht aus dem Sand (Köder verbraucht, Uhr steht) -> Stufe 1: aus dem Sand ziehen,
+// bei jedem Ruck locker lassen -> Stufe 2: Drill mit schmalem Balken und Tentakel-Rucken.
+function sand(x, y, n, kraft = 1) {
+  for (let i = 0; i < n; i++) {
+    G.parts.push({ x: x + rnd(-2, 2), y, vx: rnd(-20, 20) * kraft, vy: rnd(-42, -12) * kraft, life: rnd(.5, 1.1),
+      c: i % 2 ? '#c9b07a' : '#a8905a', g: 1, s: 1 });
+  }
+}
+function krakeSchleifen(d) {
+  const K = G.krake || (G.krake = { strecke: 0, naechster: rnd(...KRAKE.haenger), haenger: 0, monster: 1 + Math.floor(Math.random() * 3) });
+  K.strecke += d;
+  if (K.strecke < K.naechster) return false;
+  G.phase = 'haenger'; K.zug = 0; K.loesen = rnd(...KRAKE.loesen); K.haenger++;
+  sand(G.hook.x, G.hook.y, 6);
+  tone([140, 110], .06, 'triangle', .07);
+  addText('?', G.hook.x, G.hook.y - 10, '#f3e9d2');
+  return true;
+}
+function updHaenger(dt) {
+  const K = G.krake, h = G.hook, zieht = G.pressed && !G.needRelease;
+  K.zug = zieht ? K.zug + dt : Math.max(0, K.zug - dt * .5);
+  if (zieht && Math.random() < dt * 8) sand(h.x, h.y, 1, .6);
+  if (K.haenger >= K.monster && K.zug >= .45) { krakeWarnung(); return; }
+  if (K.zug >= K.loesen) {
+    G.phase = 'sink'; K.strecke = 0; K.naechster = rnd(...KRAKE.haenger);
+    sand(h.x, h.y, 5); addText('LOS', h.x, h.y - 10, '#f3e9d2');
+  }
+}
+function krakeWarnung() {
+  G.phase = 'warnung'; G.krake.t = 0; G.uhrSteht = true;
+  sweep(90, 55, 1.2, 'sawtooth', .05);
+}
+function updWarnung(dt) {
+  const K = G.krake, h = G.hook;
+  K.t += dt;
+  G.shake = Math.max(G.shake, .4 + K.t * .9);
+  if (Math.random() < dt * 14) G.parts.push({ x: h.x + rnd(-8, 8), y: h.y - 2, vx: 0, vy: rnd(-22, -12), life: 6, c: '#9fd0d8', bub: 1 });
+  if (K.t > .5 && Math.random() < dt * (10 + 20 * K.t)) sand(h.x + rnd(-10, 10), botAt(h.x) - 1, 1, .8);
+  if (K.t >= KRAKE.warnung) krakeAusbruch();
+}
+function krakeAusbruch() {
+  const h = G.hook, sp = SP.sandkrake, grund = botAt(h.x);
+  // Ab jetzt ist der Köder weg, ob die Krake gefangen wird oder nicht
+  save.vorrat.krake = Math.max(0, (save.vorrat.krake || 0) - 1);
+  if (!save.vorrat.krake) { delete save.vorrat.krake; save.tackle.koeder = 'brot'; }
+  persist();
+  const f = { sp, x: h.x, y: grund + sp.sh / 2, dir: 1, state: 'hooked', len: rollLen(sp), alpha: 1, wob: 0, speed: 0, weg: false, leben: null };
+  G.fish.push(f);
+  G.sand = { f, grund, prog: KRAKE.start1, spannung: 0, ruckT: rnd(.9, 1.6), warn: 0, ruck: 0 };
+  G.phase = 'sand';
+  G.shake = 3;
+  sand(h.x, grund - 2, 40, 1.6);
+  splash(h.x, 4);
+  sweep(220, 50, .8, 'sawtooth', .09); noise(.5, .14);
+  addText('SANDKRAKE!', clamp(h.x, 40, W - 40), grund - 40, '#ff7a5f');
+  toast('Die Sandkrake! Zieh sie aus dem Sand, aber lass bei jedem Ruck locker.');
+}
+function updSand(dt) {
+  const S = G.sand, f = S.f, h = G.hook, zieht = G.pressed;
+  const schwach = Math.max(0, 5 - rute().kraft);
+  S.ruckT -= dt;
+  if (S.ruckT <= 0 && S.warn <= 0 && S.ruck <= 0) S.warn = rnd(...KRAKE.ruckWarn);
+  if (S.warn > 0) {
+    S.warn -= dt;
+    if (S.warn <= 0) { S.ruck = rnd(.35, .6); S.ruckT = rnd(.9, 1.8); G.shake = Math.max(G.shake, 1.4); sand(f.x, S.grund - 2, 10, 1.2); }
+  }
+  S.ruck = Math.max(0, S.ruck - dt);
+  const ruckt = S.ruck > 0;
+  if (zieht) {
+    S.prog += (ruckt ? -KRAKE.ruckZug : KRAKE.zug * Math.sqrt(REEL[lvl('rolle')])) * dt;
+    S.spannung += (ruckt ? KRAKE.ruckSpannung : KRAKE.spannung) * (1 + KRAKE.schwach * schwach) * dt;
+  } else {
+    S.prog -= (ruckt ? KRAKE.ruckRutsch : KRAKE.rutsch) * dt;
+    S.spannung -= KRAKE.entspannen * dt;
+  }
+  S.spannung = clamp(S.spannung, 0, 1); S.prog = Math.min(1, S.prog);
+  // Die Krake steckt im Sand und kommt mit dem Zug heraus; vor einem Ruck zucken die Arme
+  const zuck = S.warn > 0 || ruckt;
+  f.x = h.x + Math.sin(G.t * (zuck ? 34 : 6)) * (zuck ? 1.6 : .5);
+  f.y = S.grund + f.sp.sh / 2 - f.sp.sh * (.2 + .7 * clamp(S.prog, 0, 1));
+  if (zieht && Math.random() < dt * 5) sand(f.x + rnd(-14, 14), S.grund - 1, 1, .7);
+  if (S.spannung >= 1) { krakeWeg(`Schnurbruch! Die Sandkrake war zu stark${schwach ? ' für die ' + rute().name : ''}.`); return; }
+  if (S.prog <= 0) { krakeWeg('Die Sandkrake hat sich zurück in den Sand gegraben.'); return; }
+  if (S.prog >= 1) {
+    // Stufe 2: raus aus dem Sand, jetzt wird gedrillt
+    G.sand = null; G.phase = 'fight';
+    G.fight = { f, pos: .5, tgt: .5, tt: .4, zone: .35, zv: 0, prog: KRAKE.start2, in: false, x0: h.x, y0: f.y,
+      zone_h: rute().zone * KRAKE.zoneMal, ueber: 0, spannung: 0 };
+    sand(f.x, S.grund - 2, 24, 1.3); G.shake = 2;
+    tone([330, 440, 554], .07, 'square', .05);
+    toast('Raus aus dem Sand! Jetzt drillen.');
+  }
+}
+function krakeWeg(text) {
+  const f = (G.sand && G.sand.f) || (G.fight && G.fight.f);
+  if (f) { G.fish = G.fish.filter(x => x !== f); sand(f.x, botAt(f.x) - 2, 20, 1.2); }
+  SFX.lost();
+  toast(text + ' Der Köder ist weg.');
+  G.sand = null; G.krake = null; G.uhrSteht = false;
   backToAim();
 }
 function endRound() {
@@ -1758,6 +2013,7 @@ function endRound() {
 }
 function update(dt) {
   G.t += dt;
+  G.shake = Math.max(0, G.shake - dt * 2.5);
   if (!RM) for (const c of clouds) { c.x += dt * 2.5 * (c.w / 20); if (c.x > W + 10) c.x = -c.w - 10; }
   G.spawnT -= dt;
   const cap = G.mode === 'play' ? MAXFISH[lvl('feeder')] : 6;
@@ -1769,7 +2025,11 @@ function update(dt) {
     else if (G.phase === 'biss') updBiss(dt);
     else if (G.phase === 'fight') updFight(dt);
     else if (G.phase === 'land') updLand(dt);
-    if (G.mode === 'play' && G.time > 0) {
+    else if (G.phase === 'haenger') updHaenger(dt);
+    else if (G.phase === 'warnung') updWarnung(dt);
+    else if (G.phase === 'sand') updSand(dt);
+    // Während des Kampfs mit der Sandkrake steht die Rundenuhr still
+    if (G.mode === 'play' && G.time > 0 && !G.uhrSteht) {
       G.time -= dt;
       const sec = Math.ceil(G.time);
       if (sec !== G.lastSec) { G.lastSec = sec; if (sec <= 10 && sec > 0) SFX.tick(); }
@@ -1782,10 +2042,11 @@ function update(dt) {
   }
   for (const p of G.parts) {
     p.life -= dt; p.x += p.vx * dt; p.y += p.vy * dt;
-    if (p.g) p.vy += 140 * dt;
+    if (p.g) p.vy += (p.s ? 45 : 140) * dt;
+    if (p.s) p.vx *= Math.max(0, 1 - 2.5 * dt);
     if (p.bub) { p.x += Math.sin(p.life * 5) * .15; if (p.y <= SURF + 1) p.life = 0; }
   }
-  G.parts = G.parts.filter(p => p.life > 0 && !(p.g && p.y > SURF + 2 && p.vy > 0));
+  G.parts = G.parts.filter(p => p.life > 0 && !(p.g && !p.s && p.y > SURF + 2 && p.vy > 0));
   for (const t of G.texts) { t.life -= dt; t.y -= 14 * dt; }
   G.texts = G.texts.filter(t => t.life > 0);
   updateHud();
@@ -1897,6 +2158,13 @@ function drawFight() {
   }
 }
 function draw() {
+  // Beben: das Bild wackelt (nicht bei "weniger Bewegung")
+  const bebt = G.shake > .05 && !RM;
+  if (bebt) {
+    rect(0, 0, W, H, '#121a2b');
+    cx.save();
+    cx.translate(Math.round(rnd(-1, 1) * G.shake), Math.round(rnd(-1, 1) * G.shake));
+  }
   cx.drawImage(bgc, 0, 0);
   drawClouds();
   drawSurface();
@@ -1905,7 +2173,15 @@ function draw() {
     const sp = f.sp, img = f.dir > 0 ? sp.sprR : sp.sprL;
     const bob = f.state === 'hooked' ? Math.round(Math.sin(G.t * 25)) : Math.round(Math.sin(f.wob) * .6);
     if (f.alpha != null && f.alpha < 1) cx.globalAlpha = clamp(f.alpha, 0, 1);
+    const imSand = G.sand && f === G.sand.f;
+    if (imSand) {
+      // Was noch im Sand steckt, ist nicht zu sehen
+      cx.save(); cx.beginPath(); cx.moveTo(0, 0); cx.lineTo(W, 0);
+      for (let x = W; x >= 0; x -= 4) cx.lineTo(x, botAt(x));
+      cx.closePath(); cx.clip();
+    }
     cx.drawImage(img, Math.round(f.x - sp.sw / 2), Math.round(f.y - sp.sh / 2) + bob);
+    if (imSand) cx.restore();
     cx.globalAlpha = 1;
   }
   for (const p of G.parts) rect(p.x, p.y, 1, 1, p.c);
@@ -1939,15 +2215,37 @@ function draw() {
     pixText('ANSCHLAG!', 128, 3, '#f2c14e');
   }
   if (G.fight) drawFight();
+  if (G.sand) drawSand();
+  if (G.phase === 'haenger') pixText('HÄNGER? WEITERZIEHEN!', 128, 3, '#f3e9d2');
+  if (G.phase === 'warnung' && Math.floor(G.t * 8) % 2) pixText('DER GRUND BEBT!', 128, 3, '#ff7a5f');
   for (const t of G.texts) pixText(t.s, t.x, t.y, t.c);
   if (G.mode === 'play' && save.rounds < 2) {
     const tip = G.phase === 'aim' ? 'TIPPEN = AUSWERFEN' : G.phase === 'sink' ? 'HALTEN = EINHOLEN'
       : G.phase === 'biss' ? '' : G.phase === 'fight' ? 'HALTEN = GRÜN HOCH' : '';
     if (tip) pixText(tip, G.phase === 'fight' ? 150 : 150, 3, '#f3e9d2');
   }
+  if (bebt) cx.restore();
+}
+// Stufe 1 der Sandkrake: links, wie weit sie aus dem Sand ist, rechts die Schnurspannung
+function drawSand() {
+  const S = G.sand, bx = 224, by = 64, bw = 28, bh = 122, ty = by + 4, th = bh - 8;
+  rect(bx - 1, by - 1, bw + 2, bh + 2, '#f3e9d2');
+  rect(bx, by, bw, bh, '#121a2b');
+  const ph = Math.round(th * clamp(S.prog, 0, 1));
+  rect(bx + 4, ty, 8, th, '#3a2e1e');
+  rect(bx + 4, ty + th - ph, 8, ph, '#c9b07a');
+  const sh = Math.round(th * S.spannung);
+  rect(bx + 16, ty, 8, th, '#2a3552');
+  rect(bx + 16, ty + th - sh, 8, sh, S.spannung > .75 ? '#ff7a5f' : '#e4573d');
+  const blink = Math.floor(G.t * 8) % 2;
+  if (S.warn > 0 || S.ruck > 0) { if (blink) pixText('RUCK! LOCKER LASSEN!', 112, 3, '#ff7a5f'); }
+  else if (S.spannung > .75) pixText('SPANNUNG! LOCKER!', 112, 3, '#ff7a5f');
+  else pixText('ZIEH SIE RAUS!', 112, 3, '#f2c14e');
 }
 let last = performance.now();
 function frame(now) {
+  // Beim Entwickeln kann eine Aufnahme das Spiel selbst Bild für Bild weiterrechnen (window.__ph)
+  if (window.__ph && window.__ph.manuell) { requestAnimationFrame(frame); return; }
   const dt = Math.min(.05, (now - last) / 1000);
   last = now;
   if (G.mode !== 'paused') update(dt);
@@ -1965,12 +2263,13 @@ const de = n => n.toLocaleString(window.PH_SPRACHE && PH_SPRACHE() === 'en' ? 'e
 const hud = {};
 function setTxt(id, v) { if (hud[id] !== v) { hud[id] = v; $(id).textContent = v; } }
 const TAP_TXT = { aim: 'Tippen: auswerfen', fly: 'Der Köder fliegt …', sink: 'Halten: einholen · loslassen: sinken',
-  biss: 'Jetzt anschlagen!', fight: 'Halten: grünen Balken hoch', land: 'Gefangen!' };
+  biss: 'Jetzt anschlagen!', fight: 'Halten: grünen Balken hoch', land: 'Gefangen!',
+  haenger: 'Halten: weiterziehen', warnung: 'Achtung …', sand: 'Halten: ziehen · beim Ruck loslassen' };
 function updateTap() {
   const spielt = G.mode === 'play';
   const txt = spielt ? (TAP_TXT[G.phase] || '') : 'Hier tippen, sobald die Runde läuft';
   if (hud.tap !== txt) { hud.tap = txt; $('tapLabel').textContent = txt; }
-  const aktiv = spielt && (G.phase === 'biss' || G.phase === 'fight');
+  const aktiv = spielt && (G.phase === 'biss' || G.phase === 'fight' || G.phase === 'sand' || G.phase === 'haenger');
   if (hud.tapAktiv !== aktiv) { hud.tapAktiv = aktiv; $('tapzone').classList.toggle('aktiv', aktiv); }
 }
 function updateHud() {
@@ -2003,7 +2302,7 @@ function show(id) {
   if (id === 'mTitle') renderTitle();
   if (id === 'mTackle') renderTackle();
   if (id === 'mShop') renderShop();
-  if (id === 'mAlbum') renderAlbum();
+  if (id === 'mAlbum') { buch.blatt = 0; buch.auswahl = null; renderAlbum(); }
   if (id === 'mRad') renderRad();
   if (id === 'mBoard') { renderBoard(); if (sbOn) { sbBoard(); clearInterval(boardTimer); boardTimer = setInterval(sbBoard, 20000); } }
   if (kbd) { const b = $(id).querySelector('.btn'); if (b) b.focus({ preventScroll: true }); }
@@ -2147,9 +2446,11 @@ function renderTackle() {
     const b = el('button', 'opt' + (passt ? '' : ' weg')); b.type = 'button';
     b.setAttribute('aria-pressed', String(save.tackle.koeder === k.id));
     const kopf = el('b'); kopf.append(img(k.bild, 22), document.createTextNode(k.name));
-    b.append(kopf, el('small', '', rest < 0 ? 'unbegrenzt' : rest + (rest === 1 ? ' Runde übrig' : ' Runden übrig')));
+    b.append(kopf, el('small', '', rest < 0 ? 'unbegrenzt' : k.schwer ? rest + (rest === 1 ? ' Versuch übrig' : ' Versuche übrig')
+      : rest + (rest === 1 ? ' Runde übrig' : ' Runden übrig')));
     if (save.tackle.koeder === k.id || !passt) {
-      b.append(el('small', '', passt ? (k.typ === 'kunst' ? 'Bisse nur beim Einholen' : 'liegt ruhig im Wasser') : 'braucht Spinn-, Fliegen- oder Pilkrute'));
+      b.append(el('small', '', !passt ? 'braucht Spinn-, Fliegen- oder Pilkrute' : k.schwer ? 'Schwer: schleift beim Einholen über den Grund. Nur in der Hochsee.'
+        : k.typ === 'kunst' ? 'Bisse nur beim Einholen' : 'liegt ruhig im Wasser'));
     }
     b.disabled = !passt;
     b.onclick = () => { save.tackle.koeder = k.id; persist(); renderTackle(); updateHint(); };
@@ -2159,16 +2460,18 @@ function renderTackle() {
   const treffer = SPECIES.filter(sp => fangbar(sp));
   for (const sp of treffer) {
     const li = el('li');
-    li.append(img(sp.icon, 24), el('span', '', sp.name));
+    li.append(img(sp.icon, 24), el('span', '', zeigName(sp)));
     if (sp.kraft > rute().kraft) li.append(el('span', 'pts', 'Schnurbruch!'));
     liste.append(li);
   }
   if (!treffer.length) liste.append(el('li', 'muted', 'Mit dieser Kombination beißt hier nichts.'));
   const r = rute();
-  const zuSchwer = treffer.filter(sp => sp.kraft > r.kraft).map(sp => sp.name);
-  $('kWarnung').textContent = zuSchwer.length
-    ? `Zu schwer für die ${r.name}: ${zuSchwer.join(', ')}. Beim Kurbeln steigt die Spannung, zwischendurch nachgeben!`
-    : '';
+  const zuSchwer = treffer.filter(sp => sp.kraft > r.kraft).map(zeigName);
+  $('kWarnung').textContent = koeder().schwer && gew.id !== 'hochsee'
+    ? 'Der Krakenköder wirkt nur in der Hochsee. Hier beißt damit nichts.'
+    : zuSchwer.length
+      ? `Zu schwer für die ${r.name}: ${zuSchwer.join(', ')}. Beim Kurbeln steigt die Spannung, zwischendurch nachgeben!`
+      : '';
 }
 
 function renderShop() {
@@ -2204,11 +2507,13 @@ function renderKaufListen() {
   for (const k of KOEDER) {
     if (k.id === 'brot') continue;
     const row = el('div', 'item'), txt = el('div');
-    const wer = SPECIES.filter(sp => sp.koe.includes(k.id)).map(sp => sp.name).join(', ');
-    txt.append(el('h3', '', k.name), el('p', '', 'Reicht für ' + k.runden + ' Runden · ' + (k.typ === 'kunst' ? 'nur mit Spinn- oder Fliegenrute' : 'für jede normale Rute')),
-      el('p', '', 'Dafür: ' + wer));
+    const wer = SPECIES.filter(sp => sp.koe.includes(k.id)).map(zeigName).join(', ');
+    txt.append(el('h3', '', k.name), el('p', '', k.schwer
+      ? 'Hält, bis etwas zuschnappt · nur in der Hochsee, nur mit sehr starker Rute'
+      : 'Reicht für ' + k.runden + ' Runden · ' + (k.typ === 'kunst' ? 'nur mit Spinn- oder Fliegenrute' : 'für jede normale Rute')),
+      el('p', '', k.schwer ? 'Über den Grund ziehen. Was dort im Sand lauert, ist riesig.' : 'Dafür: ' + wer));
     const rest = save.vorrat[k.id] || 0;
-    if (rest) txt.append(el('p', 'now', 'Noch ' + rest + (rest === 1 ? ' Runde' : ' Runden') + ' im Beutel'));
+    if (rest) txt.append(el('p', 'now', k.schwer ? 'Noch ' + rest + ' im Beutel' : 'Noch ' + rest + (rest === 1 ? ' Runde' : ' Runden') + ' im Beutel'));
     const btn = el('button', 'btn'); btn.type = 'button';
     btn.textContent = 'Kaufen · ' + k.preis;
     btn.disabled = save.coins < k.preis;
@@ -2237,35 +2542,107 @@ function buy(it) {
   save.coins -= c; save.up[it.k] = l + 1;
   SFX.buy(); persist(); renderShop(); updateHud();
 }
+// ---------- Fangbuch als Buch ----------
+// Dunkelbraunes Cover, danach eine Seite je Gewässer und die Seite "Legenden". Am Handy eine Seite,
+// ab 760 px eine Doppelseite. Gefangene Arten farbig, die anderen grau mit Fragezeichen. Umblättern
+// mit den Pfeilen, durch Wischen oder mit den Pfeiltasten.
+const buch = { blatt: 0, auswahl: null };
+const BUCH_BREIT = matchMedia('(min-width: 760px)');
+function buchSeiten() {
+  const s = GEWAESSER.map(g => ({ titel: g.name, arten: SPECIES.filter(sp => sp.wo.includes(g.id) && !sp.legende) }));
+  s.push({ titel: 'Legenden', arten: SPECIES.filter(sp => sp.legende), legende: true });
+  return s;
+}
+// Ansichten: 0 = Cover, danach eine Seite (schmal) oder zwei Seiten (breit)
+function buchAnsichten() {
+  const s = buchSeiten(), v = [[{ cover: true }]], n = BUCH_BREIT.matches ? 2 : 1;
+  for (let i = 0; i < s.length; i += n) v.push(s.slice(i, i + n));
+  return v;
+}
 function renderAlbum() {
   $('aCount').textContent = discovered() + '/' + SPECIES.length;
-  const wrap = $('albumGrid'); wrap.textContent = '';
-  for (const g of GEWAESSER) {
-    const arten = SPECIES.filter(sp => sp.wo.includes(g.id));
-    const gefunden = arten.filter(sp => save.album[sp.id]).length;
-    const voll = gefunden === arten.length;
-    const kopf = el('p', 'eyebrow' + (voll ? ' kopf-komplett' : ''), '');
-    kopf.append(document.createTextNode(g.name + ' · ' + gefunden + ' von ' + arten.length));
-    if (voll) kopf.append(el('span', 'pokalband', 'Komplett! Alle Arten gefangen'));
-    wrap.append(kopf);
-    const grid = el('div', 'album' + (voll ? ' komplett' : ''));
-    wrap.append(grid);
-    fuelleAlbum(grid, arten);
-  }
+  const v = buchAnsichten();
+  buch.blatt = clamp(buch.blatt, 0, v.length - 1);
+  const box = $('buchSeiten'), ansicht = v[buch.blatt];
+  box.textContent = '';
+  $('buch').classList.toggle('zu', !!ansicht[0].cover);
+  for (const s of ansicht) box.append(s.cover ? buchCover() : buchSeite(s));
+  $('buchSeite').textContent = buch.blatt === 0 ? 'Cover' : buch.blatt + ' / ' + (v.length - 1);
+  $('buchZurueck').disabled = buch.blatt === 0;
+  $('buchVor').disabled = buch.blatt >= v.length - 1;
 }
-function fuelleAlbum(grid, arten) {
-  for (const sp of arten) {
-    const a = save.album[sp.id], card = el('div', a ? 'card' : 'card unk'), pic = el('div', 'pic');
-    pic.append(img(a ? sp.img : sp.sil));
-    card.append(pic, el('h3', '', a ? sp.name : '???'));
-    if (a) card.append(el('p', '', sp.band === 'junk'
-      ? a.n + '× gefunden'
-      : a.n + '× gefangen · ' + groesster(sp) + ' ' + fmtLen(sp, a.max)));
-    card.append(el('p', '', `${BAND_TXT[sp.band]}${sp.band === 'junk' ? '' : ' · ' + sp.koe.map(k => K_BY[k].name).join(', ')}`));
-    if (sp.rar) card.append(el('span', 'tag' + (sp.rar === 'episch' ? ' episch' : ''), sp.rar));
-    grid.append(card);
-  }
+function buchCover() {
+  const c = el('div', 'blatt cover');
+  const t = el('div', 'cover-titel');
+  t.append(el('b', '', 'Fangbuch'), img(SP.hecht.img), el('span', '', discovered() + ' von ' + SPECIES.length + ' entdeckt'));
+  c.append(el('div', 'cover-rahmen'), t, el('small', 'cover-tipp', 'Antippen zum Aufschlagen'));
+  c.onclick = () => blaettern(1);
+  return c;
 }
+function buchSeite(s) {
+  const p = el('div', 'blatt seite' + (s.legende ? ' legenden' : ''));
+  const gef = s.arten.filter(sp => save.album[sp.id]).length;
+  const kopf = el('div', 'seiten-kopf');
+  kopf.append(el('h3', '', s.titel), el('span', '', gef + ' von ' + s.arten.length));
+  p.append(kopf);
+  if (gef === s.arten.length) p.append(el('div', 'stempel', 'Komplett!'));
+  const grid = el('div', 'eintraege');
+  for (const sp of s.arten) {
+    const a = save.album[sp.id];
+    const e = el('button', 'eintrag' + (a ? '' : ' unbekannt') + (buch.auswahl === sp.id ? ' gewaehlt' : ''));
+    e.type = 'button';
+    e.append(img(a ? sp.img : sp.sil), el('span', '', a ? sp.name : '?'));
+    if (a && sp.rar) e.append(el('i', 'rar ' + (sp.rar === 'episch' ? 'episch' : sp.legende ? 'legende' : 'legendaer')));
+    e.onclick = ev => { ev.stopPropagation(); buch.auswahl = buch.auswahl === sp.id ? null : sp.id; renderAlbum(); };
+    grid.append(e);
+  }
+  p.append(grid, buchInfo(s.arten.find(sp => sp.id === buch.auswahl), s));
+  return p;
+}
+function buchInfo(sp, s) {
+  const box = el('div', 'seiten-info');
+  if (!sp) {
+    box.append(el('p', '', s.legende ? 'Man erzählt sich von etwas Riesigem, das im Sand der Hochsee lauert.' : 'Tippe auf einen Fisch für mehr.'));
+    return box;
+  }
+  const a = save.album[sp.id];
+  box.append(el('b', '', a ? sp.name : '?'));
+  if (a) box.append(el('p', '', sp.band === 'junk' ? a.n + '× gefunden' : a.n + '× gefangen · ' + groesster(sp) + ' ' + fmtLen(sp, a.max)));
+  if (sp.legende && !a) box.append(el('p', '', 'Lebt im Sand der Hochsee. Was sie herauslockt, gibt es im Angelladen.'));
+  else box.append(el('p', '', `${BAND_TXT[sp.band]}${sp.band === 'junk' ? '' : ' · ' + sp.koe.map(k => K_BY[k].name).join(', ')}`));
+  if (sp.rar) box.append(el('span', 'tag' + (sp.rar === 'episch' ? ' episch' : ''), sp.rar));
+  return box;
+}
+// Umblättern: die alte Seite dreht sich über den Falz weg, darunter liegt schon die neue
+function blaettern(d) {
+  const v = buchAnsichten(), ziel = clamp(buch.blatt + d, 0, v.length - 1);
+  if (ziel === buch.blatt) return;
+  const box = $('buchSeiten'), alt = d > 0 ? box.lastElementChild : box.firstElementChild;
+  const warZu = buch.blatt === 0;
+  buch.blatt = ziel; buch.auswahl = null;
+  noise(.12, .04);
+  if (RM || !alt || warZu || ziel === 0) { renderAlbum(); return; }
+  const r = alt.getBoundingClientRect(), rb = box.getBoundingClientRect();
+  const kopie = alt.cloneNode(true);
+  kopie.classList.add('umblatt', d > 0 ? 'vor' : 'zurueck');
+  Object.assign(kopie.style, { left: (r.left - rb.left) + 'px', top: (r.top - rb.top) + 'px', width: r.width + 'px', height: r.height + 'px' });
+  renderAlbum();
+  box.append(kopie);
+  setTimeout(() => kopie.remove(), 480);
+}
+$('buchZurueck').onclick = () => blaettern(-1);
+$('buchVor').onclick = () => blaettern(1);
+{
+  let startX = null;
+  $('buch').addEventListener('pointerdown', e => { startX = e.clientX; });
+  $('buch').addEventListener('pointerup', e => {
+    if (startX == null) return;
+    const dx = e.clientX - startX;
+    startX = null;
+    if (Math.abs(dx) > 50) blaettern(dx < 0 ? 1 : -1);
+  });
+}
+BUCH_BREIT.addEventListener('change', () => { if (!$('mAlbum').hidden) { buch.blatt = 0; renderAlbum(); } });
 
 // ---------- Onlinekonto der App-Version (Supabase) ----------
 const SB = {
@@ -2625,6 +3002,8 @@ function setNick(v) {
   return true;
 }
 async function initCloud() {
+  // Beim Entwickeln (localhost) nichts an den echten Server: Tests landen sonst in der Rangliste
+  if (location.hostname === 'localhost') { lbState = 'off'; pkey = localPid(); refreshBoard(); return; }
   if (!window.claude || typeof window.claude.use !== 'function') {
     if (SB.key.length > 20) return initSupabase();
     lbState = 'off'; pkey = localPid(); refreshBoard(); return;
@@ -2690,6 +3069,11 @@ addEventListener('keydown', e => {
     if (G.mode === 'play' && !cur) pause();
     else if (cur === 'mPause') resume();
     else if (cur === 'mShop' || cur === 'mAlbum' || cur === 'mBoard') show(backTo);
+    return;
+  }
+  if (current() === 'mAlbum' && (e.key === 'ArrowRight' || e.key === 'ArrowLeft')) {
+    e.preventDefault();
+    blaettern(e.key === 'ArrowRight' ? 1 : -1);
     return;
   }
   if (e.code === 'Space' || e.key === ' ') {
@@ -2799,7 +3183,8 @@ function fit() {
 addEventListener('resize', fit);
 
 // ---------- Als App installierbar (nur außerhalb von claude.ai) ----------
-if (!window.claude && 'serviceWorker' in navigator && location.protocol.startsWith('http')) {
+// nicht beim Entwickeln (localhost): dort käme sonst eine alte Fassung aus dem Speicher
+if (!window.claude && 'serviceWorker' in navigator && location.protocol.startsWith('http') && location.hostname !== 'localhost') {
   addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
 }
 
@@ -2812,6 +3197,11 @@ updateHud();
 fit();
 requestAnimationFrame(frame);
 initCloud();
+// Nur beim Entwickeln (localhost): Zugriff für Tests und Aufnahmen, auf der echten Seite nicht da
+if (location.hostname === 'localhost') {
+  window.__ph = { G, SP, K_BY, KRAKE, get save() { return save; }, persist, setGew, startRound, update, draw, show,
+    press, release, manuell: false };
+}
 })();
 </script>
 </body>

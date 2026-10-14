@@ -2,6 +2,13 @@
 
 Pixel-Arcade-Angelspiel im Browser. 60 Sekunden pro Runde, dazu Angelladen, Fangbuch, Rekord und eine gemeinsame Rangliste.
 
+Legende seit Oktober 2026: die **Sandkrake** in der Hochsee. Den Krakenköder (1.000 Münzen) über den Grund ziehen,
+bis er hängt, weiterziehen, dann bricht sie aus dem Sand. Erst herausziehen (bei jedem Ruck locker lassen), dann
+drillen; bringt 2.000 Punkte und steht im Fangbuch auf der Seite „Legenden“. Das Fangbuch ist ein Buch zum Umblättern.
+
+Beim Entwickeln auf `localhost` (`node serve.js`) gibt es kein Onlinekonto und keinen Service Worker, dafür die
+Testschnittstelle `window.__ph` (Spielzustand, `update`/`draw` für Bild-für-Bild-Aufnahmen).
+
 ## Dateien
 
 | Datei | Zweck |

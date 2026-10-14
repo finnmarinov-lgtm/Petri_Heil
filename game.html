@@ -124,7 +124,7 @@ kbd{font-family:var(--f-disp);font-size:11px;padding:1px 5px;border:2px solid va
 .buch.zu{max-width:360px;width:100%;margin-inline:auto;padding:0;border:0;background:none;box-shadow:none}
 .seiten{display:flex;position:relative}
 .blatt{flex:1 1 0;min-width:0;position:relative}
-.seite{background:#f4ead4 repeating-linear-gradient(180deg,#f4ead4 0 23px,#e9dcc0 23px 24px);color:#3b2a1c;padding:14px 14px 12px;min-height:440px;display:flex;flex-direction:column;gap:10px;box-shadow:inset -8px 0 12px -8px rgba(60,35,15,.35)}
+.seite{background:#f4ead4 repeating-linear-gradient(180deg,#f4ead4 0 23px,#e9dcc0 23px 24px);color:#3b2a1c;padding:14px 14px 12px;min-height:var(--seite-h,440px);display:flex;flex-direction:column;gap:10px;box-shadow:inset -8px 0 12px -8px rgba(60,35,15,.35)}
 .seite + .seite{box-shadow:inset 10px 0 14px -8px rgba(60,35,15,.5)}
 .seiten-kopf{display:flex;justify-content:space-between;align-items:baseline;gap:8px;border-bottom:2px solid #b89a6a;padding-bottom:4px}
 .seiten-kopf h3{margin:0;font-family:var(--f-disp);font-size:18px;color:#5a3418}
@@ -142,12 +142,12 @@ kbd{font-family:var(--f-disp);font-size:11px;padding:1px 5px;border:2px solid va
 .legenden .eintrag img{height:96px}
 .legenden .eintrag span{font-size:22px}
 .legenden .stempel{top:auto;bottom:16px;right:16px}
-.seiten-info{margin-top:auto;border-top:2px dashed #c9ad7e;padding-top:6px;font-size:18px;line-height:1.1;color:#4a3828;min-height:66px}
+.seiten-info{margin-top:auto;border-top:2px dashed #c9ad7e;padding-top:6px;font-size:18px;line-height:1.1;color:#4a3828;height:140px;overflow:hidden}
 .seiten-info b{font-family:var(--f-disp);font-size:13px;color:#5a3418}
 .seiten-info p{margin:3px 0}
 .seiten-info .tag{margin-top:2px}
 .stempel{position:absolute;top:46px;right:12px;transform:rotate(-12deg);font-family:var(--f-disp);font-size:13px;color:#b8433a;border:2px solid #b8433a;padding:2px 6px;opacity:.85;pointer-events:none}
-.cover{background:#4a2c1a;border:3px solid #2b180d;border-radius:4px 12px 12px 4px;min-height:440px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;box-shadow:6px 6px 0 var(--shadow),inset 12px 0 0 #3a2213,inset 14px 0 0 #2b180d}
+.cover{background:#4a2c1a;border:3px solid #2b180d;border-radius:4px 12px 12px 4px;min-height:var(--seite-h,440px);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;box-shadow:6px 6px 0 var(--shadow),inset 12px 0 0 #3a2213,inset 14px 0 0 #2b180d}
 .cover-rahmen{position:absolute;inset:16px 16px 16px 28px;border:2px solid #b8894a;opacity:.55;pointer-events:none}
 .cover-titel{display:flex;flex-direction:column;align-items:center;gap:14px;color:#d9a441;text-align:center;padding-left:12px}
 .cover-titel b{font-family:var(--f-disp);font-size:30px;text-shadow:2px 2px 0 #24130a}
@@ -2543,11 +2543,36 @@ function renderAlbum() {
   buch.blatt = clamp(buch.blatt, 0, v.length - 1);
   const box = $('buchSeiten'), ansicht = v[buch.blatt];
   box.textContent = '';
+  buchHoehe(v);
   $('buch').classList.toggle('zu', !!ansicht[0].cover);
   for (const s of ansicht) box.append(s.cover ? buchCover() : buchSeite(s));
   $('buchSeite').textContent = buch.blatt === 0 ? 'Cover' : buch.blatt + ' / ' + (v.length - 1);
   $('buchZurueck').disabled = buch.blatt === 0;
   $('buchVor').disabled = buch.blatt >= v.length - 1;
+}
+// Ein Buch hat überall dieselbe Größe: alle Seiten (und das Cover) so hoch wie die höchste Seite.
+// Dafür werden alle Seiten einmal unsichtbar in voller Breite gesetzt und gemessen.
+function buchHoehe(v) {
+  const b = $('buch'), warZu = b.classList.contains('zu');
+  b.classList.remove('zu');
+  b.style.removeProperty('--seite-h');
+  const breite = $('buchSeiten').clientWidth, mess = el('div', 'seiten');
+  Object.assign(mess.style, { position: 'absolute', visibility: 'hidden', left: '0', top: '0', width: breite + 'px', flexWrap: 'wrap' });
+  const n = BUCH_BREIT.matches ? 2 : 1;
+  for (const ansicht of v) {
+    for (const s of ansicht) {
+      if (s.cover) continue;
+      const p = buchSeite(s);
+      p.style.flex = '0 0 ' + (100 / n) + '%';
+      mess.append(p);
+    }
+  }
+  b.append(mess);
+  let h = 0;
+  for (const p of mess.children) h = Math.max(h, p.offsetHeight);
+  mess.remove();
+  if (warZu) b.classList.add('zu');
+  if (h) b.style.setProperty('--seite-h', h + 'px');
 }
 function buchCover() {
   const c = el('div', 'blatt cover');

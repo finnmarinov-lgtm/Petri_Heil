@@ -578,7 +578,10 @@ kbd{font-family:var(--f-disp);font-size:11px;padding:1px 5px;border:2px solid va
     [/^LEGENDÄR! (.+) · \+(\d+)$/, 'LEGENDARY! $1 · +$2'],
     [/^Episch! (.+) · \+(\d+)$/, 'Epic! $1 · +$2'],
     [/^Petri Heil! (.+) · \+(\d+)$/, 'Tight lines! $1 · +$2'],
-    [/^(.+): kein Interesse\. Beißt auf (.+)\.$/, '$1: not interested. Takes $2.'],
+    // Die Köder stehen mit "oder" verbunden; die Namen übersetzt danach der Wortdurchgang
+    [/^(.+): kein Interesse\. Beißt auf (.+)\.$/, function (_, fisch, koeder) {
+      return fisch + ': not interested. Takes ' + koeder.split(' oder ').join(' or ') + '.';
+    }],
     [/^Zu spät! (?:Der|Die|Das) (.+) hat den Köder ausgespuckt\.$/,
       'Too late! The $1 spat the bait out.'],
     [/^Schnurbruch! (.+) war zu stark für die (.+)\.$/, 'Line break! $1 was too strong for the $2.'],

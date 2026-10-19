@@ -342,7 +342,7 @@ kbd{font-family:var(--f-disp);font-size:11px;padding:1px 5px;border:2px solid va
       'You have already played this daily round today, so it only counts for coins and the catch log.',
     'Freies Angeln: Münzen und Fangbuch zählen, die Tagesrangliste nicht.':
       'Free fishing: coins and catch log count, the daily leaderboard does not.',
-    'LEGENDÄR!': 'LEGENDARY!', 'legendär': 'legendary',
+    'LEGENDÄR!': 'LEGENDARY!', 'legendär': 'legendary', 'episch': 'epic',
 
     // Spielercode und Rangliste
     'Der Code sieht nicht richtig aus. Er hat die Form PETRI-A1B2-C3D4.':
@@ -383,8 +383,8 @@ kbd{font-family:var(--f-disp);font-size:11px;padding:1px 5px;border:2px solid va
   EN['auswerfen, die Tiefe wählen, den Köder führen, beim Biss anschlagen und den Fisch drillen, ohne dass die Schnur reißt.'] =
     'cast, pick your depth, work the bait, set the hook on the bite and fight the fish without snapping the line.';
   EN['Angeltasche:'] = 'Tackle bag:';
-  EN['sechs Ruten und neun Köder. Jede Art hat ihre Vorlieben, die falsche Rute kostet den Fisch.'] =
-    'six rods and nine baits. Every species has its preferences, and the wrong rod loses you the fish.';
+  EN['sieben Ruten und zwölf Köder. Jede Art hat ihre Vorlieben, die falsche Rute kostet den Fisch.'] =
+    'seven rods and twelve baits. Every species has its preferences, and the wrong rod loses you the fish.';
   EN['Fangbuch:'] = 'Catch log:';
   EN['Drei Gewässer:'] = 'Three waters:';
   EN['Petri Heil – Pixel-Angelspiel im Browser'] = 'Petri Heil – a pixel fishing game in your browser';
@@ -522,7 +522,17 @@ kbd{font-family:var(--f-disp);font-size:11px;padding:1px 5px;border:2px solid va
   EN['Abgebrochen.'] = 'Cancelled.';
 
   var MUSTER = [
-    [/^Dein Rekord: (\d+) Punkte$/, 'Your best: $1 points'],
+    // Zahlen kommen mit Tausendertrennzeichen an ("3,000"), deshalb [\d.,]+ statt \d+
+    [/^Dein Rekord: ([\d.,]+) Punkte$/, 'Your best: $1 points'],
+    [/^Bester Fang: (.+)$/, 'Best catch: $1'],
+    [/^Platz (\d+) in der ewigen Liste$/, 'Rank $1 in the all-time list'],
+    [/^(\d+)× gefunden$/, '$1× found'],
+    // Rangliste und Belohnung für den Tagessee
+    [/^Du stehst auf Platz (\d+) der Rangliste\.$/, 'You are number $1 on the leaderboard.'],
+    [/^Du hast den Tagessee gewonnen, vor (\d+) anderen\.$/, 'You won the daily lake, ahead of $1 others.'],
+    [/^Aufs Podest geschafft: Platz (\d+) von (\d+)\.$/, 'Made the podium: place $1 of $2.'],
+    [/^Platz (\d+) von (\d+)\. Antrittsgeld gibt es trotzdem\.$/, 'Place $1 of $2. You still get coins for taking part.'],
+    [/^Insgesamt (\d+)× gewonnen, (\d+)× aufs Podest\.$/, 'In total: won $1×, on the podium $2×.'],
     [/^Tagesrunde erledigt: (.+) Punkte$/, 'Daily round done: $1 points'],
     [/^Platz (\d+)$/, 'Rank $1'],
     [/^Platz (\d+) · (.+)$/, 'Rank $1 · $2'],
@@ -544,8 +554,8 @@ kbd{font-family:var(--f-disp);font-size:11px;padding:1px 5px;border:2px solid va
     [/^Schnurbruch! (.+) war zu stark für die (.+)$/, 'Line break! $1 was too strong for the $2'],
     [/^(.+) war zu stark für die (.+)$/, '$1 was too strong for the $2'],
     [/^(.+) gekauft und eingepackt\.$/, '$1 bought and packed.'],
-    [/^(\d+) Münzen im Beutel$/, '$1 coins in the bag'],
-    [/^(\d+) Punkte mit (.+)$/, '$1 points with $2'],
+    [/^([\d.,]+) Münzen im Beutel$/, '$1 coins in the bag'],
+    [/^([\d.,]+) Punkte mit (.+)$/, '$1 points with $2'],
     [/^Übung · (.+)$/, 'Practice · $1'],
     [/^Tagesrunde · (.+)$/, 'Daily round · $1'],
     [/^(\d+) Gewässer, (\d+) Arten, eine Runde dauert eine Minute\.$/,
@@ -587,7 +597,7 @@ kbd{font-family:var(--f-disp);font-size:11px;padding:1px 5px;border:2px solid va
     [/^Drillbereich (\d+) %$/, 'Fighting range $1 %'],
     [/^(\d+)× gefangen$/, '$1× caught'],
     [/^(?:größter|größte|größtes) (.+)$/, 'biggest $1'],
-    [/^Heute erledigt: (\d+) Punkte mit (\d+) Fischen$/, 'Done today: $1 points with $2 fish'],
+    [/^Heute erledigt: ([\d.,]+) Punkte mit (\d+) Fisch(?:en)?$/, 'Done today: $1 points with $2 fish'],
     [/^Gewertet\. Heute fehlt noch: (.+)\.$/, 'Counted. Still missing today: $1.'],
     [/^Kopieren ging nicht\. Schreib ihn ab: (.+)$/, 'Copying failed. Write it down: $1'],
     [/^Link: (.+)$/, 'Link: $1'],
@@ -599,6 +609,7 @@ kbd{font-family:var(--f-disp);font-size:11px;padding:1px 5px;border:2px solid va
     [/^Schnurbruch! Die Sandkrake war zu stark(?: für die .+)?\. Der Köder ist weg\.$/, 'Line break! The sand kraken was too strong. The bait is gone.'],
     [/^Die Sandkrake hat sich losgerissen! Der Köder ist weg\.$/, 'The sand kraken broke free! The bait is gone.'],
     [/^Die Sandkrake hat sich zurück in den Sand gegraben\. Der Köder ist weg\.$/, 'The sand kraken dug itself back into the sand. The bait is gone.'],
+    [/^(.+) hat sich losgerissen!$/, '$1 broke free!'],
     [/^(\d+) von (\d+)$/, '$1 of $2'],
     [/^Runde dauert (\d+) statt (\d+) Sekunden$/, 'A round lasts $1 instead of $2 seconds'],
     [/^Bis zu (\d+) statt (\d+) Fische im See, schnellere Bisse$/,
@@ -614,6 +625,9 @@ kbd{font-family:var(--f-disp);font-size:11px;padding:1px 5px;border:2px solid va
       EINZELWORT[schluessel] = EN[schluessel];
     }
   }
+
+  // Namen aus mehreren Wörtern: der Wortdurchgang sieht nur einzelne Wörter
+  var MEHRWORT = ['Alter Reifen'];
 
   var ATTRIBUTE = ['aria-label', 'title', 'placeholder'];
 
@@ -652,6 +666,10 @@ kbd{font-family:var(--f-disp);font-size:11px;padding:1px 5px;border:2px solid va
       for (var a = 0; a < teil.length; a++) teil[a] = abschnitt(teil[a]);
       t = teil.join(' · ');
     }
+    for (var m = 0; m < MEHRWORT.length; m++) {
+      if (t.indexOf(MEHRWORT[m]) >= 0) t = t.split(MEHRWORT[m]).join(EN[MEHRWORT[m]]);
+    }
+    t = t.replace(/\bGr\. (\d+)/g, 'size $1');
     if (t.length <= 160 && /[A-Za-zÄÖÜäöüß]/.test(t)) {
       var teile = t.split(/([^A-Za-zÄÖÜäöüß-]+)/);
       for (var k = 0; k < teile.length; k++) {
@@ -913,7 +931,7 @@ kbd{font-family:var(--f-disp);font-size:11px;padding:1px 5px;border:2px solid va
   <p>Ein kostenloses Angelspiel im Retro-Look: Es läuft ohne Installation direkt im Browser, am PC und am Handy, und lässt sich als App auf den Startbildschirm legen.</p>
   <ul>
     <li><b>Angeln in 60 Sekunden:</b> auswerfen, die Tiefe wählen, den Köder führen, beim Biss anschlagen und den Fisch drillen, ohne dass die Schnur reißt.</li>
-    <li><b>Angeltasche:</b> sechs Ruten und neun Köder. Jede Art hat ihre Vorlieben, die falsche Rute kostet den Fisch.</li>
+    <li><b>Angeltasche:</b> sieben Ruten und zwölf Köder. Jede Art hat ihre Vorlieben, die falsche Rute kostet den Fisch.</li>
     <li><b>Fangbuch:</b> heimische Süßwasserfische vom Rotauge bis zum Stör, dazu Forelle, Äsche, Döbel und Barbe im Fluss und die Arten der Hochsee.</li>
     <li><b>Drei Gewässer:</b> See, Fluss mit Strömung und Hochsee – jeden Tag derselbe Fischbestand für alle, mit eigener Tagesrangliste.</li>
   </ul>
@@ -1232,6 +1250,13 @@ const bot = new Float32Array(W + 1);
 const botAt = x => bot[clamp(Math.round(x), 0, W)];
 function xMinFor(lowerY) { for (let x = 40; x <= W; x++) if (bot[x] > lowerY + 2) return x; return W + 99; }
 function xMaxFor(lowerY) { for (let x = W; x >= 40; x--) if (bot[x] > lowerY + 2) return x; return 0; }
+// Tiefste erlaubte Mitte eines Fischs bei x: der ganze Körper bleibt über dem Grund, auch über
+// den Sandwellen der Hochsee, an deren Kämmen xMinFor/xMaxFor nicht greifen
+function maxYFor(x, sp) {
+  let m = 999;
+  for (let xx = Math.floor(x - sp.sw / 2); xx <= Math.ceil(x + sp.sw / 2); xx++) m = Math.min(m, botAt(xx));
+  return m - sp.sh / 2 - 1;
+}
 const depthM = x => ((botAt(x) - SURF) / (gew.tiefe || 14)).toFixed(1).replace('.', ',');
 function setGew(id) {
   const vorher = gew && gew.id;
@@ -1729,9 +1754,15 @@ function updFish(dt) {
       if (Math.abs(dx) > 72 || Math.abs(dy) > 38) { f.state = 'swim'; f.cool = 2; continue; }
       if (Math.abs(dx) > 1) f.dir = dx > 0 ? 1 : -1;
       const s = f.speed * 1.9 * dt;
-      f.x += clamp(dx, -s, s); f.y += clamp(dy, -12 * dt, 12 * dt);
-      f.y = Math.min(f.y, botAt(f.x) - f.sp.sh / 2 - 1);
-      if (Math.abs(dx) < 2.5 && Math.abs(dy) < 3) { hookFish(f); return; }
+      // nicht so nah ans Ufer, dass der Fisch über das Wasser gehoben würde
+      const nx = f.x + clamp(dx, -s, s);
+      if (maxYFor(nx, f.sp) >= SURF + f.sp.sh / 2 + 1) f.x = nx;
+      f.y += clamp(dy, -12 * dt, 12 * dt);
+      const tiefst = maxYFor(f.x, f.sp);
+      f.y = Math.min(f.y, tiefst);
+      // Liegt der Köder am Grund, schnappt der Fisch von oben zu (sein Körper bleibt über dem Boden)
+      const vonOben = f.y >= tiefst - .5 && dy > 0 && dy < f.sp.sh + 3;
+      if (Math.abs(dx) < 2.5 && (Math.abs(dy) < 3 || vonOben)) { hookFish(f); return; }
       continue;
     }
     if (f.state === 'approach') f.state = 'swim';
@@ -1746,6 +1777,8 @@ function updFish(dt) {
     f.x += f.dir * f.speed * dt;
     if (f.dir < 0 && (f.x < f.turnX || f.x < minXFor(f))) f.dir = 1;
     else if (f.dir > 0 && f.x > maxXFor(f)) f.dir = -1;
+    // über Sandwellen und Kanten hinweggleiten statt durch den Grund
+    f.y = Math.min(f.y, maxYFor(f.x, f.sp));
     f.cool -= dt;
     if (fishing && f.cool <= 0) {
       f.cool = rnd(.5, 1.1);
@@ -1797,7 +1830,10 @@ function updFight(dt) {
   h.x = lerp(F.x0, Math.max(60, F.x0 - 40), p * .6) + Math.sin(G.t * 9) * 2 * (1 - p * .5);
   h.y = Math.min(lerp(F.y0, SURF + 8, p * .7), botAt(h.x) - 2);
   if (f.sp.band !== 'junk' && !f.sp.legende && Math.random() < dt * 3) f.dir = -f.dir;
-  f.x = h.x - f.dir * f.sp.sw / 2; f.y = h.y;
+  f.x = h.x - f.dir * f.sp.sw / 2;
+  // Der Haken sitzt im Maul: so hoch, dass der ganze Fisch über dem Grund bleibt (Kiesbank, Uferhang)
+  h.y = Math.min(h.y, Math.max(maxYFor(f.x, f.sp), SURF + 2));
+  f.y = h.y;
   if (F.prog >= 1) landFish(); else if (F.prog <= 0) loseFish();
 }
 function landFish() {
@@ -1812,7 +1848,7 @@ function landFish() {
     tone([523, 659, 784, 1047, 1319, 1568, 2093], .1);
     addText('LEGENDE!', clamp(f.x, 40, W - 40), f.y - 22, '#ff7a5f');
     G.shake = 2.5; G.krake = null;
-  } else if (sp.rar) { tone(sp.rar === 'legendär' ? [784, 1047, 1319, 1568] : [659, 880, 1047], .09); addText(sp.rar === 'legendär' ? 'LEGENDÄR!' : 'EPISCH!', f.x, f.y - 16, sp.rar === 'legendär' ? '#f2c14e' : '#c8a0ff'); }
+  } else if (sp.rar) { tone(sp.rar === 'legendär' ? [784, 1047, 1319, 1568] : [659, 880, 1047], .09); addText(sp.rar === 'legendär' ? 'LEGENDÄR!' : 'EPISCH!', f.x, f.y - 16, sp.rar === 'legendär' ? '#f2c14e' : '#e6ccff'); }
   toast(sp.legende ? `Legende gefangen: ${fangText(sp, f.len)}! +${pts}`
     : isNew ? `Neu im Fangbuch: ${sp.name}! +${pts}`
     : sp.band === 'junk' ? `Kein Fisch: ${sp.name}, aber immerhin +1` 
@@ -2055,8 +2091,11 @@ function pixText(s, x, y, c) {
   // Leinwandtext geht nicht durch den Beobachter der Sprachumschaltung
   if (window.PH_T) s = PH_T(s);
   cx.font = '8px Silkscreen, monospace'; cx.textAlign = 'center'; cx.textBaseline = 'top';
-  cx.fillStyle = '#121a2b'; cx.fillText(s, Math.round(x) + 1, Math.round(y) + 1);
-  cx.fillStyle = c; cx.fillText(s, Math.round(x), Math.round(y));
+  // dunkler Rand rundherum, damit die Schrift auf Wasser, Himmel und Grund lesbar bleibt
+  const px = Math.round(x), py = Math.round(y);
+  cx.fillStyle = '#121a2b';
+  for (const [dx, dy] of [[-1, 0], [1, 0], [0, -1], [0, 1], [1, 1]]) cx.fillText(s, px + dx, py + dy);
+  cx.fillStyle = c; cx.fillText(s, px, py);
 }
 function drawClouds() {
   for (const c of clouds) {
@@ -2314,7 +2353,7 @@ function renderMenu() {
   const offen = tagOffen().map(g => g.name), sum = tagSumme();
   box.append(kachel(() => zurTasche(true), tagRestlich() ? 'Tagesrunde' : 'Tagesrunde nochmal',
     [tagRestlich() ? 'Noch ' + offen.length + ' von ' + TAGESRUNDEN() + ' offen: ' + offen.join(', ')
-      : 'Heute erledigt: ' + de(sum.punkte) + ' Punkte mit ' + sum.fische + ' Fischen',
+      : 'Heute erledigt: ' + de(sum.punkte) + ' Punkte mit ' + sum.fische + (sum.fische === 1 ? ' Fisch' : ' Fischen'),
       'Zählt für die Tagesrangliste. Alle angeln dasselbe Wasser.'],
     'haupt' + (tagRestlich() ? '' : ' fertig')));
   box.append(kachel(() => zurTasche(false), 'Freies Angeln',
@@ -2324,7 +2363,7 @@ function renderMenu() {
   box.append(kachel(() => { backTo = 'mTitle'; show('mShop'); }, 'Angelladen',
     [de(save.coins) + ' Münzen im Beutel', save.ruten.length + ' von ' + RUTEN.length + ' Ruten gekauft']));
   box.append(kachel(() => { backTo = 'mTitle'; show('mAlbum'); }, 'Fangbuch',
-    [discovered() + ' von ' + SPECIES.length + ' Arten entdeckt',
+    [discovered() + ' von ' + SPECIES.length + ' entdeckt',
       save.bestTop ? 'Bester Fang: ' + save.bestTop : 'Noch kein Rekordfang']));
   const platz = lbRows.findIndex(r => r.me || r.id === pkey);
   box.append(kachel(() => { backTo = 'mTitle'; show('mBoard'); }, 'Rangliste',
@@ -2338,7 +2377,7 @@ function renderTitle() {
   updateHint();
   renderMenu();
   $('tTime').textContent = roundLen();
-  $('tLead').textContent = GEWAESSER.length + ' Gewässer, ' + SPECIES.length + ' Arten, eine Runde dauert eine Minute.';
+  $('tLead').textContent = GEWAESSER.length + ' Gewässer, ' + SPECIES.filter(sp => sp.band !== 'junk').length + ' Arten, eine Runde dauert eine Minute.';
   $('tBest').textContent = de(save.best);
   $('tPokale').textContent = save.pokale.siege + (save.pokale.podeste > save.pokale.siege ? ' + ' + (save.pokale.podeste - save.pokale.siege) : '');
 

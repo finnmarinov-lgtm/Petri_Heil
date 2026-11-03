@@ -1,7 +1,7 @@
 // Service Worker: macht das Spiel offline spielbar.
 // Der Cache-Name wird von build.js automatisch aus dem Inhalt erzeugt,
 // damit installierte Geräte jede neue Fassung bekommen.
-const CACHE = 'petri-heil-35694e87';
+const CACHE = 'petri-heil-64aa7ddc';
 const ASSETS = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {

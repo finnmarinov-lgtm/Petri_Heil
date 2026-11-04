@@ -94,6 +94,7 @@ kbd{font-family:var(--f-disp);font-size:11px;padding:1px 5px;border:2px solid va
 .box-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:6px 16px}
 .purse{margin:0;color:var(--muted)}
 .purse b{font-family:var(--f-disp);font-size:16px;color:var(--gold);font-weight:400}
+.brief{margin:0;padding:14px 16px;background:#f3e9d2;color:#2a1a14;font-size:22px;line-height:1.25;box-shadow:4px 4px 0 var(--shadow);transform:rotate(-1deg)}
 .badge{margin:0;align-self:flex-start;font-family:var(--f-disp);font-size:12px;letter-spacing:.08em;text-transform:uppercase;padding:5px 8px;background:var(--gold);color:var(--ink)}
 .catches{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}
 .catches li{display:grid;grid-template-columns:56px 1fr auto;align-items:center;gap:10px;padding:4px 8px;background:var(--ink-2)}
@@ -291,7 +292,7 @@ kbd{font-family:var(--f-disp);font-size:11px;padding:1px 5px;border:2px solid va
     'in der ewigen Liste': 'in the all-time list',
 
     // Gewässer
-    'See': 'Lake', 'Fluss': 'River', 'Hochsee': 'Open sea',
+    'See': 'Lake', 'Fluss': 'River', 'Hochsee': 'Open sea', 'Eissee': 'Frozen lake',
     'Ruhiges Wasser. Flach am Steg, weit draußen tief. Karpfen, Wels und Stör leben hier.':
       'Calm water. Shallow by the jetty, deep further out. Carp, catfish and sturgeon live here.',
 
@@ -477,6 +478,31 @@ kbd{font-family:var(--f-disp);font-size:11px;padding:1px 5px;border:2px solid va
   EN['RUCK! LOCKER LASSEN!'] = 'JERK! EASE OFF!'; EN['SPANNUNG! LOCKER!'] = 'TENSION! EASE OFF!';
   EN['ZIEH SIE RAUS!'] = 'PULL IT OUT!'; EN['SANDKRAKE!'] = 'SAND KRAKEN!'; EN['LEGENDE!'] = 'LEGEND!'; EN['LOS'] = 'FREE';
   EN['Seite zurück'] = 'Previous page'; EN['Seite vor'] = 'Next page';
+  // Nacht, Gewitter, neue Legenden, Flaschenpost und Eissee (04.11.2026)
+  EN['Tageszeit'] = 'Time of day'; EN['Tagsüber'] = 'Daytime'; EN['nur nachts'] = 'night only'; EN['nur bei Gewitter'] = 'thunderstorms only'; EN['Nacht'] = 'Night'; EN['Gewitter'] = 'Thunderstorm';
+  EN['Alle Fische wie gewohnt.'] = 'All fish as usual.';
+  EN['Aal, Wels und Zander beißen öfter, manches zeigt sich nur im Dunkeln. Die Laterne brennt.'] = 'Eel, catfish and zander bite more often, and some things only show up in the dark. The lantern is lit.';
+  EN['Wetterbericht für die Tagesrunde hier: Gewitter! Die Fische beißen besser.'] = 'Weather report for the daily round here: thunderstorm! The fish bite better.';
+  EN['Wetterbericht für die Tagesrunde hier: trocken.'] = 'Weather report for the daily round here: dry.';
+  EN['Beim freien Angeln kann jederzeit ein Gewitter aufziehen.'] = 'When fishing freely, a thunderstorm can roll in at any time.';
+  EN['Gewitter! Bei Blitz und Donner beißen die Fische besser.'] = 'Thunderstorm! The fish bite better in thunder and lightning.';
+  EN['Etwas Riesiges bewegt sich im Wasser …'] = 'Something huge is moving in the water …';
+  EN['Mondscheinforelle'] = 'Moonlight trout'; EN['Quappe'] = 'Burbot'; EN['Seesaibling'] = 'Arctic char';
+  EN['Flaschenpost'] = 'Message in a bottle'; EN['Seeschlange'] = 'Lake serpent'; EN['Riesenwaller'] = 'Giant catfish';
+  EN['SEESCHLANGE!'] = 'LAKE SERPENT!'; EN['RIESENWALLER!'] = 'GIANT CATFISH!';
+  EN['Man erzählt sich von riesigen Wesen, die sich nur selten zeigen.'] = 'People talk about huge creatures that rarely show themselves.';
+  EN['Zeigt sich nur nachts im See. Beißt auf Tauwurm und hält nur an einer sehr starken Rute.'] = 'Only shows up at night in the lake. Bites on a nightcrawler and only stays on a very strong rod.';
+  EN['Kommt nur bei Gewitter aus seinem Loch im Fluss. Beißt auf Tauwurm oder Gummifisch.'] = 'Only leaves its hole in the river during a thunderstorm. Bites on a nightcrawler or a soft bait.';
+  EN['Im Winter friert der See zu. Du angelst durch ein Loch im Eis direkt am Steg, senkrecht nach unten. Quappe und Seesaibling gibt es nur hier.'] = 'In winter the lake freezes over. You fish straight down through a hole in the ice next to the jetty. Burbot and arctic char only live here.';
+  EN['Eine Nachricht!'] = 'A message!'; EN['– ein Angler vom anderen Ufer'] = '– an angler from the other shore'; EN['Weiterangeln'] = 'Keep fishing';
+  EN['Nachts im See soll etwas Langes durchs Wasser gleiten. Wer es fangen will, braucht Tauwurm und die stärkste Rute.'] = 'They say something long glides through the lake at night. To catch it, you need a nightcrawler and the strongest rod.';
+  EN['Wenn es über dem Fluss donnert, kommt der Riesenwaller aus seinem Loch.'] = 'When thunder rolls over the river, the giant catfish leaves its hole.';
+  EN['Im Mondlicht leuchten manche Forellen. Am Tag sieht man sie nie.'] = 'Some trout glow in the moonlight. You never see them during the day.';
+  EN['Bei Gewitter beißen alle Fische besser. Nicht heimgehen, wenn es blitzt!'] = 'Every fish bites better in a thunderstorm. Don’t go home when lightning strikes!';
+  EN['Im Sand der Hochsee schläft etwas mit vielen Armen. Zieh den richtigen Köder über den Grund.'] = 'Something with many arms sleeps in the sand of the open sea. Drag the right bait along the bottom.';
+  EN['Im Winter friert der See zu. Unter dem Eis wartet die Quappe.'] = 'In winter the lake freezes over. The burbot waits under the ice.';
+  EN['Aal, Wels und Zander jagen nachts. Mit der Laterne am Steg hast du gute Karten.'] = 'Eel, catfish and zander hunt at night. With the lantern on the jetty, your chances are good.';
+  EN['Ein Futterkorb lockt mehr Fische an deinen Platz.'] = 'A feeder brings more fish to your spot.';
   // Glücksrad
   // Rutenwerte, erscheinen als Abschnitte einer Zeile mit " · "
   EN['sehr leicht'] = 'very light'; EN['leicht'] = 'light'; EN['mittel'] = 'medium';
@@ -613,6 +639,7 @@ kbd{font-family:var(--f-disp);font-size:11px;padding:1px 5px;border:2px solid va
     [/^Schnurbruch! Die Sandkrake war zu stark(?: für die .+)?\. Der Köder ist weg\.$/, 'Line break! The sand kraken was too strong. The bait is gone.'],
     [/^Die Sandkrake hat sich losgerissen! Der Köder ist weg\.$/, 'The sand kraken broke free! The bait is gone.'],
     [/^Die Sandkrake hat sich zurück in den Sand gegraben\. Der Köder ist weg\.$/, 'The sand kraken dug itself back into the sand. The bait is gone.'],
+    [/^Schnurbruch! (.+) ist abgetaucht\.$/, 'Line break! $1 dived away.'],
     [/^(.+) hat sich losgerissen!$/, '$1 broke free!'],
     [/^(\d+) online · (\d+) angel(?:t|n) gerade$/, '$1 online · $2 fishing now'],
     [/^(\d+) von (\d+)$/, '$1 of $2'],
@@ -828,6 +855,11 @@ kbd{font-family:var(--f-disp);font-size:11px;padding:1px 5px;border:2px solid va
       <div class="wahl" id="kGewaesser"></div>
     </div>
     <div>
+      <p class="eyebrow">Tageszeit</p>
+      <div class="wahl" id="kZeit"></div>
+      <p class="muted small" id="kWetter"></p>
+    </div>
+    <div>
       <p class="eyebrow">Rute</p>
       <div class="wahl" id="kRuten"></div>
     </div>
@@ -925,6 +957,16 @@ kbd{font-family:var(--f-disp);font-size:11px;padding:1px 5px;border:2px solid va
   </div>
 </div>
 
+<div class="modal" id="mPost" hidden>
+  <div class="box small" role="dialog" aria-labelledby="postTitle">
+    <p class="eyebrow">Flaschenpost</p>
+    <h2 id="postTitle" class="big">Eine Nachricht!</h2>
+    <p class="brief" id="postText"></p>
+    <p class="muted small">– ein Angler vom anderen Ufer</p>
+    <div class="actions"><button class="btn primary" id="postWeiter" type="button">Weiterangeln</button></div>
+  </div>
+</div>
+
 <div class="modal" id="mPause" hidden>
   <div class="box small" role="dialog" aria-labelledby="pTitle">
     <h2 id="pTitle" class="big">Pause</h2>
@@ -995,16 +1037,16 @@ const KRAFT_TXT = ['', 'sehr leicht', 'leicht', 'mittel', 'stark', 'sehr stark']
 
 // Farben: [Körper, Bauch, Flossen, Muster]
 const SPECIES = [
-  { id: 'rotauge', wo: ['see', 'fluss'], g: 's',  name: 'Rotauge',            band: 'flach',  len: [12, 30],   pts: 5,   wild: .15, w: 10,  kraft: 1, koe: ['brot', 'maden', 'mais'],            shape: 's', c: ['#b9c6cc', '#eef2f3', '#d9534f', '#8fa3ad'] },
+  { id: 'rotauge', wo: ['see', 'fluss', 'eis'], g: 's',  name: 'Rotauge',            band: 'flach',  len: [12, 30],   pts: 5,   wild: .15, w: 10,  kraft: 1, koe: ['brot', 'maden', 'mais'],            shape: 's', c: ['#b9c6cc', '#eef2f3', '#d9534f', '#8fa3ad'] },
   { id: 'rotfeder', wo: ['see'], g: 'e', name: 'Rotfeder',           band: 'flach',  len: [14, 32],   pts: 6,   wild: .2,  w: 7,   kraft: 1, koe: ['brot', 'maden', 'mais'],            shape: 's', c: ['#c9a55a', '#f0dfae', '#e0452f', '#a8843e'] },
   { id: 'brasse', wo: ['see', 'fluss'], g: 'e',   name: 'Brasse',             band: 'mittel', len: [30, 65],   pts: 12,  wild: .25, w: 7,   kraft: 2, koe: ['maden', 'mais', 'wurm', 'pellets'], shape: 'm', c: ['#9c8a62', '#d8cba6', '#6b5d45', '#857350'] },
-  { id: 'barsch', wo: ['see', 'fluss'], g: 'r',   name: 'Barsch',             band: 'flach',  len: [15, 40],   pts: 10,  wild: .4,  w: 6,   kraft: 2, koe: ['maden', 'wurm', 'gummi', 'blinker'], shape: 's', c: ['#7f9a4c', '#d8d7a0', '#e8742c', '#3e4d24'] },
+  { id: 'barsch', wo: ['see', 'fluss', 'eis'], g: 'r',   name: 'Barsch',             band: 'flach',  len: [15, 40],   pts: 10,  wild: .4,  w: 6,   kraft: 2, koe: ['maden', 'wurm', 'gummi', 'blinker'], shape: 's', c: ['#7f9a4c', '#d8d7a0', '#e8742c', '#3e4d24'] },
   { id: 'schleie', wo: ['see'], g: 'e',  name: 'Schleie',            band: 'mittel', len: [25, 55],   pts: 18,  wild: .35, w: 4,   kraft: 2, koe: ['maden', 'wurm', 'mais'],           shape: 'm', c: ['#5d6b2c', '#a8a860', '#3f4a1c', '#4b5722'] },
   { id: 'forelle', wo: ['see', 'fluss'], g: 'e',  name: 'Regenbogenforelle',  band: 'flach',  len: [25, 55],   pts: 22,  wild: .55, w: 4,   kraft: 2, koe: ['fliege', 'maden', 'blinker'],      shape: 'm', c: ['#8a9aa8', '#f0e6d8', '#e0707e', '#d76a7a'] },
   { id: 'aal', wo: ['see', 'fluss'], g: 'r',      name: 'Aal',                band: 'grund',  len: [45, 95],   pts: 25,  wild: .75, w: 3,   kraft: 3, koe: ['wurm', 'maden'],                   shape: 'l', c: ['#3d3a2a', '#8a8466', '#2c2a1e', '#34311f'] },
   { id: 'karpfen', wo: ['see'], g: 'r', name: 'Karpfen',            band: 'tief',   len: [40, 90],   pts: 35,  wild: .5,  w: 4,   kraft: 4, koe: ['mais', 'pellets', 'boilies'],      shape: 'b', c: ['#a8863a', '#e2c979', '#7a5f26', '#8c6f2c'] },
-  { id: 'hecht', wo: ['see', 'fluss'], g: 'r',    name: 'Hecht',              band: 'mittel', len: [50, 110],  pts: 45,  wild: .8,  w: 2,   kraft: 4, koe: ['gummi', 'blinker'],                shape: 'l', c: ['#6c8a3a', '#e4e2b0', '#a0602a', '#c8d68a'] },
-  { id: 'zander', wo: ['see', 'fluss'], g: 'r',   name: 'Zander',             band: 'tief',   len: [40, 85],   pts: 40,  wild: .6,  w: 2,   kraft: 3, koe: ['gummi', 'wurm'],                   shape: 'm', c: ['#8c9a8c', '#e2e6de', '#5a665a', '#5f6d60'] },
+  { id: 'hecht', wo: ['see', 'fluss', 'eis'], g: 'r',    name: 'Hecht',              band: 'mittel', len: [50, 110],  pts: 45,  wild: .8,  w: 2,   kraft: 4, koe: ['gummi', 'blinker'],                shape: 'l', c: ['#6c8a3a', '#e4e2b0', '#a0602a', '#c8d68a'] },
+  { id: 'zander', wo: ['see', 'fluss', 'eis'], g: 'r',   name: 'Zander',             band: 'tief',   len: [40, 85],   pts: 40,  wild: .6,  w: 2,   kraft: 3, koe: ['gummi', 'wurm'],                   shape: 'm', c: ['#8c9a8c', '#e2e6de', '#5a665a', '#5f6d60'] },
   { id: 'spiegel', wo: ['see'], g: 'r',  name: 'Spiegelkarpfen',     band: 'tief',   len: [50, 100],  pts: 85,  wild: .65, w: 1.4, kraft: 5, koe: ['boilies', 'pellets'], rar: 'episch',   shape: 'b', c: ['#c99a3a', '#f0d890', '#8a5f20', '#f4d27a'] },
   { id: 'wels', wo: ['see', 'fluss'], g: 'r',     name: 'Wels',               band: 'grund',  len: [80, 220],  pts: 90,  wild: .85, w: 1,   kraft: 5, koe: ['wurm', 'boilies', 'gummi'], rar: 'episch', shape: 'x', c: ['#4a4a58', '#9a98a0', '#33333d', '#3c3c48'] },
   { id: 'stoer', wo: ['see'], g: 'r',    name: 'Stör',               band: 'grund',  len: [100, 190], pts: 150, wild: .9,  w: .35, kraft: 5, koe: ['pellets', 'boilies'],             shape: 'x', c: ['#7f8896', '#d4d8de', '#5c6470', '#c3c9d2'], rar: 'legendär' },
@@ -1024,15 +1066,30 @@ const SPECIES = [
   { id: 'leng',     wo: ['hochsee'], g: 'r', name: 'Leng',               band: 'grund',  len: [70, 150],  pts: 80,  wild: .8,  w: 1.3, kraft: 5, koe: ['pilker', 'wattwurm'], rar: 'episch', shape: 'l', c: ['#7a6a4a', '#d8cba8', '#5a4a2a', '#8f7d57'] },
   { id: 'heilbutt', wo: ['hochsee'], g: 'r', name: 'Heilbutt',           band: 'grund',  len: [90, 200],  pts: 170, wild: .9,  w: .3,  kraft: 5, koe: ['pilker', 'wattwurm'],           shape: 'x', c: ['#5a5a52', '#e0dcd0', '#3f3f38', '#6e6e64'], rar: 'legendär' },
   { id: 'netz',     wo: ['hochsee'], g: 'r', name: 'Netzrest',           band: 'junk',   len: [0, 0],     pts: 1,   wild: .05, w: 0,   kraft: 1, koe: [], shape: 'netz', c: ['#6a7a6a', '#4a5a4a', '#4a5a4a', '#8a9a8a'] },
-  { id: 'dose',     wo: ['see', 'fluss', 'hochsee'], g: 'e', name: 'Konservendose',      band: 'junk',   len: [0, 0],     pts: 1,   wild: .05, w: 0,   kraft: 1, koe: [], shape: 'dose', c: ['#8a99a8', '#5c6b7a', '#5c6b7a', '#d9534f'] },
+  { id: 'dose',     wo: ['see', 'fluss', 'hochsee', 'eis'], g: 'e', name: 'Konservendose',      band: 'junk',   len: [0, 0],     pts: 1,   wild: .05, w: 0,   kraft: 1, koe: [], shape: 'dose', c: ['#8a99a8', '#5c6b7a', '#5c6b7a', '#d9534f'] },
   { id: 'ast',      wo: ['fluss'],         g: 'r', name: 'Wurzel',             band: 'junk',   len: [0, 0],     pts: 1,   wild: .05, w: 0,   kraft: 1, koe: [], shape: 'ast',  c: ['#6b4226', '#4a2f22', '#4a2f22', '#8a5a3c'] },
   { id: 'reifen',   wo: ['see', 'fluss'],  g: 'r', name: 'Alter Reifen',       band: 'junk',   len: [0, 0],     pts: 1,   wild: .05, w: 0,   kraft: 1, koe: [], shape: 'reif', c: ['#2a2a30', '#4a4a52', '#4a4a52', '#3a3a42'] },
-  { id: 'stiefel', wo: ['see', 'fluss'], g: 'r',  name: 'Gummistiefel',       band: 'junk',   len: [38, 47],   pts: 1,   wild: .05, w: 0,   kraft: 1, koe: [],                                  shape: 'boot', c: ['#2f5a3a', '#1f3a26', '#1f3a26', '#4f8a5e'] },
+  { id: 'stiefel', wo: ['see', 'fluss', 'eis'], g: 'r',  name: 'Gummistiefel',       band: 'junk',   len: [38, 47],   pts: 1,   wild: .05, w: 0,   kraft: 1, koe: [],                                  shape: 'boot', c: ['#2f5a3a', '#1f3a26', '#1f3a26', '#4f8a5e'] },
   // Legende: lebt im Sand der Hochsee, kommt nur mit dem Krakenköder heraus (siehe krakeSchleifen),
   // schwimmt nie von selbst herum (w: 0) und bringt immer genau 2.000 Punkte (fest)
-  { id: 'sandkrake', wo: ['hochsee'], g: 'e', name: 'Sandkrake',        band: 'grund',  len: [380, 520], pts: 2000, fest: true, wild: .97, w: 0, kraft: 5, koe: ['krake'], shape: 'krake', c: ['#b4583a', '#ecbf98', '#5a2418', '#86361f'], rar: 'legende', legende: true },
+  { id: 'sandkrake', wo: ['hochsee'], g: 'e', name: 'Sandkrake',        band: 'grund',  len: [380, 520], pts: 2000, fest: true, wild: .97, w: 0, kraft: 5, koe: ['krake'], shape: 'krake', c: ['#b4583a', '#ecbf98', '#5a2418', '#86361f'], rar: 'legende', legende: true,
+    hinweis: 'Lebt im Sand der Hochsee. Was sie herauslockt, gibt es im Angelladen.' },
+  // Nur nachts (Nachtangeln, seit 04.11.2026): leuchtet im Dunkeln
+  { id: 'mondforelle', wo: ['see', 'fluss'], g: 'e', name: 'Mondscheinforelle', band: 'mittel', len: [35, 70], pts: 120, wild: .6, w: .9, kraft: 3, koe: ['wurm', 'maden', 'fliege'], shape: 'm', c: ['#a8d8e8', '#f2fbff', '#6fc3d8', '#dff6ff'], rar: 'episch', nur: 'nacht', leuchtet: true },
+  // Nur auf dem Eissee (Winter)
+  { id: 'quappe',   wo: ['eis'], g: 'e', name: 'Quappe',      band: 'grund', len: [30, 70], pts: 30, wild: .5, w: 5,   kraft: 3, koe: ['wurm', 'maden'],    shape: 'l', c: ['#6a5a3a', '#c8b88a', '#4a3e26', '#8a7650'] },
+  { id: 'saibling', wo: ['eis'], g: 'r', name: 'Seesaibling', band: 'tief',  len: [25, 60], pts: 70, wild: .6, w: 1.5, kraft: 3, koe: ['maden', 'blinker'], shape: 'm', c: ['#5a6a5a', '#f0a070', '#e4573d', '#c8d8b8'], rar: 'episch' },
+  // Seltener Fund mit einer Nachricht (selten: nicht im normalen Müll, siehe startRound)
+  { id: 'flasche', wo: ['see', 'fluss', 'hochsee', 'eis'], g: 'e', name: 'Flaschenpost', band: 'junk', len: [0, 0], pts: 1, wild: .05, w: 0, kraft: 1, koe: [], shape: 'flasche', c: ['#4f8a5e', '#f3e9d2', '#8a5a3c', '#7fbf8e'], selten: true },
+  // Legenden, die sich nur unter einer Bedingung zeigen (siehe legendenSpawn)
+  { id: 'seeschlange', wo: ['see'], g: 'e', name: 'Seeschlange', band: 'tief', len: [600, 900], pts: 1500, fest: true, wild: .95, w: 0, kraft: 5, koe: ['wurm'], shape: 'schlange', c: ['#2f6a5a', '#9fd8b8', '#1c3f36', '#6fc3a0'], rar: 'legende', legende: true, nur: 'nacht',
+    hinweis: 'Zeigt sich nur nachts im See. Beißt auf Tauwurm und hält nur an einer sehr starken Rute.' },
+  { id: 'riesenwaller', wo: ['fluss'], g: 'r', name: 'Riesenwaller', band: 'grund', len: [280, 360], pts: 1200, fest: true, wild: .95, w: 0, kraft: 5, koe: ['wurm', 'gummi'], shape: 'waller', c: ['#3a3a48', '#8a8894', '#24242e', '#2e2e3a'], rar: 'legende', legende: true, nur: 'gewitter',
+    hinweis: 'Kommt nur bei Gewitter aus seinem Loch im Fluss. Beißt auf Tauwurm oder Gummifisch.' },
 ];
 const SP = Object.fromEntries(SPECIES.map(s => [s.id, s]));
+// nachts beißen sie öfter, alle anderen seltener
+for (const id of ['aal', 'wels', 'zander', 'quappe']) SP[id].nachtaktiv = true;
 
 // Ausrüstung: Werte je Stufe
 const REEL = [1, 1.3, 1.6, 2];
@@ -1059,7 +1116,7 @@ const DEF = () => ({ v: 2, coins: 0, best: 0, bestFish: 0, bestTop: '', rounds: 
   up: { rolle: 0, feeder: 0, blei: 0, thermo: 0 },
   ruten: ['stippe'], vorrat: { maden: 3 }, tackle: { rute: 'stippe', koeder: 'maden' },
   tag: { datum: '', runden: {}, punkte: 0, fische: 0, fang: '' }, pokale: { siege: 0, podeste: 0 }, gewaesser: 'see',
-  rad: { datum: '', gewinn: 0, text: '' },
+  rad: { datum: '', gewinn: 0, text: '' }, nacht: false, postNr: 0,
   album: {}, nick: '', code: '', lbSent: 0, lbNick: '', savedAt: 0 });
 
 // ---------- Pixel-Sprites (Kopf zeigt nach rechts) ----------
@@ -1076,8 +1133,30 @@ const SHAPES = {
   ast:  ['........', '....bb..', '...bb.l.', '.bbbb.b.', 'bbl.bbb.', '.b...b..', '........', '........'],
   reif: ['..bbbb..', '.b....b.', 'b..ll..b', 'b.l..l.b', 'b.l..l.b', 'b..ll..b', '.b....b.', '..bbbb..'],
   mini: ['.fbbbb.', 'ffbbbeb', 'ffbbbbb', '.flll..'],
+  flasche: ['...ff...', '...bb...', '..bbbb..', '.bbllbb.', '.bbllbb.', '.bpllpb.', '.bbbbbb.', '..bbbb..'],
 };
 SHAPES.krake = krakeRows();
+SHAPES.schlange = schlangeRows();
+// Riesenwaller: der Wels in doppelter Größe
+SHAPES.waller = SHAPES.x.flatMap(r => { const z = [...r].map(ch => ch + ch).join(''); return [z, z]; });
+// Seeschlange: langer Körper in Wellen, Rückenzacken, Kopf rechts
+function schlangeRows() {
+  const w = 64, h = 16, g = Array.from({ length: h }, () => Array(w).fill('.'));
+  const set = (x, y, ch) => { if (x >= 0 && x < w && y >= 0 && y < h && (g[y][x] === '.' || ch !== 'f')) g[y][x] = ch; };
+  const mitte = x => 8 + Math.round(3.5 * Math.sin(x * .22));
+  for (let x = 0; x < 56; x++) {
+    const m = mitte(x), dick = x < 8 ? 1 : x < 20 ? 2 : 3;
+    for (let d = -dick; d <= dick; d++) set(x, m + d, d === dick ? 'l' : (x + d) % 7 === 0 ? 'p' : 'b');
+    if (x % 6 === 3 && x > 6) set(x, m - dick - 1, 'f');
+  }
+  const hm = mitte(55);
+  for (let y = -3; y <= 3; y++) for (let x = 0; x < 9; x++) {
+    if (x > 1 && (x * x) / 81 + (y * y) / 10 > 1) continue;
+    set(55 + x, hm + y, y === 3 ? 'l' : 'b');
+  }
+  set(60, hm - 1, 'e'); set(63, hm + 1, 'f');
+  return g.map(r => r.join(''));
+}
 // Sandkrake: groß und aus Formen gerechnet statt von Hand gezeichnet. Mantel als Ellipse rechts
 // (der Kopf zeigt nach rechts wie bei den Fischen), fünf gefächerte Arme nach links mit Saugnäpfen.
 function krakeRows() {
@@ -1248,7 +1327,18 @@ const GEWAESSER = [
     grund: x => 174 + 5 * Math.sin(x * .05 + 1) + 2.5 * Math.sin(x * .17),
     schilf: [],
   },
+  {
+    // nur im Winter (Dezember bis Februar) oder mit ?winter in der Adresse
+    id: 'eis', name: 'Eissee', stroemung: 0, eis: true, nurWinter: true,
+    info: 'Im Winter friert der See zu. Du angelst durch ein Loch im Eis direkt am Steg, senkrecht nach unten. Quappe und Seesaibling gibt es nur hier.',
+    grund: x => { const t = clamp((x - 46) / 16, 0, 1), u = t * t * (3 - 2 * t);
+      return Math.min(184, 66 + 110 * u + 2.5 * Math.sin(x * .13) + 1.5 * Math.sin(x * .31)); },
+    schilf: [{ x: 47, h: 20, c: 1 }, { x: 50, h: 15, c: 0 }],
+  },
 ];
+const WINTER = [11, 0, 1].includes(new Date().getMonth()) || /[?&]winter\b/.test(location.search);
+const verfuegbar = () => GEWAESSER.filter(g => !g.nurWinter || WINTER);
+const LOCH_X = 58;   // Eisloch am Steg
 const G_BY = Object.fromEntries(GEWAESSER.map(g => [g.id, g]));
 let gew = GEWAESSER[0];
 
@@ -1282,8 +1372,14 @@ bgc.width = W; bgc.height = H;
 function buildBg() {
   const g = bgc.getContext('2d');
   const px = (x, y, c) => { g.fillStyle = c; g.fillRect(x, y, 1, 1); };
-  // Himmel im Morgenrot, gedithert
-  const SKY = ['#2b2d5a', '#4a3a6e', '#8a4c78', '#c9676e', '#ec9a6a', '#f6c177'];
+  // Himmel im Morgenrot, gedithert; nachts dunkelblau, auf dem Eissee winterlich hell
+  // beim allerersten Aufruf (setGew beim Laden) gibt es den Spielstand noch nicht
+  let nachts = false;
+  try { nachts = !!save.nacht; } catch (e) { /* noch kein Spielstand */ }
+  const eis = !!gew.eis;
+  const SKY = nachts ? ['#0b1030', '#111843', '#18204f', '#1f285a', '#283266', '#313c70']
+    : eis ? ['#7a8fb0', '#8ea2c0', '#a4b6cf', '#bccbdc', '#d2dde8', '#e6edf3']
+    : ['#2b2d5a', '#4a3a6e', '#8a4c78', '#c9676e', '#ec9a6a', '#f6c177'];
   for (let y = 0; y < SURF; y++) {
     const band = Math.min(5, Math.floor(y / 10)), inB = y % 10;
     for (let x = 0; x < W; x++) {
@@ -1291,10 +1387,23 @@ function buildBg() {
       px(x, y, SKY[next ? band + 1 : band]);
     }
   }
-  // Sonne
-  for (let y = -11; y <= 11; y++) for (let x = -11; x <= 11; x++) {
-    const d = x * x + y * y;
-    if (d <= 121) px(196 + x, 47 + y, d < 60 ? '#fff1c8' : '#fbe3a0');
+  if (nachts) {
+    // Sterne und Mond
+    for (let i = 0; i < 48; i++) {
+      const sx = (i * 97 + 13) % W, sy = (i * 53 + 7) % 40;
+      px(sx, sy, i % 5 ? '#c8cde8' : '#ffffff');
+    }
+    for (let y = -7; y <= 7; y++) for (let x = -7; x <= 7; x++) {
+      const d = x * x + y * y;
+      if (d <= 49) px(196 + x, 22 + y, (x + 2) * (x + 2) + (y - 1) * (y - 1) < 5 || (x - 3) * (x - 3) + (y + 3) * (y + 3) < 3 ? '#d8d4bc' : '#f2efd8');
+    }
+  } else {
+    // Sonne
+    const r2 = eis ? 49 : 121, rr = eis ? 7 : 11, sy = eis ? 30 : 47;
+    for (let y = -rr; y <= rr; y++) for (let x = -rr; x <= rr; x++) {
+      const d = x * x + y * y;
+      if (d <= r2) px(196 + x, sy + y, d < r2 / 2 ? '#fff8e8' : eis ? '#f4ecd8' : '#fbe3a0');
+    }
   }
   if (gew.id === 'hochsee') {
     // Offene See: dunstiger Horizont, ein zweiter Kutter, Leuchtturm und Tonne
@@ -1333,11 +1442,14 @@ function buildBg() {
       g.fillStyle = '#2a3f45'; g.fillRect(x, t1, 1, SURF - t1);
       const t2 = Math.round(52 - 2 * Math.abs(Math.sin(x * .31 + 2)) - (x % 7 === 0 ? 1 : 0));
       g.fillStyle = '#1f3336'; g.fillRect(x, t2, 1, SURF - t2);
+      if (eis) { px(x, t1, '#e8eef3'); if (x % 3 === 0) px(x, t2, '#d8e2ea'); }   // Schnee auf den Tannen
     }
   }
 
   // Wasser nach Tiefe
-  const WATER = gew.id === 'fluss'
+  const WATER = nachts ? ['#1d3a52', '#183248', '#142a3e', '#102234', '#0c1a2a', '#081320']
+    : eis ? ['#2f6480', '#285a74', '#215068', '#1a445c', '#143850', '#0f2c42']
+    : gew.id === 'fluss'
     ? ['#4f8f9a', '#40808c', '#35707e', '#2a5f6d', '#204e5c', '#183f4c']
     : gew.id === 'hochsee'
       ? ['#2f7a8f', '#276a80', '#205a70', '#194a60', '#133c50', '#0e2e40']
@@ -1420,8 +1532,28 @@ function buildBg() {
     g.fillStyle = '#5c6b7a'; g.fillRect(6, 48, 6, 5);
     g.fillStyle = '#8a99a8'; g.fillRect(6, 48, 6, 1);
   }
+  if (eis) {
+    // Eisdecke mit Schnee, das Loch direkt am Steg
+    for (let x = 46; x < W; x++) {
+      if (Math.abs(x - LOCH_X) <= 3) continue;
+      px(x, SURF - 2, '#f4f8fb'); px(x, SURF - 1, x % 5 ? '#e6eef4' : '#f4f8fb');
+      g.fillStyle = '#c4dbe7'; g.fillRect(x, SURF, 1, 2);
+      g.fillStyle = '#9cc3d6'; g.fillRect(x, SURF + 2, 1, 2);
+      if ((x * 7) % 11 === 0) px(x, SURF + 1, '#eaf3f8');
+    }
+    g.fillStyle = '#24506a'; g.fillRect(LOCH_X - 3, SURF - 1, 7, 2);
+    g.fillStyle = '#8fb6c9'; g.fillRect(LOCH_X - 4, SURF - 2, 1, 6); g.fillRect(LOCH_X + 4, SURF - 2, 1, 6);
+    g.fillStyle = '#f4f8fb'; g.fillRect(0, 52, 45, 1);                 // Schnee auf dem Steg
+  }
   // Angler
   g.drawImage(paint(ANGLER, ANGLER_COL, false), 20, 38);
+  if (nachts) {
+    // Ufer und Himmel über dem Horizont dunkler, das Wasser dunkelt draw() ab; dann die Laterne
+    g.fillStyle = 'rgba(6,10,30,.38)'; g.fillRect(0, 36, W, SURF - 36);
+    g.fillStyle = '#3a2a20'; g.fillRect(40, 43, 5, 1); g.fillRect(42, 41, 1, 2); g.fillRect(40, 44, 1, 5); g.fillRect(44, 44, 1, 5); g.fillRect(40, 49, 5, 1);
+    g.fillStyle = '#ffd27a'; g.fillRect(41, 44, 3, 5);
+    g.fillStyle = '#fff3c8'; g.fillRect(42, 45, 1, 2);
+  }
 }
 setGew('see');
 
@@ -1466,6 +1598,7 @@ const SFX = {
   catch: () => tone([523, 659, 784, 1047], .08),
   lost: () => sweep(330, 110, .35, 'triangle', .08),
   junk: () => tone([220, 165], .12, 'triangle', .08),
+  donner: () => { noise(1.4, .2); setTimeout(() => noise(.9, .12), 260); },
   tick: () => tone([1200], .04, 'square', .03),
   buy: () => tone([660, 990], .07),
 };
@@ -1475,7 +1608,8 @@ const LS_KEY = 'petriheil.v1';
 function normalize(r) {
   const d = DEF();
   if (!r || typeof r !== 'object') return d;
-  for (const k of ['coins', 'best', 'bestFish', 'rounds', 'lbSent', 'savedAt']) if (Number.isFinite(r[k])) d[k] = r[k];
+  for (const k of ['coins', 'best', 'bestFish', 'rounds', 'lbSent', 'savedAt', 'postNr']) if (Number.isFinite(r[k])) d[k] = r[k];
+  d.nacht = r.nacht === true;
   for (const k of ['bestTop', 'nick', 'code', 'lbNick']) if (typeof r[k] === 'string') d[k] = r[k].slice(0, 40);
   if (r.up) for (const it of SHOP) { const v = r.up[it.k]; if (Number.isInteger(v)) d.up[it.k] = clamp(v, 0, it.lv.length - 1); }
   if (Array.isArray(r.ruten)) for (const id of r.ruten) if (R_BY[id] && !d.ruten.includes(id)) d.ruten.push(id);
@@ -1524,7 +1658,7 @@ const magKoeder = (sp, kid) => sp.koe.includes(kid || save.tackle.koeder);
 const koederPasstZurRute = (k, r) => k.typ !== 'kunst' || r.typ === 'kunst';
 function fangbar(sp, r, k) {
   r = r || rute(); k = k || koeder();
-  if (sp.band === 'junk' || !imGewaesser(sp)) return false;
+  if (sp.band === 'junk' || !imGewaesser(sp) || !bedingung(sp, true)) return false;
   if (!magKoeder(sp, k.id) || !koederPasstZurRute(k, r)) return false;
   const [a, b] = BANDS[sp.band];
   return xMinFor(a + sp.sh / 2) + sp.sw / 2 < r.weite;
@@ -1545,19 +1679,33 @@ function streuung(x) {
 }
 
 const imGewaesser = sp => sp.wo.includes(gew.id);
+// Tageszeit und Wetter: Nacht wählt man in der Angeltasche, Gewitter zieht von selbst auf (in der
+// Tagesrunde für alle am selben Tag, siehe gewitterHeute)
+function gewitterHeute(id) { return mkRng(datumSeed(heute() + '|wetter|' + (id || gew.id)))() < .25; }
+// vorschau: in der Angeltasche (dort zählt der Wetterbericht der Tagesrunde)
+function bedingung(sp, vorschau) {
+  if (sp.nur === 'nacht') return !!save.nacht;
+  if (sp.nur === 'gewitter') return vorschau ? (modusTag && gewitterHeute()) : !!G.gewitter;
+  return true;
+}
+function gewicht(s) {
+  if (!bedingung(s)) return 0;
+  if (!save.nacht) return s.w;
+  return s.w * (s.nachtaktiv ? 3 : s.nur === 'nacht' ? 1 : .6);
+}
 function pickSpecies(band) {
-  const pool = SPECIES.filter(s => s.w > 0 && imGewaesser(s) && (!band || s.band === band));
+  const pool = SPECIES.filter(s => gewicht(s) > 0 && imGewaesser(s) && (!band || s.band === band));
   if (!pool.length) return SPECIES.find(s => s.w > 0 && imGewaesser(s)) || SPECIES[0];
   let tot = 0;
-  for (const s of pool) tot += s.w;
+  for (const s of pool) tot += gewicht(s);
   let r = seeRnd() * tot;
-  for (const s of pool) { r -= s.w; if (r <= 0) return s; }
+  for (const s of pool) { r -= gewicht(s); if (r <= 0) return s; }
   return pool[0];
 }
 const minXFor = f => xMinFor(f.y + f.sp.sh / 2) + f.sp.sw / 2;
 const maxXFor = f => xMaxFor(f.y + f.sp.sh / 2) - f.sp.sw / 2;
-function spawnFish(inside, band) {
-  const sp = pickSpecies(band), [a, b] = BANDS[sp.band];
+function spawnFish(inside, band, nurArt) {
+  const sp = nurArt || pickSpecies(band), [a, b] = BANDS[sp.band];
   const f = { sp, y: Math.round(seeZahl(a, b)), dir: -1, x: W + sp.sw, speed: seeZahl(8, 15), state: 'swim', wob: Math.random() * 6, bub: rnd(1, 5), cool: rnd(0, 1), len: 0 };
   const minX = minXFor(f);
   if (minX > W - 12) return;
@@ -1569,7 +1717,25 @@ function spawnFish(inside, band) {
     f.alpha = 0; f.leben = seeZahl(18, 40);
     if (seeRnd() < .5) f.dir = 1;
   } else if (inside) { f.x = seeZahl(minX, W - 10); if (seeRnd() < .5) f.dir = 1; }
+  // Legenden tauchen langsam auf und bleiben eine halbe Minute
+  if (sp.legende) { f.alpha = 0; f.leben = 30; f.speed *= .6; }
   G.fish.push(f);
+  return f;
+}
+// Seeschlange und Riesenwaller gehören nicht zum normalen Bestand: unter ihrer Bedingung (Nacht bzw.
+// Gewitter) zeigen sie sich höchstens einmal pro Runde, in etwa jeder zweiten passenden Runde
+const LEG_RATE = .012;
+function legendenSpawn(dt) {
+  for (const sp of SPECIES) {
+    if (!sp.legende || !sp.nur || !imGewaesser(sp) || !bedingung(sp)) continue;
+    if (G.legSeen[sp.id] || G.fish.some(f => f.sp === sp)) continue;
+    if (seeRnd() >= dt * LEG_RATE) continue;
+    if (spawnFish(true, null, sp)) {
+      G.legSeen[sp.id] = 1;
+      toast('Etwas Riesiges bewegt sich im Wasser …');
+      sweep(110, 70, 1.2, 'triangle', .07);
+    }
+  }
 }
 // Der Tagessee: aus dem Datum wird eine feste Zahlenfolge, für alle Spieler gleich
 function mkRng(seed) {
@@ -1592,10 +1758,10 @@ function datumSeed(txt) {
 }
 let seeRnd = Math.random;                       // Zufall für den Fischbestand
 const seeZahl = (a, b) => a + seeRnd() * (b - a);
-const TAGESRUNDEN = () => GEWAESSER.length;
+const TAGESRUNDEN = () => verfuegbar().length;
 const tagAktuell = () => (save.tag.datum === heute() ? save.tag.runden : {});
 const tagGespielt = (id) => !!tagAktuell()[id || gew.id];
-const tagOffen = () => GEWAESSER.filter(g => !tagGespielt(g.id));
+const tagOffen = () => verfuegbar().filter(g => !tagGespielt(g.id));
 const tagRestlich = () => tagOffen().length;
 const tagSumme = () => {
   const r = tagAktuell();
@@ -1644,14 +1810,18 @@ function startRound(tagesrunde) {
   G.zaehlt = !!tagesrunde && !tagGespielt();
   Object.assign(G, { mode: 'play', phase: 'aim', time: roundLen(), score: 0, catches: [], hook: null, fight: null, land: null,
     aimT: 0, lastCall: false, pressed: false, needRelease: false, teased: {}, lastSec: 99, biss: null,
-    krake: null, sand: null, uhrSteht: false, shake: 0 });
+    krake: null, sand: null, uhrSteht: false, shake: 0, legSeen: {}, blitz: 0, blitzT: rnd(2, 5) });
+  G.gewitter = tagesrunde ? gewitterHeute() : Math.random() < .2;
   G.fish = [];   // frischer See, sonst schwimmen noch die Fische aus dem Menue herum
   G.junk = [];
-  const muell = SPECIES.filter(sp => sp.band === 'junk' && imGewaesser(sp));
+  const muell = SPECIES.filter(sp => sp.band === 'junk' && imGewaesser(sp) && !sp.selten);
   for (let i = 0; i < 2; i++) {
     const x = seeZahl(100, 238), sp = muell[Math.floor(seeRnd() * muell.length)] || SP.stiefel;
     G.junk.push({ x, y: botAt(x) - 4, sp });
   }
+  // ab und zu liegt eine Flaschenpost am Grund
+  if (seeRnd() < .22) { const x = seeZahl(gew.eis ? 64 : 90, 230); G.junk.push({ x, y: botAt(x) - 4, sp: SP.flasche }); }
+  if (G.gewitter) toast('Gewitter! Bei Blitz und Donner beißen die Fische besser.');
   spawnFish(true, 'flach'); spawnFish(true, 'flach');
   while (G.fish.length < MAXFISH[lvl('feeder')] - 1) spawnFish(true);
   const k = koeder();
@@ -1665,7 +1835,8 @@ function startRound(tagesrunde) {
 }
 function cast() {
   const ziel = aimX(), str = streuung(ziel);
-  const tx = clamp(ziel + (Math.random() * 2 - 1) * str, 70, rute().weite);
+  // auf dem Eissee geht der Köder immer ins Loch
+  const tx = gew.eis ? LOCH_X : clamp(ziel + (Math.random() * 2 - 1) * str, 70, rute().weite);
   const tip = rodTip();
   G.hook = { sx: tip.x, sy: tip.y, tx, t: 0, dur: .35 + (tx - 64) / 178 * .3, x: tip.x, y: tip.y };
   G.phase = 'fly'; G.needRelease = true;
@@ -1693,8 +1864,8 @@ function updHook(dt) {
     if (Math.random() < dt * 4) sand(h.x, h.y, 1, .5);
     if (gew.id === 'hochsee' && krakeSchleifen(vorher - h.x)) return;
   } else if (G.pressed && !G.needRelease) {
-    // Einholen: der Köder wandert Richtung Steg
-    const vx = 44 - h.x, vy = SURF - h.y, d = Math.hypot(vx, vy) || 1;
+    // Einholen: der Köder wandert Richtung Steg, auf dem Eissee senkrecht zum Loch hoch
+    const vx = (gew.eis ? LOCH_X : 44) - h.x, vy = SURF - h.y, d = Math.hypot(vx, vy) || 1;
     h.x += vx / d * 40 * dt; h.y += vy / d * 40 * dt;
   } else {
     h.y += SINK[lvl('blei')] * (schwer ? 1.6 : 1) * dt;
@@ -1730,8 +1901,7 @@ function hookFish(f) {
     return;
   }
   G.phase = 'fight';
-  G.fight = { f, pos: .5, tgt: .5, tt: .4, zone: .35, zv: 0, prog: .35, in: false, x0: h.x, y0: h.y,
-    zone_h: rute().zone, ueber: Math.max(0, f.sp.kraft - rute().kraft), spannung: 0 };
+  G.fight = neuerDrill(f, h);
   if (f.sp.band === 'junk') SFX.junk(); else SFX.bite();
   addText('!', h.x, h.y - 8, '#f2c14e');
 }
@@ -1795,6 +1965,8 @@ function updFish(dt) {
         else {
           let ch = .5 * BITE[fl];
           if (r.kraft - f.sp.kraft >= 3) ch *= .45;   // grobe Schnur, kleiner Fisch
+          if (G.gewitter) ch *= 1.6;                  // bei Gewitter beißt alles besser
+          if (f.sp.legende) ch *= .5;
           if (k.typ === 'kunst') ch *= 1.2;
           if (Math.random() < ch) f.state = 'approach';
         }
@@ -1833,7 +2005,7 @@ function updFight(dt) {
   }
   // Fisch zappelt am Haken und kommt mit dem Drill näher
   const h = G.hook, p = clamp(F.prog, 0, 1);
-  h.x = lerp(F.x0, Math.max(60, F.x0 - 40), p * .6) + Math.sin(G.t * 9) * 2 * (1 - p * .5);
+  h.x = lerp(F.x0, gew.eis ? F.x0 : Math.max(60, F.x0 - 40), p * .6) + Math.sin(G.t * 9) * 2 * (1 - p * .5);
   h.y = Math.min(lerp(F.y0, SURF + 8, p * .7), botAt(h.x) - 2);
   if (f.sp.band !== 'junk' && !f.sp.legende && Math.random() < dt * 3) f.dir = -f.dir;
   f.x = h.x - f.dir * f.sp.sw / 2;
@@ -1863,6 +2035,26 @@ function landFish() {
   G.land = { f, t: 0, x0: f.x, y0: f.y, pts };
   G.fight = null; G.hook = null; G.phase = 'land';
   splash(f.x, 8);
+  if (sp.id === 'flasche') flaschenpost();
+}
+// ---------- Flaschenpost ----------
+// Hinweise auf die Geheimnisse des Spiels, der Reihe nach, damit nichts doppelt kommt
+const POST = [
+  'Nachts im See soll etwas Langes durchs Wasser gleiten. Wer es fangen will, braucht Tauwurm und die stärkste Rute.',
+  'Wenn es über dem Fluss donnert, kommt der Riesenwaller aus seinem Loch.',
+  'Im Mondlicht leuchten manche Forellen. Am Tag sieht man sie nie.',
+  'Bei Gewitter beißen alle Fische besser. Nicht heimgehen, wenn es blitzt!',
+  'Im Sand der Hochsee schläft etwas mit vielen Armen. Zieh den richtigen Köder über den Grund.',
+  'Im Winter friert der See zu. Unter dem Eis wartet die Quappe.',
+  'Aal, Wels und Zander jagen nachts. Mit der Laterne am Steg hast du gute Karten.',
+  'Ein Futterkorb lockt mehr Fische an deinen Platz.',
+];
+function flaschenpost() {
+  const nr = save.postNr || 0;
+  save.postNr = nr + 1; persist();
+  $('postText').textContent = POST[nr % POST.length];
+  G.mode = 'paused'; G.pressed = false;
+  show('mPost');
 }
 function updBiss(dt) {
   const B = G.biss;
@@ -1880,19 +2072,33 @@ function anschlag() {
   const f = G.biss.f;
   G.biss = null;
   G.phase = 'fight';
-  const h = G.hook;
-  G.fight = { f, pos: .5, tgt: .5, tt: .4, zone: .35, zv: 0, prog: .35, in: false, x0: h.x, y0: h.y,
-    zone_h: rute().zone, ueber: Math.max(0, f.sp.kraft - rute().kraft), spannung: 0 };
+  G.fight = neuerDrill(f, G.hook);
   SFX.catch2 ? SFX.catch2() : tone([660, 990], .05);
+}
+// Legenden (außer der Sandkrake, die ihren eigenen Ablauf hat): schmaler Balken, Rucke, die Uhr steht
+function neuerDrill(f, h) {
+  const leg = f.sp.legende;
+  if (leg) { G.uhrSteht = true; G.shake = 1.5; addText(f.sp.name.toUpperCase() + '!', clamp(h.x, 50, W - 50), h.y - 18, '#ff7a5f'); }
+  return { f, pos: .5, tgt: .5, tt: .4, zone: .35, zv: 0, prog: .35, in: false, x0: h.x, y0: h.y,
+    zone_h: rute().zone * (leg ? KRAKE.zoneMal : 1), ueber: Math.max(0, f.sp.kraft - rute().kraft), spannung: 0 };
 }
 function updLand(dt) {
   const L = G.land;
   L.t += dt / .6;
   if (L.t >= 1) { addText('+' + L.pts, 30, 30, '#f2c14e'); G.land = null; G.uhrSteht = false; backToAim(); }
 }
+function legendeWeg(f, text) {
+  G.fish = G.fish.filter(x => x !== f);
+  splash(f.x, 14);
+  SFX.lost();
+  toast(text);
+  G.uhrSteht = false;
+  backToAim();
+}
 function schnurBruch() {
   const f = G.fight.f;
-  if (f.sp.legende) { krakeWeg('Schnurbruch! Die Sandkrake war zu stark.'); return; }
+  if (f.sp.id === 'sandkrake') { krakeWeg('Schnurbruch! Die Sandkrake war zu stark.'); return; }
+  if (f.sp.legende) { legendeWeg(f, 'Schnurbruch! ' + f.sp.name + ' ist abgetaucht.'); return; }
   SFX.lost();
   toast('Schnurbruch! ' + f.sp.name + ' war zu stark für die ' + rute().name + '.');
   f.state = 'swim'; f.dir = 1; f.speed = 34; f.cool = 8; f.turnX = -99;
@@ -1900,7 +2106,8 @@ function schnurBruch() {
 }
 function loseFish() {
   const f = G.fight.f;
-  if (f.sp.legende) { krakeWeg('Die Sandkrake hat sich losgerissen!'); return; }
+  if (f.sp.id === 'sandkrake') { krakeWeg('Die Sandkrake hat sich losgerissen!'); return; }
+  if (f.sp.legende) { legendeWeg(f, f.sp.name + ' hat sich losgerissen!'); return; }
   SFX.lost();
   if (f.sp.band === 'junk') { G.fish = G.fish.filter(x => x !== f); toast('Hänger gelöst.'); }
   else { f.state = 'swim'; f.dir = 1; f.speed = 30; f.cool = 6; f.turnX = -99; toast(`${f.sp.name} hat sich losgerissen!`); }
@@ -2040,10 +2247,20 @@ function update(dt) {
   G.shake = Math.max(0, G.shake - dt * 2.5);
   if (!RM) for (const c of clouds) { c.x += dt * 2.5 * (c.w / 20); if (c.x > W + 10) c.x = -c.w - 10; }
   G.spawnT -= dt;
-  const cap = G.mode === 'play' ? MAXFISH[lvl('feeder')] : 6;
+  const cap = G.mode === 'play' ? MAXFISH[lvl('feeder')] + (G.gewitter ? 2 : 0) : 6;
   if (G.spawnT <= 0) { G.spawnT = rnd(.8, 2.2); if (G.fish.filter(f => f.state !== 'hooked').length < cap) spawnFish(false); }
   updFish(dt);
   if (G.mode === 'play') {
+    legendenSpawn(dt);
+    if (G.gewitter) {
+      // Blitz alle paar Sekunden, der Donner kommt etwas später
+      G.blitz = Math.max(0, G.blitz - dt);
+      G.blitzT -= dt;
+      if (G.blitzT <= 0) {
+        G.blitzT = rnd(4, 9); G.blitz = .3; G.blitzX = rnd(70, 240);
+        setTimeout(SFX.donner, rnd(250, 900));
+      }
+    }
     if (G.phase === 'aim') G.aimT += dt;
     else if (G.phase === 'fly' || G.phase === 'sink') updHook(dt);
     else if (G.phase === 'biss') updBiss(dt);
@@ -2103,15 +2320,73 @@ function pixText(s, x, y, c) {
   for (const [dx, dy] of [[-1, 0], [1, 0], [0, -1], [0, 1], [1, 1]]) cx.fillText(s, px + dx, py + dy);
   cx.fillStyle = c; cx.fillText(s, px, py);
 }
+const sturm = () => !!G.gewitter && (G.mode === 'play' || G.mode === 'paused');
 function drawClouds() {
+  const n = save.nacht, st = sturm();
+  // Farben: Morgenrot, nachts graublau, auf dem Eissee weiß, bei Gewitter schwer und dunkel
+  const [c1, c2, c3] = st ? (n ? ['#23273a', '#2d3248', '#171a28'] : ['#4a4f63', '#5a5f74', '#3a3e50'])
+    : n ? ['#272d4c', '#323a5c', '#1e2440'] : gew.eis ? ['#e6ecf2', '#f4f8fb', '#c8d4e0'] : ['#e9a58f', '#f2bfa4', '#c97a7a'];
+  if (st) {
+    // Gewitterhimmel: Himmel und Wasser dunkler, die Sonne verschwindet hinter den Wolken
+    cx.fillStyle = n ? 'rgba(10,12,24,.45)' : 'rgba(34,38,56,.62)'; cx.fillRect(0, 0, W, SURF);
+    cx.fillStyle = 'rgba(20,24,40,.22)'; cx.fillRect(0, SURF, W, H - SURF);
+    rect(0, 0, W, 10, c3);
+    for (let x = 0; x < W; x += 2) rect(x, 10 + (x % 6 === 0 ? 1 : 0), 2, 2, c3);
+  }
   for (const c of clouds) {
-    rect(c.x, c.y, c.w, 3, '#e9a58f');
-    rect(c.x + 3, c.y - 2, c.w - 8, 2, '#f2bfa4');
-    rect(c.x + 2, c.y + 3, c.w - 4, 1, '#c97a7a');
+    const w = st ? c.w + 14 : c.w;
+    rect(c.x, c.y, w, 3, c1);
+    rect(c.x + 3, c.y - 2, w - 8, 2, c2);
+    rect(c.x + 2, c.y + 3, w - 4, 1, c3);
+  }
+}
+// Regen bei Gewitter, Schnee auf dem Eissee (bei "weniger Bewegung" stehen die Tropfen still)
+function drawWetter() {
+  const t = RM ? 0 : G.t;
+  if (sturm()) {
+    for (let i = 0; i < 80; i++) {
+      const x = ((i * 37 + t * 70) % (W + 20)) - 10, y = (i * 23 + t * 240) % (H + 10) - 5;
+      rect(x, y, 1, 3, 'rgba(190,210,230,.42)');
+    }
+    if (G.blitz > 0) {
+      // Blitz: gezackte Linie vom Himmel zum Horizont, dazu ein heller Schein
+      let x = G.blitzX, y = 0;
+      while (y < SURF - 6) { const nx = x + ((Math.floor(y * 7 + G.blitzX) % 7) - 3), ny = y + 4; pline(x, y, nx, ny, '#fff7d6'); x = nx; y = ny; }
+      if (!RM) { cx.fillStyle = `rgba(255,255,255,${(G.blitz * .9).toFixed(2)})`; cx.fillRect(0, 0, W, H); }
+    }
+  } else if (gew.eis) {
+    for (let i = 0; i < 40; i++) {
+      const x = ((i * 53 + Math.sin(t + i) * 6 + t * 6) % W + W) % W, y = (i * 29 + t * 14) % SURF;
+      rect(x, y, 1, 1, '#f4f8fb');
+    }
+  }
+}
+// Nacht: Wasser abdunkeln, dann Laternenschein und leuchtende Fische darüber
+function drawNacht() {
+  if (!save.nacht) return;
+  cx.fillStyle = 'rgba(6,10,30,.38)'; cx.fillRect(0, SURF, W, H - SURF);
+  const flacker = RM ? 1 : .9 + .1 * Math.sin(G.t * 11) * Math.sin(G.t * 3.7);
+  const gl = cx.createRadialGradient(42, 46, 2, 42, 46, 34);
+  gl.addColorStop(0, `rgba(255,200,120,${(.28 * flacker).toFixed(3)})`); gl.addColorStop(1, 'rgba(255,200,120,0)');
+  cx.fillStyle = gl; cx.fillRect(8, 12, 68, 68);
+  for (const f of G.fish) {
+    if (!f.sp.leuchtet) continue;
+    const sp = f.sp, a = f.alpha != null ? clamp(f.alpha, 0, 1) : 1;
+    const hl = cx.createRadialGradient(f.x, f.y, 1, f.x, f.y, 14);
+    hl.addColorStop(0, `rgba(159,232,255,${(.45 * a).toFixed(3)})`); hl.addColorStop(1, 'rgba(159,232,255,0)');
+    cx.fillStyle = hl; cx.fillRect(f.x - 14, f.y - 14, 28, 28);
+    cx.globalAlpha = a;
+    cx.drawImage(f.dir > 0 ? sp.sprR : sp.sprL, Math.round(f.x - sp.sw / 2), Math.round(f.y - sp.sh / 2));
+    cx.globalAlpha = 1;
   }
 }
 function drawSurface() {
   const t = RM ? 0 : G.t;
+  if (gew.eis) {
+    // unter dem Eis bewegt sich nur das Wasser im Loch
+    for (let x = LOCH_X - 3; x <= LOCH_X + 3; x++) rect(x, SURF - 1, 1, 1, Math.sin(x * .9 + t * 3) > .2 ? '#6fb0c0' : '#3f7f96');
+    return;
+  }
   for (let x = 0; x < W; x++) {
     if (botAt(x) <= SURF + 3) continue;                     // dort liegt das Ufer
     rect(x, SURF, 1, 1, Math.sin(x * .3 + t * 2) > .2 ? '#9fd0d8' : '#6fb0c0');
@@ -2129,9 +2404,11 @@ function drawSurface() {
       }
     }
   }
+  // Spiegelung von Sonne oder Mond (bei Gewitter keine)
+  if (sturm()) return;
   for (let k = 0; k < 7; k++) {
-    const w = Math.max(2, Math.round(13 - k * 1.7)), off = Math.round(Math.sin(t * 2 + k) * 2);
-    rect(196 - w / 2 + off, SURF + 2 + k * 2, w, 1, k < 3 ? '#f6c177' : '#d99a6a');
+    const w = Math.max(2, Math.round((save.nacht ? 8 : 13) - k * 1.7)), off = Math.round(Math.sin(t * 2 + k) * 2);
+    rect(196 - w / 2 + off, SURF + 2 + k * 2, w, 1, save.nacht ? (k < 3 ? '#e8e6d0' : '#a8b0c8') : k < 3 ? '#f6c177' : '#d99a6a');
   }
 }
 function drawReeds() {
@@ -2213,6 +2490,8 @@ function draw() {
   }
   for (const p of G.parts) rect(p.x, p.y, 1, 1, p.c);
   drawReeds();
+  drawNacht();
+  drawWetter();
   drawRodAndLine();
   if (G.land) {
     const L = G.land, t = Math.min(1, L.t), sp = L.f.sp;
@@ -2221,8 +2500,8 @@ function draw() {
     cx.drawImage(sp.sprL, Math.round(x - sp.sw / 2), Math.round(y - sp.sh / 2));
   }
   if (G.mode === 'play' && G.phase === 'aim') {
-    const x = Math.round(aimX()), b = Math.round(Math.sin(G.t * 8));
-    const str = Math.round(streuung(x));
+    const x = gew.eis ? LOCH_X : Math.round(aimX()), b = Math.round(Math.sin(G.t * 8));
+    const str = gew.eis ? 0 : Math.round(streuung(x));
     if (str > 1) {
       // Streubereich: hier kann der Köder landen
       rect(x - str, SURF - 4, str * 2, 1, 'rgba(228,87,61,.55)');
@@ -2281,7 +2560,7 @@ function frame(now) {
 }
 
 // ---------- Oberfläche ----------
-const MODALS = ['mTitle', 'mResult', 'mTackle', 'mShop', 'mAlbum', 'mBoard', 'mRad', 'mBelohnung', 'mPause'];
+const MODALS = ['mTitle', 'mResult', 'mTackle', 'mShop', 'mAlbum', 'mBoard', 'mRad', 'mBelohnung', 'mPause', 'mPost'];
 let backTo = 'mTitle', kbd = false;
 const el = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
 const img = (src, w) => { const i = new Image(); i.src = src; i.alt = ''; if (w) i.style.width = w + 'px'; return i; };
@@ -2302,7 +2581,8 @@ function updateTap() {
 function updateHud() {
   updateTap();
   const spieltGerade = G.mode === 'play' || G.mode === 'paused';
-  const badge = spieltGerade ? ((G.zaehlt ? 'Tagesrunde · ' : 'Übung · ') + gew.name) : '';
+  const badge = spieltGerade ? ((G.zaehlt ? 'Tagesrunde · ' : 'Übung · ') + gew.name
+    + (save.nacht ? ' · Nacht' : '') + (G.gewitter ? ' · Gewitter' : '')) : '';
   if (hud.badge !== badge) {
     hud.badge = badge;
     $('modeBadge').textContent = badge;
@@ -2383,7 +2663,7 @@ function renderTitle() {
   updateHint();
   renderMenu();
   $('tTime').textContent = roundLen();
-  $('tLead').textContent = GEWAESSER.length + ' Gewässer, ' + SPECIES.filter(sp => sp.band !== 'junk').length + ' Arten, eine Runde dauert eine Minute.';
+  $('tLead').textContent = verfuegbar().length + ' Gewässer, ' + SPECIES.filter(sp => sp.band !== 'junk').length + ' Arten, eine Runde dauert eine Minute.';
   $('tBest').textContent = de(save.best);
   $('tPokale').textContent = save.pokale.siege + (save.pokale.podeste > save.pokale.siege ? ' + ' + (save.pokale.podeste - save.pokale.siege) : '');
 
@@ -2435,7 +2715,7 @@ const anschlagTxt = r => (r.typ === 'kunst' ? 'hakt beim Einholen selbst' : r.an
 function renderTackle() {
   $('kCoins').textContent = de(save.coins);
   const gb = $('kGewaesser'); gb.textContent = '';
-  for (const g of GEWAESSER) {
+  for (const g of verfuegbar()) {
     const b = el('button', 'opt'); b.type = 'button';
     b.setAttribute('aria-pressed', String(gew.id === g.id));
     const kopf = el('b'); kopf.append(document.createTextNode(g.name));
@@ -2445,6 +2725,19 @@ function renderTackle() {
     b.onclick = () => { setGew(g.id); save.gewaesser = g.id; persist(); renderTackle(); updateHint(); };
     gb.append(b);
   }
+  const zb = $('kZeit'); zb.textContent = '';
+  for (const [wert, name, info] of [[false, 'Tagsüber', 'Alle Fische wie gewohnt.'],
+    [true, 'Nacht', 'Aal, Wels und Zander beißen öfter, manches zeigt sich nur im Dunkeln. Die Laterne brennt.']]) {
+    const b = el('button', 'opt'); b.type = 'button';
+    b.setAttribute('aria-pressed', String(!!save.nacht === wert));
+    b.append(el('b', '', name));
+    if (!!save.nacht === wert) b.append(el('small', '', info));
+    b.onclick = () => { save.nacht = wert; persist(); buildBg(); renderTackle(); };
+    zb.append(b);
+  }
+  $('kWetter').textContent = modusTag
+    ? (gewitterHeute() ? 'Wetterbericht für die Tagesrunde hier: Gewitter! Die Fische beißen besser.' : 'Wetterbericht für die Tagesrunde hier: trocken.')
+    : 'Beim freien Angeln kann jederzeit ein Gewitter aufziehen.';
   $('kModus').textContent = modusTag
     ? (tagGespielt() ? `Tagesrunde im ${gew.name} heute schon gewertet, diese Runde zählt nur für Münzen und Fangbuch`
       : `Tagesrunde im ${gew.name} · zählt für die Tagesrangliste, noch ${tagRestlich()} von ${TAGESRUNDEN()} offen`)
@@ -2576,7 +2869,9 @@ function buy(it) {
 const buch = { blatt: 0, auswahl: null };
 const BUCH_BREIT = matchMedia('(min-width: 760px)');
 function buchSeiten() {
-  const s = GEWAESSER.map(g => ({ titel: g.name, arten: SPECIES.filter(sp => sp.wo.includes(g.id) && !sp.legende) }));
+  // die Eissee-Seite erst im Winter oder wenn schon etwas nur dort Lebendes gefangen ist
+  const zeigen = g => !g.nurWinter || WINTER || SPECIES.some(sp => sp.wo.length === 1 && sp.wo[0] === g.id && save.album[sp.id]);
+  const s = GEWAESSER.filter(zeigen).map(g => ({ titel: g.name, arten: SPECIES.filter(sp => sp.wo.includes(g.id) && !sp.legende) }));
   s.push({ titel: 'Legenden', arten: SPECIES.filter(sp => sp.legende), legende: true });
   return s;
 }
@@ -2687,14 +2982,15 @@ function buchSeite(s) {
 function buchInfo(sp, s) {
   const box = el('div', 'seiten-info');
   if (!sp) {
-    box.append(el('p', '', s.legende ? 'Man erzählt sich von etwas Riesigem, das im Sand der Hochsee lauert.' : 'Tippe auf einen Fisch für mehr.'));
+    box.append(el('p', '', s.legende ? 'Man erzählt sich von riesigen Wesen, die sich nur selten zeigen.' : 'Tippe auf einen Fisch für mehr.'));
     return box;
   }
   const a = save.album[sp.id];
   box.append(el('b', '', a ? sp.name : '?'));
   if (a) box.append(el('p', '', sp.band === 'junk' ? a.n + '× gefunden' : a.n + '× gefangen · ' + groesster(sp) + ' ' + fmtLen(sp, a.max)));
-  if (sp.legende && !a) box.append(el('p', '', 'Lebt im Sand der Hochsee. Was sie herauslockt, gibt es im Angelladen.'));
-  else box.append(el('p', '', `${BAND_TXT[sp.band]}${sp.band === 'junk' ? '' : ' · ' + sp.koe.map(k => K_BY[k].name).join(', ')}`));
+  if (sp.legende && !a) box.append(el('p', '', sp.hinweis));
+  else box.append(el('p', '', `${BAND_TXT[sp.band]}${sp.band === 'junk' ? '' : ' · ' + sp.koe.map(k => K_BY[k].name).join(', ')}`
+    + (sp.nur === 'nacht' ? ' · nur nachts' : sp.nur === 'gewitter' ? ' · nur bei Gewitter' : '')));
   if (sp.rar) box.append(el('span', 'tag' + (sp.rar === 'episch' ? ' episch' : ''), sp.rar));
   return box;
 }
@@ -3300,6 +3596,7 @@ const zurTasche = tag => {
 $('bAgain').onclick = () => zurTasche(tagRestlich() > 0);
 $('bShopPlay').onclick = () => zurTasche(modusTag);
 $('kLos').onclick = () => startRound(modusTag);
+$('postWeiter').onclick = () => resume();
 $('pzOk').onclick = () => show('mTitle');
 $('bDrehen').onclick = drehen;
 $('bTabTag').onclick = () => setBoardTab('tag');
@@ -3384,7 +3681,8 @@ if (!window.claude && 'serviceWorker' in navigator && location.protocol.startsWi
 }
 
 // ---------- Start ----------
-setGew(save.gewaesser);
+// den Eissee gibt es nur im Winter: sonst zurück an den See
+setGew(G_BY[save.gewaesser] && verfuegbar().includes(G_BY[save.gewaesser]) ? save.gewaesser : 'see');
 for (let i = 0; i < 6; i++) spawnFish(true);
 syncSound();
 renderTitle();
@@ -3395,7 +3693,7 @@ initCloud();
 // Nur beim Entwickeln (localhost): Zugriff für Tests und Aufnahmen, auf der echten Seite nicht da
 if (location.hostname === 'localhost') {
   window.__ph = { G, SP, K_BY, KRAKE, get save() { return save; }, persist, setGew, startRound, update, draw, show,
-    press, release, manuell: false };
+    press, release, buildBg, spawnFish, legendenSpawn, flaschenpost, manuell: false };
 }
 })();
 </script>

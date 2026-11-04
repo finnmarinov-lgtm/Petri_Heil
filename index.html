@@ -115,6 +115,9 @@ kbd{font-family:var(--f-disp);font-size:11px;padding:1px 5px;border:2px solid va
 .box-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:6px 16px}
 .purse{margin:0;color:var(--muted)}
 .purse b{font-family:var(--f-disp);font-size:16px;color:var(--gold);font-weight:400}
+.item.monster{border-color:#ff3b2e;box-shadow:0 0 0 2px #7a1414 inset,0 0 18px rgba(255,59,46,.35)}
+.btn.monster{background:#7a1414;border-color:#ff3b2e;color:#ffd0a0}
+.monster{color:#ff6a4e}
 .brief{margin:0;padding:14px 16px;background:#f3e9d2;color:#2a1a14;font-size:22px;line-height:1.25;box-shadow:4px 4px 0 var(--shadow);transform:rotate(-1deg)}
 .badge{margin:0;align-self:flex-start;font-family:var(--f-disp);font-size:12px;letter-spacing:.08em;text-transform:uppercase;padding:5px 8px;background:var(--gold);color:var(--ink)}
 .catches{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}
@@ -516,6 +519,11 @@ kbd{font-family:var(--f-disp);font-size:11px;padding:1px 5px;border:2px solid va
   EN['Zeigt sich nur nachts im See. Beißt auf Tauwurm und hält nur an einer sehr starken Rute.'] = 'Only shows up at night in the lake. Bites on a nightcrawler and only stays on a very strong rod.';
   EN['Kommt nur bei Gewitter aus seinem Loch im Fluss. Beißt auf Tauwurm oder Gummifisch.'] = 'Only leaves its hole in the river during a thunderstorm. Bites on a nightcrawler or a soft bait.';
   EN['Im Winter friert der See zu. Du angelst durch ein Loch im Eis direkt am Steg, senkrecht nach unten. Quappe und Seesaibling gibt es nur hier.'] = 'In winter the lake freezes over. You fish straight down through a hole in the ice next to the jetty. Burbot and arctic char only live here.';
+  EN['Monsterrute'] = 'Monster rod'; EN['monströs'] = 'monstrous'; EN['Tragkraft monströs'] = 'Line strength monstrous';
+  EN['Monster-Münzen:'] = 'Monster coins:'; EN['· Monster-Münzen:'] = '· Monster coins:'; EN['+1 MONSTER-MÜNZE'] = '+1 MONSTER COIN';
+  EN['Aus schwarzem Obsidian, in dem rote Glut pulsiert. Hält jedes Monster, wirft weit und genau und nimmt jeden Köder.'] = 'Black obsidian with red embers pulsing inside. Holds any monster, casts far and true, and takes every bait.';
+  EN['Man erzählt sich von riesigen Wesen, die sich nur selten zeigen. Jede bringt eine Monster-Münze.'] = 'People talk about huge creatures that rarely show themselves. Each one brings a monster coin.';
+  EN['Wer drei Monster fängt, bekommt im Laden eine Rute, wie es keine zweite gibt.'] = 'Catch three monsters, and the shop has a rod like no other for you.';
   EN['Eine Nachricht!'] = 'A message!'; EN['– ein Angler vom anderen Ufer'] = '– an angler from the other shore'; EN['Weiterangeln'] = 'Keep fishing';
   EN['Nachts im See soll etwas Langes durchs Wasser gleiten. Wer es fangen will, braucht Tauwurm und die stärkste Rute.'] = 'They say something long glides through the lake at night. To catch it, you need a nightcrawler and the strongest rod.';
   EN['Wenn es über dem Fluss donnert, kommt der Riesenwaller aus seinem Loch.'] = 'When thunder rolls over the river, the giant catfish leaves its hole.';
@@ -639,6 +647,10 @@ kbd{font-family:var(--f-disp);font-size:11px;padding:1px 5px;border:2px solid va
     [/^Noch (\d+) Runden im Beutel$/, '$1 rounds left in the bag'],
     [/^(\d+) Runde übrig$/, '$1 round left'],
     [/^(\d+) Runden übrig$/, '$1 rounds left'],
+    [/^Kaufen · (\d+) Monster-Münzen$/, 'Buy · $1 monster coins'],
+    [/^Jede gefangene Legende bringt eine Monster-Münze\. Du hast (\d+) von (\d+)\.$/, 'Every legend you catch brings a monster coin. You have $1 of $2.'],
+    [/^(\d+) Monster-Münzen$/, '$1 monster coins'],
+    [/^Legende gefangen: (.+)! \+(\d+) · \+1 Monster-Münze$/, 'Legend caught: $1! +$2 · +1 monster coin'],
     [/^Kaufen · (\d+)$/, 'Buy · $1'],
     [/^Heute gedreht: (.+)$/, 'Spun today: $1'],
     [/^\+(.+) Münzen · jetzt (.+) im Beutel$/, '+$1 coins · now $2 in the bag'],
@@ -904,7 +916,7 @@ kbd{font-family:var(--f-disp);font-size:11px;padding:1px 5px;border:2px solid va
 
 <div class="modal" id="mShop" hidden>
   <div class="box wide" role="dialog" aria-labelledby="sTitle">
-    <div class="box-head"><h2 id="sTitle">Angelladen</h2><p class="purse">Münzen: <b id="sCoins">0</b></p></div>
+    <div class="box-head"><h2 id="sTitle">Angelladen</h2><p class="purse">Münzen: <b id="sCoins">0</b><span id="sMonsterZeile"> · Monster-Münzen: <b id="sMonster" class="monster">0</b></span></p></div>
     <p class="eyebrow">Ruten</p>
     <div class="shop" id="shopRuten"></div>
     <p class="eyebrow">Köder nachkaufen</p>
@@ -1037,7 +1049,12 @@ const RUTEN = [
     info: 'Trockenfliege dicht unter der Oberfläche. Größter Drillbereich, viel Zeit zum Anschlag.' },
   { id: 'pilk',    name: 'Pilkrute',      preis: 520, zone: .30, kraft: 5, weite: 210, typ: 'kunst', genau: .7, anschlag: .9,
     info: 'Kurze, harte Bootsrute für schwere Pilker. Bringt auch Leng und Heilbutt hoch.' },
+  // Nur für Monster-Münzen (eine pro gefangener Legende): stärker als alles andere, nimmt jeden Köder
+  // (typ kunst erlaubt Kunstköder, Naturköder gehen mit jeder Rute), fein: keine Abzüge bei kleinen Fischen
+  { id: 'monster', name: 'Monsterrute',   preis: 0, monster: 3, zone: .40, kraft: 6, weite: 246, typ: 'kunst', alles: true, fein: true, genau: .9, anschlag: 1.3,
+    info: 'Aus schwarzem Obsidian, in dem rote Glut pulsiert. Hält jedes Monster, wirft weit und genau und nimmt jeden Köder.' },
 ];
+const MONSTER_PREIS = 3;
 const KOEDER = [
   { id: 'brot',    name: 'Brotflocke',    preis: 0,   runden: 0, typ: 'natur', c: '#f3e9d2' },
   { id: 'mais',    name: 'Mais',          preis: 30,  runden: 5, typ: 'natur', c: '#f2c14e' },
@@ -1055,7 +1072,7 @@ const KOEDER = [
 ];
 const R_BY = Object.fromEntries(RUTEN.map(r => [r.id, r]));
 const K_BY = Object.fromEntries(KOEDER.map(k => [k.id, k]));
-const KRAFT_TXT = ['', 'sehr leicht', 'leicht', 'mittel', 'stark', 'sehr stark'];
+const KRAFT_TXT = ['', 'sehr leicht', 'leicht', 'mittel', 'stark', 'sehr stark', 'monströs'];
 
 // Farben: [Körper, Bauch, Flossen, Muster]
 const SPECIES = [
@@ -1138,7 +1155,7 @@ const DEF = () => ({ v: 2, coins: 0, best: 0, bestFish: 0, bestTop: '', rounds: 
   up: { rolle: 0, feeder: 0, blei: 0, thermo: 0 },
   ruten: ['stippe'], vorrat: { maden: 3 }, tackle: { rute: 'stippe', koeder: 'maden' },
   tag: { datum: '', runden: {}, punkte: 0, fische: 0, fang: '' }, pokale: { siege: 0, podeste: 0 }, gewaesser: 'see',
-  rad: { datum: '', gewinn: 0, text: '' }, nacht: false, postNr: 0,
+  rad: { datum: '', gewinn: 0, text: '' }, nacht: false, postNr: 0, monster: 0,
   album: {}, nick: '', code: '', lbSent: 0, lbNick: '', savedAt: 0 });
 
 // ---------- Pixel-Sprites (Kopf zeigt nach rechts) ----------
@@ -1273,9 +1290,11 @@ const R_ICONS = {
   karpfen: ['.........kkk', '........kkk.', '.......kkk..', '......kkk...', '.....kkk....', '....kkk.....', '...kkk......', '..hh.rrrr...', '.hh.rwwwwr..', 'hh..rwwwwr..', '.....rrrr...', '............'],
   spinn:   ['..........kk', '.........kk.', '........kk..', '.......kk...', '......kk....', '.....kk.....', '....kk...s..', '...kk...sss.', '..hh.rr.sss.', '.hh.rwwr.s..', 'hh...rr.....', '............'],
   pilk:    ['.........kk.', '........kk..', '.......kk...', '......kk....', '.....kk.....', '....kk...s..', '...kk....s..', '..hh.rrr.s..', '.hh.rwwwr...', 'hh..rwwwr...', '.....rrr....', '............'],
+  monster: ['.........x.x', '..........ox', '.........oo.', '........ox..', '.......oo...', '......xo....', '.....oo.....', '....ox......', '..dd.mm.....', '.dd.mxxm....', 'dd...mm.....', '.x...x......'],
   fliege:  ['.........kk.', '........kk..', '.......kk...', '......kk....', '.....kk.....', '....kk......', '...kk.......', '..hh........', '.hh..llll...', 'hh..l....l..', '.....llll...', '............'],
 };
-const R_ICON_COL = { k: '#c8b89a', h: '#6b4226', r: '#8a99a8', w: '#5c6b7a', g: '#6fa35a', y: '#f2c14e', s: '#c8ccd2', l: '#f3e9d2' };
+const R_ICON_COL = { k: '#c8b89a', h: '#6b4226', r: '#8a99a8', w: '#5c6b7a', g: '#6fa35a', y: '#f2c14e', s: '#c8ccd2', l: '#f3e9d2',
+  o: '#24122b', x: '#ff3b2e', d: '#7a1414', m: '#3a1a2a' };
 const ANGLER = ['....hhh...', '...hhhhh..', '.hhhhhhhhh', '....sss...', '....ssk...', '....sss...', '...rrrr...', '..rrcrrss.',
   '..rrrcr...', '..rcrrr...', '..ppppp...', '..pp.pp...', '..pp.pp...', '..bb.bb...', '.bbb.bbb..'];
 const ANGLER_COL = { h: '#d9a441', s: '#e8b48a', k: '#2a1a14', r: '#b8433a', c: '#7a2a26', p: '#34507a', b: '#3a2a20' };
@@ -1630,7 +1649,7 @@ const LS_KEY = 'petriheil.v1';
 function normalize(r) {
   const d = DEF();
   if (!r || typeof r !== 'object') return d;
-  for (const k of ['coins', 'best', 'bestFish', 'rounds', 'lbSent', 'savedAt', 'postNr']) if (Number.isFinite(r[k])) d[k] = r[k];
+  for (const k of ['coins', 'best', 'bestFish', 'rounds', 'lbSent', 'savedAt', 'postNr', 'monster']) if (Number.isFinite(r[k])) d[k] = r[k];
   d.nacht = r.nacht === true;
   for (const k of ['bestTop', 'nick', 'code', 'lbNick']) if (typeof r[k] === 'string') d[k] = r[k].slice(0, 40);
   if (r.up) for (const it of SHOP) { const v = r.up[it.k]; if (Number.isInteger(v)) d.up[it.k] = clamp(v, 0, it.lv.length - 1); }
@@ -1986,7 +2005,7 @@ function updFish(dt) {
         else if (k.typ === 'kunst' && !ziehen) { /* Kunstköder muss sich bewegen */ }
         else {
           let ch = .5 * BITE[fl];
-          if (r.kraft - f.sp.kraft >= 3) ch *= .45;   // grobe Schnur, kleiner Fisch
+          if (r.kraft - f.sp.kraft >= 3 && !r.fein) ch *= .45;   // grobe Schnur, kleiner Fisch
           if (G.gewitter) ch *= 1.6;                  // bei Gewitter beißt alles besser
           if (f.sp.legende) ch *= .5;
           if (k.typ === 'kunst') ch *= 1.2;
@@ -2047,9 +2066,14 @@ function landFish() {
   if (sp.legende) {
     tone([523, 659, 784, 1047, 1319, 1568, 2093], .1);
     addText('LEGENDE!', clamp(f.x, 40, W - 40), f.y - 22, '#ff7a5f');
+    // jede Legende bringt eine Monster-Münze (für die Monsterrute im Laden)
+    save.monster = (save.monster || 0) + 1;
+    G.texts.push({ s: '+1 MONSTER-MÜNZE', x: clamp(f.x, 60, W - 60), y: f.y - 8, life: 2.2, c: '#ff3b2e' });
+    for (let i = 0; i < 26; i++) G.parts.push({ x: f.x + rnd(-6, 6), y: f.y + rnd(-4, 4), vx: rnd(-30, 30), vy: rnd(-60, -15), life: rnd(.6, 1.3), c: i % 3 ? '#ff3b2e' : '#ffb070', g: 1, s: 1 });
+    setTimeout(() => tone([196, 247, 294, 392], .12, 'sawtooth', .05), 700);
     G.shake = 2.5; G.krake = null;
   } else if (sp.rar) { tone(sp.rar === 'legendär' ? [784, 1047, 1319, 1568] : [659, 880, 1047], .09); addText(sp.rar === 'legendär' ? 'LEGENDÄR!' : 'EPISCH!', f.x, f.y - 16, sp.rar === 'legendär' ? '#f2c14e' : '#e6ccff'); }
-  toast(sp.legende ? `Legende gefangen: ${fangText(sp, f.len)}! +${pts}`
+  toast(sp.legende ? `Legende gefangen: ${fangText(sp, f.len)}! +${pts} · +1 Monster-Münze`
     : isNew ? `Neu im Fangbuch: ${sp.name}! +${pts}`
     : sp.band === 'junk' ? `Kein Fisch: ${sp.name}, aber immerhin +1` 
     : `${sp.rar === 'legendär' ? 'LEGENDÄR! ' : sp.rar === 'episch' ? 'Episch! ' : 'Petri Heil! '}${fangText(sp, f.len)} · +${pts}`);
@@ -2070,6 +2094,7 @@ const POST = [
   'Im Winter friert der See zu. Unter dem Eis wartet die Quappe.',
   'Aal, Wels und Zander jagen nachts. Mit der Laterne am Steg hast du gute Karten.',
   'Ein Futterkorb lockt mehr Fische an deinen Platz.',
+  'Wer drei Monster fängt, bekommt im Laden eine Rute, wie es keine zweite gibt.',
 ];
 function flaschenpost() {
   const nr = save.postNr || 0;
@@ -2441,11 +2466,42 @@ function drawReeds() {
     if (r.c) rect(r.x + sway, top - 5, 2, 5, '#6b4226');
   }
 }
+function drawMonsterRute(tip) {
+  const t = RM ? 0 : G.t, bx = ROD_BASE.x, by = ROD_BASE.y;
+  // roter Schein um den Stab
+  const mx = (bx + tip.x) / 2, my = (by + tip.y) / 2;
+  const gl = cx.createRadialGradient(mx, my, 1, mx, my, 22);
+  gl.addColorStop(0, `rgba(255,59,46,${(.34 + .1 * Math.sin(t * 4)).toFixed(3)})`); gl.addColorStop(1, 'rgba(255,59,46,0)');
+  cx.fillStyle = gl; cx.fillRect(mx - 22, my - 22, 44, 44);
+  // doppelt so dick wie die anderen Ruten, mit dunkelroter Kante
+  pline(bx - 1, by, tip.x - 1, tip.y, '#5a0f12');
+  pline(bx + 1, by + 1, tip.x + 1, tip.y + 1, '#5a0f12');
+  pline(bx, by, tip.x, tip.y, '#24122b');
+  pline(bx + 1, by, tip.x + 1, tip.y, '#24122b');
+  pline(bx + 1, by, bx + 6, by - 6, '#7a1414');
+  // Glut-Adern, die am Stab entlang wandern
+  for (let i = 0; i < 9; i++) {
+    const u = ((i / 9) + t * .35) % 1, x = lerp(bx, tip.x, u), y = lerp(by, tip.y, u);
+    rect(x, y, 2, 1, Math.sin(t * 6 + i * 1.7) > 0 ? '#ff3b2e' : '#ff8a4c');
+  }
+  // glühende Spitze
+  rect(tip.x - 1, tip.y - 1, 3, 3, 'rgba(255,59,46,.45)');
+  rect(tip.x, tip.y, 1, 1, '#ffd0a0');
+  // Funken steigen vom Stab auf
+  for (let i = 0; i < 12; i++) {
+    const u = (i * .37) % 1, p = (t * .9 + i * .23) % 1;
+    const x = lerp(bx, tip.x, u) + Math.sin(t * 2 + i) * 2 * p, y = lerp(by, tip.y, u) - p * 16;
+    if (p < .85) rect(x, y, 1, 1, p < .35 ? '#ffb070' : p < .65 ? '#ff3b2e' : '#9a1a14');
+  }
+}
 function drawRodAndLine() {
   const tip = rodTip(), h = G.hook;
-  pline(ROD_BASE.x, ROD_BASE.y, tip.x, tip.y, '#6b4226');
-  pline(ROD_BASE.x + 1, ROD_BASE.y, ROD_BASE.x + 6, ROD_BASE.y - 6, '#4a2f22');
-  rect(tip.x, tip.y, 1, 1, '#f3e9d2');
+  if (rute().id === 'monster') drawMonsterRute(tip);
+  else {
+    pline(ROD_BASE.x, ROD_BASE.y, tip.x, tip.y, '#6b4226');
+    pline(ROD_BASE.x + 1, ROD_BASE.y, ROD_BASE.x + 6, ROD_BASE.y - 6, '#4a2f22');
+    rect(tip.x, tip.y, 1, 1, '#f3e9d2');
+  }
   if (!h) {
     if (G.land) return;
     pline(tip.x, tip.y + 1, tip.x, tip.y + 9, 'rgba(243,233,210,.6)');
@@ -2669,7 +2725,7 @@ function renderMenu() {
   box.append(kachel(() => { modusTag = tagRestlich() > 0; backTo = 'mTitle'; show('mTackle'); }, 'Angeltasche',
     [gew.name + ' · ' + rute().name, 'Köder: ' + koeder().name], '', [rute().bild, koeder().bild]));
   box.append(kachel(() => { backTo = 'mTitle'; show('mShop'); }, 'Angelladen',
-    [de(save.coins) + ' Münzen im Beutel', save.ruten.length + ' von ' + RUTEN.length + ' Ruten gekauft']));
+    [de(save.coins) + ' Münzen im Beutel', save.monster ? save.monster + ' Monster-Münzen' : '', save.ruten.length + ' von ' + RUTEN.length + ' Ruten gekauft']));
   box.append(kachel(() => { backTo = 'mTitle'; show('mAlbum'); }, 'Fangbuch',
     [discovered() + ' von ' + SPECIES.length + ' entdeckt',
       save.bestTop ? 'Bester Fang: ' + save.bestTop : 'Noch kein Rekordfang']));
@@ -2733,7 +2789,7 @@ function shopText(it, l) {
   return '';
 }
 const genauTxt = r => (r.genau >= .9 ? 'sehr genauer Wurf' : r.genau >= .8 ? 'genauer Wurf' : r.genau >= .6 ? 'ungenauer Wurf' : 'sehr ungenauer Wurf');
-const anschlagTxt = r => (r.typ === 'kunst' ? 'hakt beim Einholen selbst' : r.anschlag >= 1.3 ? 'viel Zeit zum Anschlag' : r.anschlag >= .8 ? 'wenig Zeit zum Anschlag' : 'kaum Zeit zum Anschlag');
+const anschlagTxt = r => (r.typ === 'kunst' && !r.alles ? 'hakt beim Einholen selbst' : r.anschlag >= 1.3 ? 'viel Zeit zum Anschlag' : r.anschlag >= .8 ? 'wenig Zeit zum Anschlag' : 'kaum Zeit zum Anschlag');
 function renderTackle() {
   $('kCoins').textContent = de(save.coins);
   const gb = $('kGewaesser'); gb.textContent = '';
@@ -2818,6 +2874,7 @@ function renderTackle() {
 
 function renderShop() {
   $('sCoins').textContent = de(save.coins);
+  $('sMonster').textContent = save.monster || 0;
   renderKaufListen();
   const box = $('shopList'); box.textContent = '';
   for (const it of SHOP) {
@@ -2841,6 +2898,13 @@ function renderKaufListen() {
       el('p', '', `Tragkraft ${KRAFT_TXT[r.kraft]} · Drillbereich ${Math.round(r.zone * 100)} % · ${genauTxt(r)} · ${anschlagTxt(r)}`));
     const btn = el('button', 'btn'); btn.type = 'button';
     if (save.ruten.includes(r.id)) { btn.textContent = 'Im Besitz'; btn.disabled = true; }
+    else if (r.monster) {
+      // kostet Monster-Münzen statt normaler Münzen
+      btn.textContent = 'Kaufen · ' + r.monster + ' Monster-Münzen'; btn.classList.add('monster');
+      btn.disabled = (save.monster || 0) < r.monster; btn.onclick = () => kaufeRute(r);
+      txt.append(el('p', 'now monster', 'Jede gefangene Legende bringt eine Monster-Münze. Du hast ' + (save.monster || 0) + ' von ' + r.monster + '.'));
+      row.classList.add('monster');
+    }
     else { btn.textContent = 'Kaufen · ' + r.preis; btn.disabled = save.coins < r.preis; btn.onclick = () => kaufeRute(r); }
     row.append(img(r.bild, 40), txt, btn);
     rb.append(row);
@@ -2866,6 +2930,8 @@ function renderKaufListen() {
 }
 function kaufeRute(r) {
   if (save.coins < r.preis || save.ruten.includes(r.id)) return;
+  if (r.monster && (save.monster || 0) < r.monster) return;
+  if (r.monster) save.monster -= r.monster;
   save.coins -= r.preis; save.ruten.push(r.id); save.tackle.rute = r.id;
   if (!koederPasstZurRute(koeder(), r)) save.tackle.koeder = r.typ === 'kunst' ? (hatVorrat('gummi') ? 'gummi' : 'brot') : 'brot';
   SFX.buy(); persist(); renderShop(); updateHud();
@@ -3004,7 +3070,7 @@ function buchSeite(s) {
 function buchInfo(sp, s) {
   const box = el('div', 'seiten-info');
   if (!sp) {
-    box.append(el('p', '', s.legende ? 'Man erzählt sich von riesigen Wesen, die sich nur selten zeigen.' : 'Tippe auf einen Fisch für mehr.'));
+    box.append(el('p', '', s.legende ? 'Man erzählt sich von riesigen Wesen, die sich nur selten zeigen. Jede bringt eine Monster-Münze.' : 'Tippe auf einen Fisch für mehr.'));
     return box;
   }
   const a = save.album[sp.id];

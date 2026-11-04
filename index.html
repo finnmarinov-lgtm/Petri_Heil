@@ -519,6 +519,7 @@ kbd{font-family:var(--f-disp);font-size:11px;padding:1px 5px;border:2px solid va
   EN['Zeigt sich nur nachts im See. Beißt auf Tauwurm und hält nur an einer sehr starken Rute.'] = 'Only shows up at night in the lake. Bites on a nightcrawler and only stays on a very strong rod.';
   EN['Kommt nur bei Gewitter aus seinem Loch im Fluss. Beißt auf Tauwurm oder Gummifisch.'] = 'Only leaves its hole in the river during a thunderstorm. Bites on a nightcrawler or a soft bait.';
   EN['Im Winter friert der See zu. Du angelst durch ein Loch im Eis direkt am Steg, senkrecht nach unten. Quappe und Seesaibling gibt es nur hier.'] = 'In winter the lake freezes over. You fish straight down through a hole in the ice next to the jetty. Burbot and arctic char only live here.';
+  EN['Entwickler-Spielstand · zählt für keine Rangliste'] = 'Developer save · never counts for a leaderboard';
   EN['Monsterrute'] = 'Monster rod'; EN['monströs'] = 'monstrous'; EN['Tragkraft monströs'] = 'Line strength monstrous';
   EN['Monster-Münzen:'] = 'Monster coins:'; EN['· Monster-Münzen:'] = '· Monster coins:'; EN['+1 MONSTER-MÜNZE'] = '+1 MONSTER COIN';
   EN['Aus schwarzem Obsidian, in dem rote Glut pulsiert. Hält jedes Monster, wirft weit und genau und nimmt jeden Köder.'] = 'Black obsidian with red embers pulsing inside. Holds any monster, casts far and true, and takes every bait.';
@@ -841,6 +842,7 @@ kbd{font-family:var(--f-disp);font-size:11px;padding:1px 5px;border:2px solid va
     <h2 id="tTitle" class="big">Petri Heil!</h2>
     <p class="lead" id="tLead">Drei Gewässer, eine Runde dauert eine Minute.</p>
     <p class="online" id="tOnline" hidden><i></i><span id="tOnlineText"></span></p>
+    <p class="badge" id="tDev" hidden>Entwickler-Spielstand · zählt für keine Rangliste</p>
     <dl class="facts">
       <div><dt>Rekord</dt><dd id="tBest">0</dd></div>
       <div><dt>Pokale</dt><dd id="tPokale">0</dd></div>
@@ -1651,6 +1653,8 @@ function normalize(r) {
   if (!r || typeof r !== 'object') return d;
   for (const k of ['coins', 'best', 'bestFish', 'rounds', 'lbSent', 'savedAt', 'postNr', 'monster']) if (Number.isFinite(r[k])) d[k] = r[k];
   d.nacht = r.nacht === true;
+  // Entwickler-Spielstand (Finn, alles freigeschaltet): zählt nie für eine Rangliste
+  d.dev = r.dev === true;
   for (const k of ['bestTop', 'nick', 'code', 'lbNick']) if (typeof r[k] === 'string') d[k] = r[k].slice(0, 40);
   if (r.up) for (const it of SHOP) { const v = r.up[it.k]; if (Number.isInteger(v)) d.up[it.k] = clamp(v, 0, it.lv.length - 1); }
   if (Array.isArray(r.ruten)) for (const id of r.ruten) if (R_BY[id] && !d.ruten.includes(id)) d.ruten.push(id);
@@ -2740,6 +2744,8 @@ function renderMenu() {
 function renderTitle() {
   updateHint();
   renderMenu();
+  // Hinweis im Titel, wenn der Entwickler-Spielstand geladen ist
+  $('tDev').hidden = !save.dev;
   $('tTime').textContent = roundLen();
   $('tLead').textContent = verfuegbar().length + ' Gewässer, ' + SPECIES.filter(sp => sp.band !== 'junk').length + ' Arten, eine Runde dauert eine Minute.';
   $('tBest').textContent = de(save.best);
@@ -3281,10 +3287,12 @@ async function sbPush() {
   if (!sbOn) return;
   if (sbBusy) { sbDirty = true; return; }
   sbBusy = true; sbDirty = false;
-  const basis = { p_code: playerCode(), p_name: save.nick, p_stand: save,
-    p_best: save.best, p_fische: save.bestFish, p_fang: save.bestTop };
-  const mitTag = Object.assign({}, basis, { p_tag_datum: save.tag.datum || null,
-    p_tag_punkte: save.tag.punkte, p_tag_fische: save.tag.fische, p_tag_fang: save.tag.fang });
+  // Entwickler-Spielstand: ohne Namen, Rekord und Tagesrunde, damit er in keiner Rangliste auftaucht
+  const dev = !!save.dev;
+  const basis = { p_code: playerCode(), p_name: dev ? '' : save.nick, p_stand: save,
+    p_best: dev ? 0 : save.best, p_fische: dev ? 0 : save.bestFish, p_fang: dev ? '' : save.bestTop };
+  const mitTag = Object.assign({}, basis, { p_tag_datum: dev ? null : save.tag.datum || null,
+    p_tag_punkte: dev ? 0 : save.tag.punkte, p_tag_fische: dev ? 0 : save.tag.fische, p_tag_fang: dev ? '' : save.tag.fang });
   try {
     await rpc('stand_speichern', sbAltDb ? basis : mitTag);
   } catch (e) {
